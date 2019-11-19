@@ -1,0 +1,207 @@
+/*
+ * Stylig based on: Ares Dashboard v1.0.0  by pixelcave https://pixelcave.com
+ */
+
+/* Bootstrap Overwrite/Extend */
+html, body {
+  height: 100%;
+}
+
+body {
+  color: #e8f4ff;
+  font-family: 'Open Sans', sans-serif;
+  background-image: url(images/bg_ares.jpg);
+  background-size: cover;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  color: rgba(255, 255, 255, .75);
+
+}
+
+::-webkit-scrollbar {
+  background-color: rgba(255, 255, 255, .10);
+  width: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, .25);
+}
+
+
+h1, h2, h3, .h1, .h2, .h3, .heading {
+  font-family: 'Raleway', sans-serif;
+  margin: 0;
+  color: #e8f4ff;
+}
+
+a {
+  color: #62d0f0;
+  font-weight: 600;
+  -webkit-transition: color .15s ease-out;
+  transition: color .15s ease-out;
+}
+
+a:hover,
+a:focus {
+  color: #62d0f0;
+  text-decoration: none;
+}
+
+a.link-sf {
+  position: relative;
+}
+
+a.link-sf:before {
+  position: absolute;
+  top: -5px;
+  right: -2px;
+  bottom: -5px;
+  left: -2px;
+  content: "";
+  background-color: rgba(255, 255, 255, .15);
+  visibility: hidden;
+  -webkit-transform: scaleY(2);
+  -ms-transform: scaleY(2);
+  transform: scaleY(2);
+  -webkit-transition: -webkit-transform .12s ease-out;
+  transition: transform .12s ease-out;
+}
+
+a.link-sf:hover,
+a.link-sf:focus {
+  color: #fff;
+}
+
+a.link-sf:hover:before,
+a.link-sf:focus:before {
+  visibility: visible;
+  -webkit-transform: scaleY(1);
+  -ms-transform: scaleY(1);
+  transform: scaleY(1);
+}
+
+a.link-sf:active:before {
+  -webkit-transform: scaleY(1.2);
+  -ms-transform: scaleY(1.2);
+  transform: scaleY(1.2);
+}
+
+.text-success {
+  color: #2ecc71;
+}
+
+.text-warning{
+  color: #bd9110;
+}
+
+.text-danger {
+  color: #e74c3c;
+}
+
+.btn-outline-primary, .btn-outline-danger {
+  color: rgba(255, 255, 255, .75);
+  border: 2px solid rgba(255, 255, 255, .25);
+  background: transparent;
+}
+.btn-outline-primary:hover, .btn.btn-outline-primary:focus {
+  color: rgba(255, 255, 255, 1);
+  border-color: rgba(255, 255, 255, 1);
+  outline: 0;
+  background: transparent;
+}
+.btn-outline-primary:active {
+  color: #fff;
+  border-color: #fff;
+  background: rgba(255, 255, 255, .15);
+  background: transparent;
+}
+
+
+.btn {
+  border-left-width: 4px !important;
+  border-right-width: 4px !important;
+}
+
+.progress {
+  margin-bottom: 10px;
+  background: rgba(0, 0, 0, .25);
+  height: 10px;
+}
+
+.progress-bar-sf {
+  background-color: rgba(98, 208, 240, .1);
+}
+
+.container-fluid:before {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  content: '';
+  z-index: -1;
+}
+
+.container-fluid:before {
+  background-color: rgba(0, 22, 41, .75);
+}
+
+.gutter-small {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#page-header {
+  padding: 25px 20px 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, .07);
+}
+
+#page-main {
+  padding: 20px 20px 1px;
+}
+
+/* Blocks */
+.block {
+  margin-bottom: 20px;
+  padding: 5px 10px;
+  background-color: rgba(0, 0, 0, .15);
+  border-left: 4px solid rgba(255, 255, 255, .1);
+}
+
+.indicator {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  line-height: inherit;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.indicator.circle {
+  border-radius: 50%;
+}
+
+.indicator.danger {
+  background-color: #e74c3c;
+}
+
+.indicator.warning{
+  background-color: #bd9110;
+}
+
+.indicator.success {
+  background-color: #2ecc71;
+}
+
+
+.text-small { font-size: 14px !important; }
+.text-large { font-size: 18px !important; }
+
+.overflow-hidden { overflow: hidden; }
+.visibility-hidden { visibility: hidden; }
+
+.y-50 {
+  height: 45vh;
+  min-height: 45vh;
+  max-height: 45vh;
+  overflow-y: auto;
+}

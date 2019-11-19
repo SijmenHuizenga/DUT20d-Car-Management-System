@@ -1,0 +1,15 @@
+{
+  "short_name": "CMS Operator",
+  "name": "Car Management System for the DUTMIT Driverless car",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#757e88",
+  "background_color": "#051b38"
+}
