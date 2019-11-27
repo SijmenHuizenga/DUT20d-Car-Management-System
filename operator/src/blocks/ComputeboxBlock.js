@@ -3,13 +3,13 @@ import ReactTooltip from 'react-tooltip'
 
 class ComputeboxBlock extends React.Component {
     render() {
-        let {rosnode: {up}, pinger: {computebox: {last_success, last_run}}} = this.props.groundStationState;
+        let {rosnode: {up}, pinger: {computebox: {timestamp, success}}} = this.props.groundStationState;
 
         return <div className="block clearfix">
             <span className="text-small ">
                 <span className={"indicator circle " + (up ? "success" : "danger")}
                       data-tip={"Groundstation ros node is " + (up ? "up" : "down")}/>&nbsp;
-                <span className={"indicator circle " + (this.getPingColor(last_success))}
+                <span className={"indicator circle " + this.getPingColor(timestamp, success)}
                       data-tip data-for="pingtooltip"/>&nbsp;
                 Uptime: 25 minutes</span>
             <div className="float-right">
@@ -17,23 +17,29 @@ class ComputeboxBlock extends React.Component {
             </div>
             <ReactTooltip place="bottom" />
             <ReactTooltip place="bottom" id='pingtooltip' getContent={[() => {
-                return this.getPingTitle(last_success, last_run)
+                return this.getPingTitle(timestamp, success)
             }, 100]} />
         </div>
     }
 
-    getPingColor(last_success) {
-        if(new Date().getTime() / 1000 - last_success < 2) {
-            return "success";
-        } else {
-            return "danger"
+    getPingColor(timestamp, success) {
+        if(!this.lastPingWasRecent(timestamp)) {
+            return "warning";
         }
+        return success ? "success" : "danger"
     }
 
-    getPingTitle(last_success, last_run) {
+    getPingTitle(timestamp) {
         let now = (new Date()).getTime() / 1000;
-        return "Last ping to computebox was " + this.nicenumber(now - last_run) + " seconds ago. " +
-            "Last successful ping was " + this.nicenumber(now - last_success) + " seconds ago."
+        if(!this.lastPingWasRecent(timestamp)) {
+            return "Last ping to computebox was too long ago ("+this.nicenumber(now - timestamp)+" seconds)"
+        }
+
+        return "Last ping to computebox was " + this.nicenumber(now - timestamp) + " seconds ago. "
+    }
+
+    lastPingWasRecent(timestamp) {
+        return new Date().getTime() / 1000 - timestamp < 2
     }
 
     nicenumber(n) {
