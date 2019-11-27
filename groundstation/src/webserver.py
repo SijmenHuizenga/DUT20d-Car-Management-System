@@ -1,5 +1,7 @@
-from flask import Flask
-app = Flask(__name__)
+import state
+from flask import Flask, send_from_directory
+
+app = Flask(__name__, static_folder='../../operator/build/', static_url_path='')
 
 
 def start_server():
@@ -7,5 +9,11 @@ def start_server():
 
 
 @app.route('/')
-def hello_world():
-    return 'Hello, World!'
+def root():
+    return app.send_static_file('index.html')
+
+
+@app.route('/state')
+def home():
+    return state.state
+

@@ -4,6 +4,10 @@ import time
 import socket
 from std_msgs.msg import String
 import rosgraph
+import state
+
+
+global subscrib
 
 
 def register_subscribers():
@@ -16,7 +20,6 @@ def unregister_subscribers():
     global subscrib
     subscrib.unregister()
     print("[rosnode] Unregistered subscribers")
-
 
 
 def callback(msg):
@@ -34,6 +37,7 @@ def is_master_disconnected():
 def run_node():
     rospy.init_node('cms_groundstation')
     register_subscribers()
+    state.set_rosnode_health(True)
     rate_1_second = rospy.Rate(1)
     while 1:
         if rospy.is_shutdown():
@@ -44,8 +48,9 @@ def run_node():
         rate_1_second.sleep()
 
 
-def start_server():
+def run():
     while 1:
+        state.set_rosnode_health(False)
         if rospy.is_shutdown():
             print("[rosnode] Gracefull end reached")
             return
