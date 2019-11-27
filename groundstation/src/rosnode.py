@@ -4,7 +4,7 @@ import time
 import socket
 from std_msgs.msg import String
 import rosgraph
-import state
+from state import statemanager as state
 
 
 global subscrib

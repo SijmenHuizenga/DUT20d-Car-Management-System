@@ -1,7 +1,7 @@
 import threading
 import os
 import time
-import state
+from state import statemanager as state
 
 computeboxHostname = "google.com"
 
