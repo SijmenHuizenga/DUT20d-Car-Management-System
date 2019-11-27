@@ -25,7 +25,4 @@ def ping_computebox_forever():
 def ping_computebox():
     global computeboxHostname
     response = os.system("ping -c 1 -w 1 -W 1 " + computeboxHostname + " > /dev/null 2>&1")
-
-    state.did_computebox_ping()
-    if response == 0:
-        state.did_successful_computebox_ping()
+    state.did_ping("computebox", response == 0)

@@ -31,9 +31,16 @@ class ComputeboxBlock extends React.Component {
     }
 
     getPingTitle(last_success, last_run) {
-        let now = Math.round((new Date()).getTime() / 100);
-        return "Last ping to computebox was " + Math.round(now - last_run * 10) / 10 + " seconds ago. " +
-            "Last successful ping was " + Math.round(now - last_success * 10) / 10 + " seconds ago."
+        let now = (new Date()).getTime() / 1000;
+        return "Last ping to computebox was " + this.nicenumber(now - last_run) + " seconds ago. " +
+            "Last successful ping was " + this.nicenumber(now - last_success) + " seconds ago."
+    }
+
+    nicenumber(n) {
+        n = Math.round(n * 10) / 10;
+        if(n % 1 === 0)
+            return n + '.0';
+        return n + '';
     }
 
     componentDidMount() {

@@ -52,7 +52,7 @@ def run():
     while 1:
         state.set_rosnode_health(False)
         if rospy.is_shutdown():
-            print("[rosnode] Gracefull end reached")
+            print("[rosnode] Graceful end reached")
             return
         if is_master_disconnected():
             print("[rosnode] master offline, retrying in 1 seconds")

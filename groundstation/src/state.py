@@ -1,4 +1,8 @@
 import time
+import sqlite3
+import threading
+database = sqlite3.connect('development.db', check_same_thread=False)
+databaselock = threading.Lock()
 
 state = {
     'pinger': {
@@ -13,16 +17,33 @@ state = {
 }
 
 
-def did_computebox_ping():
-    global state
-    state['pinger']['computebox']['last_run'] = time.time()
+def create_database():
+    global database
+    global databaselock
+    databaselock.acquire()
+    with database:
+        database.execute('CREATE TABLE IF NOT EXISTS pings (timestamp FLOAT, device VARCHAR(10), success BOOLEAN)')
+    databaselock.release()
 
 
-def did_successful_computebox_ping():
+def did_ping(device, success):
     global state
-    state['pinger']['computebox']['last_success'] = time.time()
+    global database
+    now = time.time()
+    state['pinger'][device]['timestamp'] = now
+    state['pinger'][device]['success'] = success
+    if success:
+        state['pinger'][device]['last_success'] = now
+    databaselock.acquire()
+    with database:
+        database.execute('''INSERT INTO pings VALUES (:now, :device, :success)''',
+                         {"now": now, "device": device, "success": success})
+    databaselock.release()
 
 
 def set_rosnode_health(is_up):
     global state
     state['rosnode']['up'] = is_up
+
+
+create_database()
