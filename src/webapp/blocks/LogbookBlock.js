@@ -2,7 +2,6 @@ import React from "react";
 import TextareaAutosize from "react-autosize-textarea";
 import Markdown from 'react-markdown';
 
-
 class LogbookBlock extends React.Component {
     constructor(props) {
         super(props);
@@ -10,6 +9,7 @@ class LogbookBlock extends React.Component {
             input: '',
             inputDisabled: false,
             error: null,
+            scrollStickToBottom: true,
         };
     }
 
@@ -19,10 +19,11 @@ class LogbookBlock extends React.Component {
 
         return <div className="block y-50 d-flex flex-column">
             {error ? <div className="alert alert-danger" role="alert">{error}</div> : null}
-            <div className="flex-row overflow-auto">
+            <div className="flex-row overflow-auto" ref={(el) => this.scroller = el}
+                 onScroll={this.handleUserScroll.bind(this)}>
                 <table className="logtable">
                     <tbody>
-                        {logbook.map((line) => <LogbookLine {...line} setError={(e) => this.setState({error: e})} />)}
+                    {logbook.map((line) => <LogbookLine {...line} setError={(e) => this.setState({error: e})}/>)}
                     </tbody>
                 </table>
             </div>
@@ -38,6 +39,29 @@ class LogbookBlock extends React.Component {
         </div>
     }
 
+    handleUserScroll() {
+        let n = this.isScrolledToBottom();
+        if (n !== this.state.scrollStickToBottom)
+            this.setState({scrollStickToBottom: n});
+    }
+
+    componentDidMount() {
+        this.scrollToBottom();
+    }
+
+    componentDidUpdate() {
+        this.scrollToBottom();
+    }
+
+    isScrolledToBottom() {
+        return this.scroller.scrollTop === (this.scroller.scrollHeight - this.scroller.offsetHeight)
+    }
+
+    scrollToBottom() {
+        if (this.state.scrollStickToBottom)
+            this.scroller.scrollTop = this.scroller.scrollHeight - this.scroller.offsetHeight;
+    }
+
     handleKeyDown(e) {
         if (e.key === 'Enter') {
             this.storeNewLine()
@@ -46,7 +70,7 @@ class LogbookBlock extends React.Component {
     }
 
     storeNewLine() {
-        this.setState({inputDisabled: true});
+        this.setState({inputDisabled: true, scrollStickToBottom: true});
 
         fetch('/logbook', {
             method: 'POST',
@@ -145,7 +169,7 @@ class EditableText extends React.Component {
             this.stopEditing();
             return;
         }
-        if(e.key === "Enter" && !e.shiftKey) {
+        if (e.key === "Enter" && !e.shiftKey) {
             this.saveEditing();
         }
     }
@@ -165,7 +189,7 @@ class EditableText extends React.Component {
     }
 
     saveEditing() {
-        if(this.state.input === "") {
+        if (this.state.input === "") {
             alert("Cannot have empty message");
             return
         }
@@ -174,7 +198,7 @@ class EditableText extends React.Component {
         }, () => {
             this.props.save(this.state.input)
                 .then((success) => {
-                    if(success){
+                    if (success) {
                         this.setState({
                             editing: false,
                             input: null,
