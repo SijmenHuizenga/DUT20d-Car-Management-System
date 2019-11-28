@@ -45,6 +45,14 @@ class Database:
         self.databaselock.release()
         return out
 
+    def query(self, query, args):
+        self.databaselock.acquire()
+        cursor = self.database.cursor()
+        cursor.execute(query, args)
+        cursor.close()
+        self.database.commit()
+        self.databaselock.release()
+
 
 def dict_factory(cursor, row):
     d = {}

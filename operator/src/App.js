@@ -15,16 +15,13 @@ class App extends React.Component {
     constructor(props){
         super(props);
         this.state = {
-            connectionerror: null
+            connectionerror: "groundstation offline"
         };
     }
 
     render() {
-        if(this.state.groundStationState === undefined) {
-            return <div className="text-center">Groundstation offline</div>
-        }
         return <div className="container-fluid">
-            {this.renderDashboard()}
+            {this.state.groundStationState === undefined ? null : this.renderDashboard()}
             {this.state.connectionerror === null ? null :
                 <div className="overlay error text-center">{this.state.connectionerror}</div>}
         </div>
@@ -74,7 +71,7 @@ class App extends React.Component {
         });
         this.socket.on('disconnect', () => {
             this.setState({
-                connectionerror: "Disconnected from groundstation",
+                connectionerror: "groundstation disconnected",
             })
         });
     }

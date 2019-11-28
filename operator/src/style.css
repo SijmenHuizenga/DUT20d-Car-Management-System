@@ -10,7 +10,6 @@ html, body {
 body {
   color: #e8f4ff;
   font-family: 'Open Sans', sans-serif;
-  background-image: url(images/bg_ares.jpg);
   background-size: cover;
   background-attachment: fixed;
   background-repeat: no-repeat;
@@ -146,14 +145,15 @@ a.link-sf:active:before {
 }
 
 .overlay.error {
-  position: absolute;
+  position: fixed;
   z-index: 9999;
   background-color: rgba(231, 76, 60, 0.5);
   left: 0;
   top: 0;
-  width: 100vw;
-  height: 100vh;
-  color: white
+  font-size: 10vw;
+  width: 100%;
+  height: 100%;
+  color: white;
 }
 
 .gutter-small {
@@ -210,8 +210,25 @@ a.link-sf:active:before {
 .overflow-hidden { overflow: hidden; }
 .visibility-hidden { visibility: hidden; }
 
-.logtable tr td:first-child {
-    padding-right: 6px;
+.logtable, .logtable tbody {
+  width: 100%;
+}
+.logtable textarea {
+  width: 100%;
+  padding: 0;
+  border: none;
+  background-color: rgba(0, 0, 0, 0.29);
+  color: rgba(255, 255, 255, 0.8)
+}
+.logtable textarea:focus {
+  outline: none;
+}
+.logtable .timestamp {
+    color: rgba(255, 255, 255, 0.4);
+    width: 1px;
+}
+.logtable tr td:last-child {
+  padding-left: 6px;
 }
 
 .easy-edit-hover-on {

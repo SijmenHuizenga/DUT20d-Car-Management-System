@@ -5,7 +5,8 @@ class RecordingBlock extends React.Component {
         return <div className="block">
             <div className="mb-2">
                 <span className="text-large "><span className="indicator circle danger" /> Recording</span>
-                <span className=" text-small">trackdrive_1_2019nov05.bag.active</span>
+                <span className="pl-1 text-small">| trackdrive_1_2019nov05.bag.active</span>
+                <span className="pl-1 text-small">| recording for 03:42</span>
                 <div className="float-right">
                     <button type="button" className="btn btn-sm btn-outline-primary">Stop recording
                     </button>

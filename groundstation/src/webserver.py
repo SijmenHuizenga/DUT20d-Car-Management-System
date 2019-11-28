@@ -40,3 +40,16 @@ def logbook_create():
     except Exception, e:
         print "error while handling /logbook request:", e
         abort(500, e)
+
+
+@app.route('/logbook/<int:rowid>', methods=['PUT'])
+def logbook_update(rowid):
+    try:
+        content = request.get_json()
+        if 'text' not in content:
+            abort(400)
+        state.update_logbook_line(rowid, content['text'])
+        return "ok", 201
+    except Exception, e:
+        print "error while handling /logbook request:", e
+        abort(500, e)

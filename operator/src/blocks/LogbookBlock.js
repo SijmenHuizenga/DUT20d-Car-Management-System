@@ -19,7 +19,7 @@ class LogbookBlock extends React.Component {
         return <div className="block y-50 d-flex flex-column">
             {error ? <div className="alert alert-danger" role="alert">{error}</div> : null}
             <div className="flex-row overflow-auto">
-                <table className={"logtable"}>
+                <table className="logtable">
                     <tbody>
                         {logbook.map((line) => <LogbookLine {...line} setError={(e) => this.setState({error: e})} />)}
                     </tbody>
@@ -69,12 +69,12 @@ class LogbookBlock extends React.Component {
 class LogbookLine extends React.Component {
     render() {
         return <tr>
-            <td>
+            <td className="timestamp">
                 {this.renderTimestamp(this.props.timestamp)}
             </td>
             <td>
                 <EditableText value={this.props.text} save={this.saveUpdate.bind(this)}>
-                    <span style={{color: "red"}}>{this.props.text}</span>
+                    <span className="pl-1">{this.props.text}</span>
                 </EditableText>
             </td>
         </tr>
@@ -102,7 +102,7 @@ class LogbookLine extends React.Component {
                 return false;
             } else {
                 this.props.setError(null);
-                return false;
+                return true;
             }
         })
     }
@@ -124,7 +124,8 @@ class EditableText extends React.Component {
         if (this.state.editing) {
             return <div>
                 <TextareaAutosize
-                    maxRows={3}
+                    maxRows={10}
+                    className="pl-1 d-flex bd-highlight"
                     value={this.state.input}
                     onKeyDown={this.onKey.bind(this)}
                     onChange={(e) => this.setState({input: e.target.value})}
@@ -166,7 +167,7 @@ class EditableText extends React.Component {
         this.setState({
             inputDisabled: true,
         }, () => {
-            this.props.save()
+            this.props.save(this.state.input)
                 .then((success) => {
                     if(success){
                         this.setState({
@@ -187,10 +188,6 @@ class EditableText extends React.Component {
         this.inputref.current.focus();
     }
 
-    textareaAdjustHeight(o) {
-        o.style.height = "1px";
-        o.style.height = (25+o.scrollHeight)+"px";
-    }
 }
 
 export default LogbookBlock;

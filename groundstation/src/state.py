@@ -47,6 +47,20 @@ class StateManager:
         self.state['logbook'].append(line)
         self.emit_state()
 
+    def get_logbook_line(self, rowid):
+        for line in self.state['logbook']:
+            if line['rowid'] == rowid:
+                return line
+        return None
+
+    def update_logbook_line(self, rowid, newtext):
+        line = self.get_logbook_line(rowid)
+        if line is None:
+            raise Exception("Row does not exit")
+        line['text'] = newtext
+        self.db.query("UPDATE logbook SET text=:text WHERE rowid=:rowid", line)
+        self.emit_state()
+
     def set_sio(self, sio):
         self.sio = sio
 
