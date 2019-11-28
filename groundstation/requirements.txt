@@ -1,4 +1,0 @@
-flask
-python-socketio
-dataclasses
-paramiko

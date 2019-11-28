@@ -1,5 +1,6 @@
 import React from 'react';
 import io from 'socket.io-client';
+import './style.css';
 import HealthBlock from './blocks/HealthBlock'
 import NodesBlock from "./blocks/NodesBlock";
 import TopicsBlock from "./blocks/TopicsBlock";
@@ -10,7 +11,7 @@ import LogbookBlock from "./blocks/LogbookBlock";
 import RecordingBlock from "./blocks/RecordingBlock";
 
 
-class App extends React.Component {
+class Dashboard extends React.Component {
 
     constructor(props){
         super(props);
@@ -77,4 +78,4 @@ class App extends React.Component {
     }
 }
 
-export default App;
+export default Dashboard;

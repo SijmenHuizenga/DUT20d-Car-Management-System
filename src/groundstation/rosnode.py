@@ -35,7 +35,7 @@ def is_master_disconnected():
 
 
 def run_node():
-    rospy.init_node('cms_groundstation')
+    rospy.init_node('cms')
     register_subscribers()
     state.set_rosnode_health(True)
     state.add_logbook_line(time.time(), "Connected to ROS master", "groundstation")
