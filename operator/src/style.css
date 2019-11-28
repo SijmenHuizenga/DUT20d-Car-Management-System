@@ -231,6 +231,10 @@ a.link-sf:active:before {
   padding-left: 6px;
 }
 
+.logline p {
+  margin: 0;
+}
+
 .easy-edit-hover-on {
   font-style: normal !important;
 }

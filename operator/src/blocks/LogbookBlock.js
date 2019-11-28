@@ -1,5 +1,6 @@
 import React from "react";
 import TextareaAutosize from "react-autosize-textarea";
+import Markdown from 'react-markdown';
 
 
 class LogbookBlock extends React.Component {
@@ -74,7 +75,7 @@ class LogbookLine extends React.Component {
             </td>
             <td>
                 <EditableText value={this.props.text} save={this.saveUpdate.bind(this)}>
-                    <span className="pl-1">{this.props.text}</span>
+                    <Markdown source={this.props.text} className="pl-1 logline"/>
                 </EditableText>
             </td>
         </tr>
@@ -164,6 +165,10 @@ class EditableText extends React.Component {
     }
 
     saveEditing() {
+        if(this.state.input === "") {
+            alert("Cannot have empty message");
+            return
+        }
         this.setState({
             inputDisabled: true,
         }, () => {

@@ -38,6 +38,7 @@ def run_node():
     rospy.init_node('cms_groundstation')
     register_subscribers()
     state.set_rosnode_health(True)
+    state.add_logbook_line(time.time(), "Connected to ROS master", "groundstation")
     rate_1_second = rospy.Rate(1)
     while 1:
         if rospy.is_shutdown():
@@ -59,3 +60,4 @@ def run():
             time.sleep(1)
             continue
         run_node()
+        state.add_logbook_line(time.time(), "Disconnected from ROS master", "groundstation")
