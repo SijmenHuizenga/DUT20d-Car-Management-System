@@ -210,6 +210,14 @@ a.link-sf:active:before {
 .overflow-hidden { overflow: hidden; }
 .visibility-hidden { visibility: hidden; }
 
+.logtable tr td:first-child {
+    padding-right: 6px;
+}
+
+.easy-edit-hover-on {
+  font-style: normal !important;
+}
+
 .y-50 {
   height: 45vh;
   min-height: 45vh;

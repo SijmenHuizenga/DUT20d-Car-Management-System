@@ -62,19 +62,6 @@ class App extends React.Component {
         </main>
     }
 
-    updateState() {
-        // fetch("/state")
-        //     .then((response) => {
-        //         if (response.status !== 200 || !response.ok) {
-        //             console.log("Connection to groundstation lost", response);
-        //             this.setState({connectionerror: "Connection to groundstation lost: " + response.statusText})
-        //         } else {
-        //             response.json().then((data) => )
-        //
-        //         }
-        //     })
-    }
-
     componentDidMount() {
         this.socket = io({
             reconnectionDelayMax: 1000,
@@ -90,11 +77,6 @@ class App extends React.Component {
                 connectionerror: "Disconnected from groundstation",
             })
         });
-
-    }
-
-    componentWillUnmount() {
-        // clearInterval(this.interval);
     }
 }
 

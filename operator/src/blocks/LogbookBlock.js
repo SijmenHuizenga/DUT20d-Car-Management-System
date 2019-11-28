@@ -1,4 +1,6 @@
 import React from "react";
+import TextareaAutosize from "react-autosize-textarea";
+
 
 class LogbookBlock extends React.Component {
     constructor(props) {
@@ -17,10 +19,11 @@ class LogbookBlock extends React.Component {
         return <div className="block y-50 d-flex flex-column">
             {error ? <div className="alert alert-danger" role="alert">{error}</div> : null}
             <div className="flex-row overflow-auto">
-                {logbook.map(this.renderLine.bind(this))}
-                <div style={{ float:"left", clear: "both" }}
-                     ref={(el) => { this.logbookEnd = el; }}>
-                </div>
+                <table className={"logtable"}>
+                    <tbody>
+                        {logbook.map((line) => <LogbookLine {...line} setError={(e) => this.setState({error: e})} />)}
+                    </tbody>
+                </table>
             </div>
             <div className="flex-row flex-grow-1">
                 <div className="input-group pt-1 input-group-sm">
@@ -28,22 +31,10 @@ class LogbookBlock extends React.Component {
                            onChange={(e) => this.setState({input: e.target.value})}
                            onKeyDown={this.handleKeyDown.bind(this)}
                            disabled={inputDisabled}
-                           ref={(el) => { this.inputfield = el; }}/>
+                           ref={(el) => this.inputfield = el}/>
                 </div>
             </div>
         </div>
-    }
-
-    renderLine(line) {
-        return <div>{this.renderTimestamp(line.timestamp)}: {line.text}</div>
-    }
-
-    renderTimestamp(timestamp) {
-        let date = new Date(timestamp*1000);
-        let hours = date.getHours();
-        let minutes = "0" + date.getMinutes();
-        let seconds = "0" + date.getSeconds();
-        return hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
     }
 
     handleKeyDown(e) {
@@ -51,18 +42,6 @@ class LogbookBlock extends React.Component {
             this.storeNewLine()
         }
         return false;
-    }
-
-    scrollToBottom = () => {
-        this.logbookEnd.scrollIntoView({ behavior: "smooth" });
-    };
-
-    componentDidMount() {
-        this.scrollToBottom();
-    }
-
-    componentDidUpdate() {
-        this.scrollToBottom();
     }
 
     storeNewLine() {
@@ -84,6 +63,133 @@ class LogbookBlock extends React.Component {
                 this.inputfield.focus();
             }
         })
+    }
+}
+
+class LogbookLine extends React.Component {
+    render() {
+        return <tr>
+            <td>
+                {this.renderTimestamp(this.props.timestamp)}
+            </td>
+            <td>
+                <EditableText value={this.props.text} save={this.saveUpdate.bind(this)}>
+                    <span style={{color: "red"}}>{this.props.text}</span>
+                </EditableText>
+            </td>
+        </tr>
+    }
+
+    renderTimestamp(timestamp) {
+        let date = new Date(timestamp * 1000);
+        let hours = date.getHours();
+        let minutes = "0" + date.getMinutes();
+        let seconds = "0" + date.getSeconds();
+        return hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
+    }
+
+    saveUpdate(newText) {
+        return fetch('/logbook/' + this.props.rowid, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                text: newText
+            })
+        }).then((response) => {
+            if (response.status !== 201 || !response.ok) {
+                console.log("Failed to update logline", response);
+                this.props.setError('Failed to update logline: ' + response.statusText);
+                return false;
+            } else {
+                this.props.setError(null);
+                return false;
+            }
+        })
+    }
+}
+
+class EditableText extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            editing: false,
+            input: null,
+            inputDisabled: false,
+        };
+        this.inputref = React.createRef()
+    }
+
+    render() {
+        if (this.state.editing) {
+            return <div>
+                <TextareaAutosize
+                    maxRows={3}
+                    value={this.state.input}
+                    onKeyDown={this.onKey.bind(this)}
+                    onChange={(e) => this.setState({input: e.target.value})}
+                    disabled={this.state.inputDisabled}
+                    ref={this.inputref}
+                />
+            </div>
+        }
+        return <div onClick={this.startEditing.bind(this)}>
+            {this.props.children}
+        </div>;
+    }
+
+    onKey(e) {
+        if (e.key === "Escape") {
+            this.stopEditing();
+            return;
+        }
+        if(e.key === "Enter" && !e.shiftKey) {
+            this.saveEditing();
+        }
+    }
+
+    startEditing() {
+        this.setState({
+            editing: true,
+            input: this.props.value
+        }, () => this.focusEditor());
+    }
+
+    stopEditing() {
+        this.setState({
+            editing: false,
+            input: null
+        })
+    }
+
+    saveEditing() {
+        this.setState({
+            inputDisabled: true,
+        }, () => {
+            this.props.save()
+                .then((success) => {
+                    if(success){
+                        this.setState({
+                            editing: false,
+                            input: null,
+                            inputDisabled: false
+                        })
+                    } else {
+                        this.setState({
+                            inputDisabled: false
+                        }, () => this.focusEditor())
+                    }
+                })
+        })
+    }
+
+    focusEditor() {
+        this.inputref.current.focus();
+    }
+
+    textareaAdjustHeight(o) {
+        o.style.height = "1px";
+        o.style.height = (25+o.scrollHeight)+"px";
     }
 }
 
