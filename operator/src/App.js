@@ -12,18 +12,25 @@ class App extends React.Component {
 
     constructor(props){
         super(props);
-        this.state = {};
+        this.state = {
+            connectionerror: null
+        };
     }
 
     render() {
+        if(this.state.groundStationState === undefined) {
+            return <div className="text-center">Groundstation offline</div>
+        }
         return <div className="container-fluid">
-            {this.state.groundStationState === undefined
-                ? "Did not yet receive data form ground station"
-                : this.renderDashboard()}
+            {this.renderDashboard()}
+            {this.state.connectionerror === null ? null :
+                <div className="overlay error text-center">{this.state.connectionerror}</div>}
         </div>
+
     }
 
     renderDashboard() {
+        console.log(this.state.groundStationState);
         return <main id="page-main">
             <div className="row">
                 <div className="col-xl-2 col-lg-4 col-sm-12 col-xs-12 gutter-small">
@@ -44,7 +51,7 @@ class App extends React.Component {
             </div>
             <div className="row">
                 <div className="col-xl-6 col-xs-12 gutter-small">
-                    <LogbookBlock/>
+                    <LogbookBlock groundStationState={this.state.groundStationState}/>
                 </div>
                 <div className="col-xl-6 col-xs-12 gutter-small">
                     <RecordingBlock/>
@@ -55,8 +62,18 @@ class App extends React.Component {
 
     updateState() {
         fetch("/state")
-            .then((response) => response.json())
-            .then((newState) => this.setState({groundStationState: newState}))
+            .then((response) => {
+                if (response.status !== 200 || !response.ok) {
+                    console.log("Connection to groundstation lost", response);
+                    this.setState({connectionerror: "Connection to groundstation lost: " + response.statusText})
+                } else {
+                    response.json().then((data) => this.setState({
+                        groundStationState: data,
+                        connectionerror: null,
+                    }))
+
+                }
+            })
     }
 
     componentDidMount() {

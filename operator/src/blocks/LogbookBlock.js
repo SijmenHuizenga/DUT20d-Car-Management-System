@@ -1,70 +1,91 @@
 import React from "react";
 
 class LogbookBlock extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            input: '',
+            inputDisabled: false,
+            error: null,
+        };
+    }
+
     render() {
+        let {input, inputDisabled, error} = this.state;
+        let {logbook} = this.props.groundStationState;
+
         return <div className="block y-50 d-flex flex-column">
-    <div className="flex-row overflow-auto">
-        21:37:09 Closed GnuPG cryptographic agent and passphrase cache (access for web
-        browsers).<br/>
-        21:37:09 gpg-agent-ssh.socket: Succeeded.<br/>
-        21:37:09 Closed GnuPG cryptographic agent (ssh-agent emulation).<br/>
-        21:37:09 dbus.socket: Succeeded.<br/>
-        21:37:09 Closed D-Bus User Message Bus Socket.<br/>
-        21:37:09 p11-kit-server.socket: Succeeded.<br/>
-        21:37:09 Closed p11-kit server.<br/>
-        21:37:09 Reached target Shutdown.<br/>
-        21:37:09 systemd-exit.service: Succeeded.<br/>
-        22:10:29 Reached target Timers.<br/>
-        22:10:29 Listening on GnuPG cryptographic agent (ssh-agent emulation).<br/>
-        22:10:29 Reached target Paths.<br/>
-        22:10:29 Listening on GnuPG cryptographic agent and passphrase cache.<br/>
-        22:10:29 Starting D-Bus User Message Bus Socket.<br/>
-        22:10:29 Listening on p11-kit server.<br/>
-        22:10:29 Listening on Multimedia System.<br/>
-        22:10:29 Listening on GnuPG cryptographic agent and passphrase cache (access for web
-        browsers).<br/>
-        22:10:29 Listening on GnuPG network certificate management daemon.<br/>
-        22:10:29 Listening on D-Bus User Message Bus Socket.<br/>
-        22:10:29 Reached target Sockets.<br/>
-        22:10:29 Reached target Basic System.<br/>
-        22:10:29 Reached target Main User Target.<br/>
-        21:37:09 Closed GnuPG cryptographic agent and passphrase cache (access for web
-        browsers).<br/>
-        21:37:09 gpg-agent-ssh.socket: Succeeded.<br/>
-        21:37:09 Closed GnuPG cryptographic agent (ssh-agent emulation).<br/>
-        21:37:09 dbus.socket: Succeeded.<br/>
-        21:37:09 Closed D-Bus User Message Bus Socket.<br/>
-        21:37:09 p11-kit-server.socket: Succeeded.<br/>
-        21:37:09 Closed p11-kit server.<br/>
-        21:37:09 Reached target Shutdown.<br/>
-        21:37:09 systemd-exit.service: Succeeded.<br/>
-        22:10:29 Reached target Timers.<br/>
-        22:10:29 Listening on GnuPG cryptographic agent (ssh-agent emulation).<br/>
-        22:10:29 Reached target Paths.<br/>
-        22:10:29 Listening on GnuPG cryptographic agent and passphrase cache.<br/>
-        22:10:29 Starting D-Bus User Message Bus Socket.<br/>
-        22:10:29 Listening on p11-kit server.<br/>
-        22:10:29 Listening on Multimedia System.<br/>
-        22:10:29 Listening on GnuPG cryptographic agent and passphrase cache (access for web
-        browsers).<br/>
-        22:10:29 Listening on GnuPG network certificate management daemon.<br/>
-        22:10:29 Listening on D-Bus User Message Bus Socket.<br/>
-        22:10:29 Reached target Sockets.<br/>
-        22:10:29 Reached target Basic System.<br/>
-        22:10:29 Reached target Main User Target.<br/>
-    </div>
-    <div className="flex-row flex-grow-1">
-        <div className="input-group pt-1 input-group-sm">
-            <input type="text" className="form-control"/>
-            <button className="btn btn-sm btn-outline-primary" type="button">newline</button>
-            <button className="btn btn-sm btn-outline-primary" type="button">screenshot
-            </button>
-            <button className="btn btn-sm btn-outline-primary" type="button">post-to-asana
-            </button>
+            {error ? <div className="alert alert-danger" role="alert">{error}</div> : null}
+            <div className="flex-row overflow-auto">
+                {logbook.map(this.renderLine.bind(this))}
+                <div style={{ float:"left", clear: "both" }}
+                     ref={(el) => { this.logbookEnd = el; }}>
+                </div>
+            </div>
+            <div className="flex-row flex-grow-1">
+                <div className="input-group pt-1 input-group-sm">
+                    <input type="text" className="form-control" value={input}
+                           onChange={(e) => this.setState({input: e.target.value})}
+                           onKeyDown={this.handleKeyDown.bind(this)}
+                           disabled={inputDisabled}
+                           ref={(el) => { this.inputfield = el; }}/>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
+    }
+
+    renderLine(line) {
+        return <div>{this.renderTimestamp(line.timestamp)}: {line.text}</div>
+    }
+
+    renderTimestamp(timestamp) {
+        let date = new Date(timestamp*1000);
+        let hours = date.getHours();
+        let minutes = "0" + date.getMinutes();
+        let seconds = "0" + date.getSeconds();
+        return hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
+    }
+
+    handleKeyDown(e) {
+        if (e.key === 'Enter') {
+            this.storeNewLine()
+        }
+        return false;
+    }
+
+    scrollToBottom = () => {
+        this.logbookEnd.scrollIntoView({ behavior: "smooth" });
+    };
+
+    componentDidMount() {
+        this.scrollToBottom();
+    }
+
+    componentDidUpdate() {
+        this.scrollToBottom();
+    }
+
+    storeNewLine() {
+        this.setState({inputDisabled: true});
+
+        fetch('/logbook', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                text: this.state.input,
+                source: 'human'
+            })
+        }).then((response) => {
+            if (response.status !== 201 || !response.ok) {
+                console.log("Failed to store logline", response);
+                this.setState({inputDisabled: false, error: 'Failed to store logline: ' + response.statusText})
+            } else {
+                this.setState({inputDisabled: false, input: '', error: null});
+                this.inputfield.focus();
+            }
+        })
     }
 }
+
 export default LogbookBlock;
 
