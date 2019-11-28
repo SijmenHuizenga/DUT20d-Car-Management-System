@@ -1,4 +1,5 @@
 import React from 'react';
+import io from 'socket.io-client';
 import HealthBlock from './blocks/HealthBlock'
 import NodesBlock from "./blocks/NodesBlock";
 import TopicsBlock from "./blocks/TopicsBlock";
@@ -7,6 +8,7 @@ import ServicesBlock from "./blocks/ServicesBlock";
 import GitBlock from "./blocks/GitBlock";
 import LogbookBlock from "./blocks/LogbookBlock";
 import RecordingBlock from "./blocks/RecordingBlock";
+
 
 class App extends React.Component {
 
@@ -61,28 +63,38 @@ class App extends React.Component {
     }
 
     updateState() {
-        fetch("/state")
-            .then((response) => {
-                if (response.status !== 200 || !response.ok) {
-                    console.log("Connection to groundstation lost", response);
-                    this.setState({connectionerror: "Connection to groundstation lost: " + response.statusText})
-                } else {
-                    response.json().then((data) => this.setState({
-                        groundStationState: data,
-                        connectionerror: null,
-                    }))
-
-                }
-            })
+        // fetch("/state")
+        //     .then((response) => {
+        //         if (response.status !== 200 || !response.ok) {
+        //             console.log("Connection to groundstation lost", response);
+        //             this.setState({connectionerror: "Connection to groundstation lost: " + response.statusText})
+        //         } else {
+        //             response.json().then((data) => )
+        //
+        //         }
+        //     })
     }
 
     componentDidMount() {
-        this.updateState();
-        this.interval = setInterval(this.updateState.bind(this), 1000);
+        this.socket = io({
+            reconnectionDelayMax: 1000,
+        });
+        this.socket.on('state', (data) => {
+            this.setState({
+                groundStationState: data,
+                connectionerror: null,
+            })
+        });
+        this.socket.on('disconnect', () => {
+            this.setState({
+                connectionerror: "Disconnected from groundstation",
+            })
+        });
+
     }
 
     componentWillUnmount() {
-        clearInterval(this.interval);
+        // clearInterval(this.interval);
     }
 }
 

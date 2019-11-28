@@ -1,13 +1,20 @@
-import sys
 import time
+import logging
 from flask import Flask, send_from_directory, request, abort
+import socketio
 from state import statemanager as state
 
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
+sio = socketio.Server(async_mode='threading')
 app = Flask(__name__, static_folder='../../operator/build/', static_url_path='')
+app.wsgi_app = socketio.WSGIApp(sio, app.wsgi_app)
+state.set_sio(sio)
 
 
 def start_server():
-    app.run()
+    app.run(threaded=True)
 
 
 @app.route('/')
