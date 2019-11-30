@@ -10,20 +10,30 @@ class LogbookBlock extends React.Component {
             inputDisabled: false,
             error: null,
             scrollStickToBottom: true,
+            dragSelectedRowid: null,
+            dragLastHoveredRowid: null,
+            dragCurrentHoverRowid: null,
         };
     }
 
     render() {
         let {input, inputDisabled, error} = this.state;
-        let {logbook} = this.props.groundStationState;
-
         return <div className="block y-50 d-flex flex-column">
             {error ? <div className="alert alert-danger" role="alert">{error}</div> : null}
             <div className="flex-row overflow-auto" ref={(el) => this.scroller = el}
                  onScroll={this.handleUserScroll.bind(this)}>
-                <table className="logtable">
+                <table className="logtable" onMouseLeave={this.resetDragging.bind(this)}>
                     <tbody>
-                    {logbook.map((line) => <LogbookLine {...line} setError={(e) => this.setState({error: e})}/>)}
+                    {this.renderDragIndicator()}
+                    {this.state.dragSelectedRowid != null ? <style>{".logtable .timestamp {user-select: none;}"}</style> : null}
+                    {this.props.lines.map((line) =>
+                        <LogbookLine {...line}
+                                     setError={(e) => this.setState({error: e})}
+                                     onMouseDown={this.lineOnMouseDown.bind(this)}
+                                     onMouseUp={this.lineOnMouseUp.bind(this)}
+                                     onMouseLeave={this.lineOnMouseLeave.bind(this)}
+                                     onMouseEnter={this.lineOnMouseEnter.bind(this)}/>
+                        )}
                     </tbody>
                 </table>
             </div>
@@ -37,6 +47,91 @@ class LogbookBlock extends React.Component {
                 </div>
             </div>
         </div>
+    }
+
+    renderDragIndicator() {
+        if(this.state.dragSelectedRowid == null || this.state.dragLastHoveredRowid == null || this.state.dragCurrentHoverRowid == null){
+            return null;
+        }
+        if(this.state.dragCurrentHoverRowid === this.state.dragSelectedRowid) {
+            return null;
+        }
+
+        let originalLineIndex = this.props.lines.findIndex((line) => line.rowid === this.state.dragSelectedRowid);
+        let currentLineIndex = this.props.lines.findIndex((line) => line.rowid === this.state.dragCurrentHoverRowid);
+        let previousLineIndex = this.props.lines.findIndex((line) => line.rowid === this.state.dragLastHoveredRowid);
+        let willBePlasedUnderCurrentLine =  currentLineIndex > previousLineIndex;
+
+        return <style>
+            {`.logtable tbody tr:nth-of-type(${currentLineIndex + 1}) { border-${willBePlasedUnderCurrentLine ? "bottom" : "top"}: solid 3px #262f38;}
+              .logtable tbody tr:nth-of-type(${originalLineIndex + 1}) {background-color: #262f38} 
+              `}
+        </style>
+    }
+
+    lineOnMouseDown(rowid) {
+        if(this.state.dragSelectedRowid != null){
+            return;
+        }
+        this.setState({
+            dragSelectedRowid: rowid,
+            dragLastHoveredRowid: rowid
+        })
+    }
+    lineOnMouseUp() {
+        let lastLineIndex = this.findIndexOfRow(this.state.dragLastHoveredRowid);
+        let currentLineIndex = this.findIndexOfRow(this.state.dragCurrentHoverRowid);
+
+        let betweenBottom, betweenTop;
+        if(lastLineIndex < currentLineIndex) {
+            //moving down (positive)
+            betweenBottom = lastLineIndex + 1;
+            betweenTop = currentLineIndex + 1;
+        }
+        if(lastLineIndex > currentLineIndex) {
+            //moving up (negative)
+            betweenBottom = lastLineIndex - 1;
+            betweenTop = currentLineIndex - 1;
+        }
+
+        let lineBetweenBottom = this.props.lines[betweenBottom];
+        let lineBetweenTop = this.props.lines[betweenTop];
+
+        let newTimestamp;
+        if(lineBetweenBottom !== undefined && lineBetweenTop !== undefined) {
+            newTimestamp = Math.min(lineBetweenBottom.timestamp, lineBetweenTop.timestamp) + Math.abs(lineBetweenBottom.timestamp - lineBetweenTop.timestamp) / 2;
+        } else if(lineBetweenBottom !== undefined) {
+            newTimestamp = lineBetweenBottom.timestamp - 1
+        } else if(lineBetweenTop !== undefined) {
+            newTimestamp = lineBetweenTop.timestamp + 1;
+        } else {
+            this.resetDragging();
+            return;
+        }
+
+        console.log(`Moving ${this.state.dragSelectedRowid} to timestamp ${newTimestamp}`);
+
+        this.resetDragging();
+    }
+    lineOnMouseEnter(rowid) {
+        this.setState({
+            dragCurrentHoverRowid: rowid
+        })
+    }
+    lineOnMouseLeave(rowid) {
+        this.setState({
+            dragLastHoveredRowid: rowid
+        })
+    }
+    resetDragging() {
+        this.setState({
+            dragSelectedRowid: null,
+            dragLastHoveredRowid: null,
+        })
+    }
+
+    findIndexOfRow(rowid) {
+        return this.props.lines.findIndex((line) => line.rowid === rowid)
     }
 
     handleUserScroll() {
@@ -92,9 +187,19 @@ class LogbookBlock extends React.Component {
 }
 
 class LogbookLine extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            moving: false
+        };
+    }
+
     render() {
-        return <tr>
-            <td className="timestamp">
+        return <tr onMouseUp={this.onMouseUp.bind(this)}
+                   onMouseLeave={this.onMouseLeave.bind(this)}
+                   onMouseEnter={this.onMouseEnter.bind(this)}
+                   ref={(el) => this.trRef = el}>
+            <td className="timestamp" onMouseDown={this.onMouseDown.bind(this)}>
                 {this.renderTimestamp(this.props.timestamp)}
             </td>
             <td>
@@ -131,6 +236,25 @@ class LogbookLine extends React.Component {
             }
         })
     }
+
+    onMouseDown(e) {
+        if (e.button !== 0) return;
+        this.props.onMouseDown(this.props.rowid);
+    }
+    onMouseUp(e) {
+        if (e.button !== 0) return;
+        this.props.onMouseUp(this.props.rowid);
+    }
+
+    onMouseLeave(e) {
+        if (e.button !== 0) return;
+        this.props.onMouseLeave(this.props.rowid);
+    }
+
+    onMouseEnter(e) {
+        if (e.button !== 0) return;
+        this.props.onMouseEnter(this.props.rowid);
+    }
 }
 
 class EditableText extends React.Component {
@@ -149,7 +273,7 @@ class EditableText extends React.Component {
         if (this.state.editing) {
             return <div>
                 <TextareaAutosize
-                    maxRows={10}
+                    maxRows={this.props.maxRows || 10}
                     className="pl-1 d-flex bd-highlight"
                     value={this.state.input}
                     onKeyDown={this.onKey.bind(this)}
@@ -159,7 +283,7 @@ class EditableText extends React.Component {
                 />
             </div>
         }
-        return <div onClick={this.startEditing.bind(this)}>
+        return <div onDoubleClick={this.startEditing.bind(this)} >
             {this.props.children}
         </div>;
     }

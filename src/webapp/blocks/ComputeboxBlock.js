@@ -3,7 +3,8 @@ import ReactTooltip from 'react-tooltip'
 
 class ComputeboxBlock extends React.Component {
     render() {
-        let {rosnode: {up}, pinger: {computebox: {timestamp, success}}} = this.props.groundStationState;
+        let up = this.props.rosnode_up;
+        let {computebox: {timestamp, success}} = this.props.pinger;
 
         return <div className="block clearfix">
             <span className="text-small ">
