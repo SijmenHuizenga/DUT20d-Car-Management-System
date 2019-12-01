@@ -108,9 +108,17 @@ class TopicIndicator extends React.Component {
     render() {
         return <div>
             <span
-                className={`indicator circle ${this.props.selected ? getIndicatorColorFromState(this.props.topicstate) : ""}`}/>
+                className={`indicator circle ${this.props.selected ? topicStateToColor(this.props.topicstate) : ""}`}
+                data-tip={this.getTitle()}/>
             <span className="text-small pl-2">{this.props.topicname}</span>
         </div>
+    }
+
+    getTitle() {
+        if(!this.props.selected) {
+            return "This topic is not selected for recording.";
+        }
+        return "This topic is selected for recording<br/> The topic is " + topicStateToDescription(this.props.topicstate)
     }
 }
 
@@ -119,7 +127,7 @@ class TopicSelector extends React.Component {
         let {topicname, selected, topicstate} = this.props;
         return <div className="custom-control custom-checkbox">
             <input type="checkbox"
-                   className={`custom-control-input ${getIndicatorColorFromState(topicstate)}`}
+                   className={`custom-control-input ${topicStateToColor(topicstate)}`}
                    id={`recordtopic_${topicname}`}
                    checked={selected}
                    onChange={this.handleCheckboxChange}
@@ -136,7 +144,7 @@ class TopicSelector extends React.Component {
     }
 }
 
-function getIndicatorColorFromState(state) {
+function topicStateToColor(state) {
     switch (state) {
         case "OFFLINE":
             return "danger";
@@ -144,6 +152,17 @@ function getIndicatorColorFromState(state) {
             return "warning";
         case "ACTIVE":
             return "success";
+    }
+}
+
+function topicStateToDescription(state) {
+    switch (state) {
+        case "OFFLINE":
+            return "Offline: it has no attached publishers or subscribers";
+        case "IDLE":
+            return "Idle: no messages are being sent recently";
+        case "ACTIVE":
+            return "Active: messages are being sent on this topic frequently";
     }
 }
 

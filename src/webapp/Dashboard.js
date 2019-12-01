@@ -9,6 +9,7 @@ import ServicesBlock from "./blocks/ServicesBlock";
 import GitBlock from "./blocks/GitBlock";
 import LogbookBlock from "./blocks/LogbookBlock";
 import RecordingBlock from "./blocks/RecordingBlock";
+import ReactTooltip from "react-tooltip";
 
 //todo: brake preasure sensor
 //todo: ams voltage
@@ -67,6 +68,8 @@ class Dashboard extends React.Component {
 
     render() {
         return <div className="container-fluid">
+            <ReactTooltip place="bottom" multiline={true}/>
+
             {this.state.groundStationState === null || this.state.connectionerror !== null
                 ? <div className="overlay error text-center">{this.state.connectionerror}</div>
                 : this.renderDashboard()}

@@ -9,14 +9,13 @@ class ComputeboxBlock extends React.Component {
         return <div className="block clearfix">
             <span className="text-small ">
                 <span className={"indicator circle " + (up ? "success" : "danger")}
-                      data-tip={"Groundstation ros node is " + (up ? "up" : "down")}/>&nbsp;
+                      data-tip={`Groundstation ros node is ${up ? "up" : "down"} <br /> CMS is connected to ros master.`}/>&nbsp;
                 <span className={"indicator circle " + this.getPingColor(timestamp, success)}
                       data-tip data-for="pingtooltip"/>&nbsp;
                 Uptime: 25 minutes</span>
             <div className="float-right">
                 <button type="button" className="btn btn-sm btn-outline-danger py-0">Reboot Luke</button>
             </div>
-            <ReactTooltip place="bottom" />
             <ReactTooltip place="bottom" id='pingtooltip' getContent={[() => {
                 return this.getPingTitle(timestamp, success)
             }, 100]} />
@@ -30,13 +29,13 @@ class ComputeboxBlock extends React.Component {
         return success ? "success" : "danger"
     }
 
-    getPingTitle(timestamp) {
+    getPingTitle(timestamp, success) {
         let now = (new Date()).getTime() / 1000;
         if(!this.lastPingWasRecent(timestamp)) {
             return "Last ping to computebox was too long ago ("+this.nicenumber(now - timestamp)+" seconds)"
         }
 
-        return "Last ping to computebox was " + this.nicenumber(now - timestamp) + " seconds ago. "
+        return `Last ping to computebox (${this.nicenumber(now - timestamp)} seconds ago) was ${success ? "successfull" : "fail"}. `
     }
 
     lastPingWasRecent(timestamp) {
