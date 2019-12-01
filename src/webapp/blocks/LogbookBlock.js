@@ -1,6 +1,6 @@
 import React from "react";
-import TextareaAutosize from "react-autosize-textarea";
 import Markdown from 'react-markdown';
+import EditableText from "../util/EditableText";
 
 class LogbookBlock extends React.Component {
     constructor(props) {
@@ -203,7 +203,7 @@ class LogbookLine extends React.Component {
                 {this.renderTimestamp(this.props.timestamp)}
             </td>
             <td>
-                <EditableText value={this.props.text} save={this.saveUpdate.bind(this)}>
+                <EditableText value={this.props.text} save={this.saveUpdate.bind(this)} multiline={true}>
                     <Markdown source={this.props.text} className="pl-1 logline"/>
                 </EditableText>
             </td>
@@ -255,92 +255,6 @@ class LogbookLine extends React.Component {
         if (e.button !== 0) return;
         this.props.onMouseEnter(this.props.rowid);
     }
-}
-
-class EditableText extends React.Component {
-
-    constructor(props) {
-        super(props);
-        this.state = {
-            editing: false,
-            input: null,
-            inputDisabled: false,
-        };
-        this.inputref = React.createRef()
-    }
-
-    render() {
-        if (this.state.editing) {
-            return <div>
-                <TextareaAutosize
-                    maxRows={this.props.maxRows || 10}
-                    className="pl-1 d-flex bd-highlight"
-                    value={this.state.input}
-                    onKeyDown={this.onKey.bind(this)}
-                    onChange={(e) => this.setState({input: e.target.value})}
-                    disabled={this.state.inputDisabled}
-                    ref={this.inputref}
-                />
-            </div>
-        }
-        return <div onDoubleClick={this.startEditing.bind(this)} >
-            {this.props.children}
-        </div>;
-    }
-
-    onKey(e) {
-        if (e.key === "Escape") {
-            this.stopEditing();
-            return;
-        }
-        if (e.key === "Enter" && !e.shiftKey) {
-            this.saveEditing();
-        }
-    }
-
-    startEditing() {
-        this.setState({
-            editing: true,
-            input: this.props.value
-        }, () => this.focusEditor());
-    }
-
-    stopEditing() {
-        this.setState({
-            editing: false,
-            input: null
-        })
-    }
-
-    saveEditing() {
-        if (this.state.input === "") {
-            alert("Cannot have empty message");
-            return
-        }
-        this.setState({
-            inputDisabled: true,
-        }, () => {
-            this.props.save(this.state.input)
-                .then((success) => {
-                    if (success) {
-                        this.setState({
-                            editing: false,
-                            input: null,
-                            inputDisabled: false
-                        })
-                    } else {
-                        this.setState({
-                            inputDisabled: false
-                        }, () => this.focusEditor())
-                    }
-                })
-        })
-    }
-
-    focusEditor() {
-        this.inputref.current.focus();
-    }
-
 }
 
 export default LogbookBlock;

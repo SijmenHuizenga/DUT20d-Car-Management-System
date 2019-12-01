@@ -203,6 +203,38 @@ a.link-sf:active:before {
   background-color: #2ecc71;
 }
 
+.custom-control-input:checked ~ .custom-control-label::before {
+  border: none;
+}
+
+.custom-control-input.success:checked ~ .custom-control-label::before {
+  background-color: #2ecc71;
+}
+
+.custom-control-input.success:disabled:checked ~ .custom-control-label::before {
+  background-color: #2ecc71;
+}
+
+.custom-control-input.warning:checked ~ .custom-control-label::before {
+  background-color: #bd9110;
+}
+
+.custom-control-input.warning:disabled:checked ~ .custom-control-label::before {
+  background-color: #bd9110;
+}
+
+.custom-control-input.danger:checked ~ .custom-control-label::before {
+  background-color: #e74c3c;
+}
+
+.custom-control-input.danger:disabled:checked ~ .custom-control-label::before {
+  background-color: #e74c3c;
+}
+
+
+.custom-control-input[disabled]:checked ~ .custom-control-label {
+  color: #e8f4ff;
+}
 
 .text-small { font-size: 14px !important; }
 .text-large { font-size: 18px !important; }
@@ -213,14 +245,15 @@ a.link-sf:active:before {
 .logtable, .logtable tbody {
   width: 100%;
 }
-.logtable textarea {
-  width: 100%;
+textarea {
   padding: 0;
+  margin: 0;
   border: none;
   background-color: rgba(0, 0, 0, 0.29);
-  color: rgba(255, 255, 255, 0.8)
+  color: rgba(255, 255, 255, 0.8);
+  width: 100%;
 }
-.logtable textarea:focus {
+textarea:focus {
   outline: none;
 }
 .logtable .timestamp {

@@ -10,6 +10,9 @@ import GitBlock from "./blocks/GitBlock";
 import LogbookBlock from "./blocks/LogbookBlock";
 import RecordingBlock from "./blocks/RecordingBlock";
 
+//todo: brake preasure sensor
+//todo: ams voltage
+
 const devmode = true;
 const fakeDashboard = {
     rosnode: {
@@ -28,7 +31,28 @@ const fakeDashboard = {
         {rowid: 444, timestamp: 4, text: "Example line 444"},
         {rowid: 555, timestamp: 5, text: "Example line 555"},
         {rowid: 666, timestamp: 66, text: "Example line 666"},
-    ]
+    ],
+    topics: {
+        "/world_state": {state: "ACTIVE"},
+        "/planning_ReferencePath": {state: "ACTIVE"},
+        "/visualization_markers/world_state": {state: "IDLE"},
+        "/planning_BoundaryMarkers": {state: "OFFLINE"},
+        "/mavros/local_position/velocity_body": {state: "OFFLINE"},
+        "/visualization_markers/world_evidence": {state: "OFFLINE"}
+    },
+    recording: {
+        is_recording: true,
+        bagname: "sysid_corner1_vioenabled",
+        bagfilename: "sysid_corner1_vioenabled_20190804172203.bag.active",
+        recordingduration: "03:42",
+        selected_topics: [
+            "/planning_ReferencePath",
+            "/visualization_markers/world_state",
+            "/mavros/local_position/velocity_local",
+            "/world_state",
+            "/mavros/local_position/pose",
+        ],
+    }
 };
 
 class Dashboard extends React.Component {
@@ -53,7 +77,7 @@ class Dashboard extends React.Component {
     renderDashboard() {
         console.log("render", this.state.groundStationState);
 
-        let {rosnode, pinger, logbook} = this.state.groundStationState;
+        let {rosnode, pinger, logbook, recording, topics} = this.state.groundStationState;
 
         return <main id="page-main">
             <div className="row">
@@ -78,7 +102,7 @@ class Dashboard extends React.Component {
                     <LogbookBlock lines={logbook}/>
                 </div>
                 <div className="col-xl-6 col-xs-12 gutter-small">
-                    <RecordingBlock/>
+                    <RecordingBlock {...recording} topics={topics}/>
                 </div>
             </div>
         </main>
