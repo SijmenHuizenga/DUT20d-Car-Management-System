@@ -17,7 +17,7 @@ class EditableText extends React.Component {
         if (this.state.editing) {
             return <TextareaAutosize
                     maxRows={this.props.multiline ? 10 : 1}
-                    className="pl-1"
+                    className="pl-1 d-flex"
                     value={this.state.input}
                     onKeyDown={this.onKey.bind(this)}
                     onChange={(e) => this.setState({input: e.target.value})}
@@ -25,7 +25,7 @@ class EditableText extends React.Component {
                     ref={this.inputref}
                 />
         }
-        return <div onDoubleClick={this.startEditing.bind(this)} style={{display: "inline-block"}}>
+        return <div onDoubleClick={this.startEditing.bind(this)}>
             {this.props.children}
         </div>;
     }

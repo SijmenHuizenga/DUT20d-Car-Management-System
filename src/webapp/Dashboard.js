@@ -42,7 +42,7 @@ const fakeDashboard = {
         "/visualization_markers/world_evidence": {state: "OFFLINE"}
     },
     recording: {
-        is_recording: true,
+        is_recording: false,
         bagname: "sysid_corner1_vioenabled",
         bagfilename: "sysid_corner1_vioenabled_20190804172203.bag.active",
         recordingduration: "03:42",

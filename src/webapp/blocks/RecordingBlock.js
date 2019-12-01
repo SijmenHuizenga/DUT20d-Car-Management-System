@@ -1,5 +1,6 @@
 import React from "react";
 import EditableText from "../util/EditableText";
+import Requestor from "../util/Requestor"
 
 class RecordingContainer extends React.Component {
     render() {
@@ -8,6 +9,13 @@ class RecordingContainer extends React.Component {
 }
 
 class RecordingBlock extends React.Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            error: null
+        }
+    }
+
     allTopics() {
         let out = [...this.props.selected_topics, ...Object.keys(this.props.topics)];
         out.sort();
@@ -26,8 +34,19 @@ class RecordingBlock extends React.Component {
     }
 
     onRecordingToggle() {
-        //todo: backend
-        console.log("toggle")
+        return Requestor.put("/recording/" + (this.props.is_recording ? "stop" : "start"), {})
+            .then(() => this.setError(null))
+            .catch((error) => this.setError("Couldn't start/stop recording: " + error))
+    }
+
+    renderErrorblock() {
+        return this.state.error ? <div className="alert alert-danger" role="alert">{this.state.error}</div> : null;
+    }
+
+    setError(error) {
+        this.setState({
+            error: error
+        })
     }
 }
 
@@ -36,6 +55,7 @@ class InactiveRecordingBlock extends RecordingBlock {
         let {bagname} = this.props;
 
         return <div className="block">
+            {this.renderErrorblock()}
             <div className="d-flex">
                 <div className="text-large">Idle</div>
                 <div className="flex-grow-1 pl-1">
@@ -55,6 +75,7 @@ class InactiveRecordingBlock extends RecordingBlock {
                 {this.allTopics().map((topicname) =>
                     <TopicSelector key={topicname}
                                    topicname={topicname}
+                                   setError={this.setError.bind(this)}
                                    selected={this.isTopicSelected(topicname)}
                                    topicstate={this.getTopicState(topicname)}/>
                 )}
@@ -62,15 +83,16 @@ class InactiveRecordingBlock extends RecordingBlock {
         </div>
     }
     updateFilename(newname) {
-        //todo: backend
-        console.log(newname);
-        return new Promise((resolve => resolve(true)))
+        return Requestor.put("/recording/", {filename: newname})
+            .then(() => this.setError(null))
+            .catch((error) => this.setError("Failed to update recording filename: " + error));
     }
 }
 
 class ActiveRecordingBlock extends RecordingBlock {
     render() {
         return <div className="block">
+            {this.renderErrorblock()}
             <div className="mb-2 ">
                 <span className="text-large">Recording</span>
                 <span className="pl-1 text-small">| {this.props.bagfilename}</span>
@@ -123,7 +145,7 @@ class TopicSelector extends React.Component {
                    className={`custom-control-input ${topicStateToColor(topicstate)}`}
                    id={`recordtopic_${topicname}`}
                    checked={selected}
-                   onChange={this.handleCheckboxChange}
+                   onChange={this.handleCheckboxChange.bind(this)}
             />
             <label
                 className="custom-control-label"
@@ -133,8 +155,12 @@ class TopicSelector extends React.Component {
     }
 
     handleCheckboxChange(e) {
-        //todo: activate/deactive send
-        console.log(e.target.checked)
+        return Requestor.put("/recording/toggletopic", {
+            topicname: this.props.topicname,
+            selected: e.target.checked
+        })
+            .then(() => this.props.setError(null))
+            .catch((error) => this.props.setError("Failed to update recording filename: " + error));
     }
 }
 
