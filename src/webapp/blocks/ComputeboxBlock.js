@@ -16,7 +16,7 @@ class ComputeboxBlock extends React.Component {
             <div className="float-right">
                 <button type="button" className="btn btn-sm btn-outline-danger py-0">Reboot Luke</button>
             </div>
-            <ReactTooltip place="bottom" id='pingtooltip' getContent={[() => {
+            <ReactTooltip place="bottom" delayShow={300} id='pingtooltip' getContent={[() => {
                 return this.getPingTitle(timestamp, success)
             }, 100]} />
         </div>

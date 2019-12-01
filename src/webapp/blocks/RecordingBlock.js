@@ -106,19 +106,12 @@ class ActiveRecordingBlock extends RecordingBlock {
 
 class TopicIndicator extends React.Component {
     render() {
+        let {topicname, selected, topicstate} = this.props;
         return <div>
-            <span
-                className={`indicator circle ${this.props.selected ? topicStateToColor(this.props.topicstate) : ""}`}
-                data-tip={this.getTitle()}/>
-            <span className="text-small pl-2">{this.props.topicname}</span>
+            <span className={`indicator circle ${selected ? topicStateToColor(topicstate) : ""}`}
+                  data-tip={topicDescription(selected, topicstate)}/>
+            <span className="text-small pl-2">{topicname}</span>
         </div>
-    }
-
-    getTitle() {
-        if(!this.props.selected) {
-            return "This topic is not selected for recording.";
-        }
-        return "This topic is selected for recording<br/> The topic is " + topicStateToDescription(this.props.topicstate)
     }
 }
 
@@ -134,6 +127,7 @@ class TopicSelector extends React.Component {
             />
             <label
                 className="custom-control-label"
+                data-tip={topicDescription(selected, topicstate)}
                 htmlFor={`recordtopic_${topicname}`}>{topicname}</label>
         </div>
     }
@@ -164,6 +158,10 @@ function topicStateToDescription(state) {
         case "ACTIVE":
             return "Active: messages are being sent on this topic frequently";
     }
+}
+
+function topicDescription(selected, topicstate) {
+    return `This topic is ${selected ? "" : "not"} selected for recording<br/> The topic is ${topicStateToDescription(topicstate)}`
 }
 
 export default RecordingContainer;

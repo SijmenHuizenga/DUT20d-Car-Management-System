@@ -68,7 +68,9 @@ class Dashboard extends React.Component {
 
     render() {
         return <div className="container-fluid">
-            <ReactTooltip place="bottom" multiline={true}/>
+            <ReactTooltip place="bottom"
+                          multiline={true}
+                          delayShow={300}/>
 
             {this.state.groundStationState === null || this.state.connectionerror !== null
                 ? <div className="overlay error text-center">{this.state.connectionerror}</div>
