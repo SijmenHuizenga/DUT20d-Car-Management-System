@@ -11,10 +11,7 @@ import LogbookBlock from "./blocks/LogbookBlock";
 import RecordingBlock from "./blocks/RecordingBlock";
 import ReactTooltip from "react-tooltip";
 
-//todo: brake preasure sensor
-//todo: ams voltage
-
-const devmode = true;
+const devmode = false;
 const fakeDashboard = {
     rosnode: {
         up: true,
@@ -68,10 +65,6 @@ class Dashboard extends React.Component {
 
     render() {
         return <div className="container-fluid">
-            <ReactTooltip place="bottom"
-                          multiline={true}
-                          delayShow={300}/>
-
             {this.state.groundStationState === null || this.state.connectionerror !== null
                 ? <div className="overlay error text-center">{this.state.connectionerror}</div>
                 : this.renderDashboard()}
@@ -80,7 +73,7 @@ class Dashboard extends React.Component {
     }
 
     renderDashboard() {
-        console.log("render", this.state.groundStationState);
+        // console.log("render", this.state.groundStationState);
 
         let {rosnode, pinger, logbook, recording, topics} = this.state.groundStationState;
 
@@ -110,6 +103,9 @@ class Dashboard extends React.Component {
                     <RecordingBlock {...recording} topics={topics}/>
                 </div>
             </div>
+            <ReactTooltip place="bottom"
+                          multiline={true}
+                          delayShow={300}/>
         </main>
     }
 
