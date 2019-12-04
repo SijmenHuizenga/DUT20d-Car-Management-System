@@ -19,6 +19,8 @@ class LogbookBlock extends React.Component {
 
     render() {
         let {input, inputDisabled, error} = this.state;
+        let {lines} = this.props;
+        lines.sort((a, b) => a.timestamp - b.timestamp);
         return <div className="block y-50 d-flex flex-column">
             {error ? <div className="alert alert-danger" role="alert">{error}</div> : null}
             <div className="flex-row overflow-auto" ref={(el) => this.scroller = el}
@@ -28,8 +30,9 @@ class LogbookBlock extends React.Component {
                     {this.renderDragIndicator()}
                     {this.state.dragSelectedRowid != null ?
                         <style>{".logtable .timestamp {user-select: none;}"}</style> : null}
-                    {this.props.lines.map((line) =>
+                    {lines.map((line) =>
                         <LogbookLine {...line}
+                                     key={line.timestamp}
                                      onMouseDown={this.lineOnMouseDown.bind(this)}
                                      onMouseUp={this.lineOnMouseUp.bind(this)}
                                      onMouseLeave={this.lineOnMouseLeave.bind(this)}
@@ -126,7 +129,7 @@ class LogbookBlock extends React.Component {
         }
 
         console.log(`Moving ${this.state.dragSelectedRowid} to timestamp ${newTimestamp}`);
-        this.updateLine(this.state.dragSelectedRowid, {timestmap: newTimestamp});
+        this.updateLine(this.state.dragSelectedRowid, {timestamp: newTimestamp});
         this.resetDragging();
     }
 
@@ -195,9 +198,15 @@ class LogbookBlock extends React.Component {
     }
 
     updateLine(rowid, changeset) {
-        Requestor.put(`/logbook/${this.props.rowid}`, changeset)
-            .then(() => this.setState({error: null}))
-            .catch((error) => this.setState({error: 'Failed to update logline: ' + error}));
+        return Requestor.put(`/logbook/${rowid}`, changeset)
+            .then(() => {
+                this.setState({error: null});
+                return true;
+            })
+            .catch((error) => {
+                this.setState({error: 'Failed to update logline: ' + error});
+                return false;
+            });
     }
 }
 
@@ -211,10 +220,11 @@ class LogbookLine extends React.Component {
 
     render() {
         let {rowid, timestamp, text, updateLine} = this.props;
-        return <tr onMouseUp={this.onMouseUp.bind(this)}
-                   onMouseLeave={this.onMouseLeave.bind(this)}
+        return <tr onMouseLeave={this.onMouseLeave.bind(this)}
                    onMouseEnter={this.onMouseEnter.bind(this)}>
-            <td className="timestamp" onMouseDown={this.onMouseDown.bind(this)}>
+            <td className="timestamp"
+                onMouseDown={this.onMouseDown.bind(this)}
+                onMouseUp={this.onMouseUp.bind(this)}>
                 {this.renderTimestamp(timestamp)}
             </td>
             <td>

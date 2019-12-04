@@ -172,6 +172,7 @@ function topicStateToColor(state) {
             return "warning";
         case "ACTIVE":
             return "success";
+        default: return "danger";
     }
 }
 
@@ -183,6 +184,7 @@ function topicStateToDescription(state) {
             return "Idle: no messages are being sent recently";
         case "ACTIVE":
             return "Active: messages are being sent on this topic frequently";
+        default: return `UNKOWN STATE ${state}`;
     }
 }
 

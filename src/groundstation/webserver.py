@@ -45,10 +45,14 @@ def logbook_create():
 @app.route('/logbook/<int:rowid>', methods=['PUT'])
 def logbook_update(rowid):
     try:
-        content = request.get_json()
-        if 'text' not in content:
-            abort(400)
-        state.update_logbook_line(rowid, content['text'])
+        changes = request.get_json()
+        if 'text' in changes:
+            print("Updating text")
+            state.update_logbook_line_text(rowid, changes['text'])
+
+        if 'timestamp' in changes:
+            print("Updating timestamp")
+            state.update_logbook_line_timestamp(rowid, changes['timestamp'])
         return "ok", 201
     except Exception, e:
         print "error while handling /logbook request:", e

@@ -67,12 +67,20 @@ class StateManager:
                 return line
         return None
 
-    def update_logbook_line(self, rowid, newtext):
+    def update_logbook_line_text(self, rowid, text):
         line = self.get_logbook_line(rowid)
         if line is None:
-            raise Exception("Row does not exit")
-        line['text'] = newtext
+            raise Exception("Line does not exit")
+        line['text'] = text
         self.db.query("UPDATE logbook SET text=:text WHERE rowid=:rowid", line)
+        self.emit_state()
+
+    def update_logbook_line_timestamp(self, rowid, timestmap):
+        line = self.get_logbook_line(rowid)
+        if line is None:
+            raise Exception("Line does not exit")
+        line['timestamp'] = timestmap
+        self.db.query("UPDATE logbook SET text=:text WHERE timestamp=:timestamp", line)
         self.emit_state()
 
     def set_sio(self, sio):
