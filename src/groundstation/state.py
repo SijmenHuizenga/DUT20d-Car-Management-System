@@ -15,13 +15,22 @@ class StateManager:
                 'up': False,
             },
             'logbook': [],
-            'topics': [],
+            'topics': {
+                # '/rosout': {'lastseen': 123456,
+                #             'type': 'rosgraph_msgs/Log'}
+            },
+            'nodes': {
+                # '/cms': {'lastseen': 123456,
+                #          'subscriptions': ['/rosout', '/statistics'],
+                #          'publications': ['/example']}
+            },
             'recording': {
                 'is_recording': False,
                 'bagname': "sysid_corner1_vioenabled",
                 'bagfilename': "sysid_corner1_vioenabled_20190804172203.bag.active",
                 'recordingduration': "03:42",
                 'selected_topics': [
+                    "/rosout"
                     "/planning_ReferencePath",
                     "/visualization_markers/world_state",
                     "/mavros/local_position/velocity_local",

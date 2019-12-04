@@ -16,6 +16,10 @@ class Database:
             self.database.execute('CREATE TABLE IF NOT EXISTS pings (timestamp FLOAT, device VARCHAR(10), success BOOLEAN)')
             self.database.execute('CREATE TABLE IF NOT EXISTS rosnodehealth (timestamp FLOAT, up BOOLEAN)')
             self.database.execute('CREATE TABLE IF NOT EXISTS logbook (timestamp FLOAT, text TEXT, source VARCHAR(255))')
+            self.database.execute('CREATE TABLE IF NOT EXISTS nodes (timestamp FLOAT, name VARCHAR(255))')
+            self.database.execute('CREATE TABLE IF NOT EXISTS topics (timestamp FLOAT, name VARCHAR(255), type VARCHAR(255))')
+            self.database.execute('CREATE TABLE IF NOT EXISTS node_topic_subscription (timestamp FLOAT, node VARCHAR(255), topic VARCHAR(255))')
+            self.database.execute('CREATE TABLE IF NOT EXISTS node_topic_publication (timestamp FLOAT, node VARCHAR(255), topic VARCHAR(255))')
         self.databaselock.release()
 
     def insert(self, query, args):
