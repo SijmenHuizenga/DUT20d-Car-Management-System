@@ -13,7 +13,7 @@ class Database:
     def create_schema(self):
         self.databaselock.acquire()
         with self.database:
-            self.database.execute('CREATE TABLE IF NOT EXISTS pings (timestamp FLOAT, device VARCHAR(10), success BOOLEAN)')
+            self.database.execute('CREATE TABLE IF NOT EXISTS pings (timestamp FLOAT, host VARCHAR(10), success BOOLEAN)')
             self.database.execute('CREATE TABLE IF NOT EXISTS rosnodehealth (timestamp FLOAT, up BOOLEAN)')
             self.database.execute('CREATE TABLE IF NOT EXISTS logbook (timestamp FLOAT, text TEXT, source VARCHAR(255))')
             self.database.execute('CREATE TABLE IF NOT EXISTS nodes (timestamp FLOAT, name VARCHAR(255))')

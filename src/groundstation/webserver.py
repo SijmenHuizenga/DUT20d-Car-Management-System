@@ -4,7 +4,9 @@ from flask import Flask, send_from_directory, request, abort
 import socketio
 
 from state import statemanager as state
+from sshclient import ssh
 import logbook
+
 logbook = logbook.Logbook()
 
 # Disable logging of http requests in console
@@ -61,3 +63,12 @@ def logbook_update(rowid):
     except Exception, e:
         print "error while handling /logbook request:", e
         abort(500, e)
+
+
+@app.route('/rebootluke')
+def reboot_luke():
+    try:
+        ssh.run_command("reboot")
+    except:
+        pass
+    return "ok", 200

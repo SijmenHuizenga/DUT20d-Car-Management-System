@@ -5,14 +5,16 @@ from database import database as db
 class StateManager:
     def __init__(self):
         self.state = {
-            'pinger': {
-                'computebox': {
-                    'timestamp': 0.0,
-                    'success': False,
-                }
+            'ping': {
+                # 'uptime': 'up 11 hours, 52 minutes',
+                # 'timestamp': 0.0,
+                # 'success': False,
+            },
+            'ssh': {
+                # 'connected': False,
             },
             'rosnode': {
-                'up': False,
+                # 'up': False,
             },
             'logbook': [],
             'topics': {
@@ -52,6 +54,13 @@ class StateManager:
 
     def populate_memory_state(self):
         self.state['logbook'] = db.select_all("SELECT rowid, * FROM logbook", {})
+
+        alltimetopics = db.select_all("SELECT name FROM topics GROUP BY name", {})
+        for topic in alltimetopics:
+            self.state['topics'][topic['name']] = {
+                'lastseen': -1,
+                'type': 'unkown',
+            }
 
     def set_sio(self, sio):
         self.sio = sio

@@ -1,20 +1,26 @@
 import React from 'react';
 import ReactTooltip from 'react-tooltip'
+import Requestor from "../util/Requestor";
 
 class ComputeboxBlock extends React.Component {
     render() {
         let up = this.props.rosnode_up;
-        let {computebox: {timestamp, success}} = this.props.pinger;
+        let {timestamp, success, uptime} = this.props.ping;
+        let sshConnected = this.props.ssh.connected;
 
         return <div className="block clearfix">
             <span className="text-small ">
                 <span className={"indicator circle " + (up ? "success" : "danger")}
                       data-tip={`Groundstation ros node is ${up ? "up" : "down"} <br /> CMS is connected to ros master.`}/>&nbsp;
+                <span className={"indicator circle " + (sshConnected ? "success" : "danger")}
+                      data-tip={`Groundstation is ${sshConnected ? "" : "not"} connected to luke via ssh`}/>&nbsp;
                 <span className={"indicator circle " + this.getPingColor(timestamp, success)}
                       data-tip data-for="pingtooltip"/>&nbsp;
-                Uptime: 25 minutes</span>
+                {uptime}</span>
             <div className="float-right">
-                <button type="button" className="btn btn-sm btn-outline-danger py-0">Reboot Luke</button>
+                <button type="button"
+                        className="btn btn-sm btn-outline-danger py-0"
+                        onClick={this.rebootLuke.bind(this)}>Reboot Luke</button>
             </div>
             <ReactTooltip place="bottom" delayShow={300} id='pingtooltip' getContent={[() => {
                 return this.getPingTitle(timestamp, success)
@@ -55,6 +61,10 @@ class ComputeboxBlock extends React.Component {
     }
     componentWillUnmount() {
         clearInterval(this.interval);
+    }
+
+    rebootLuke() {
+        Requestor.execute("/rebootluke")
     }
 }
 

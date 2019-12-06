@@ -16,11 +16,10 @@ const fakeDashboard = {
     rosnode: {
         up: true,
     },
-    pinger: {
-        computebox: {
-            timestamp: 1234,
-            success: true
-        }
+    ping: {
+        uptime: 'up for 20 hours and 11 minutes',
+        timestamp: 1234,
+        success: true
     },
     logbook: [
         {rowid: 111, timestamp: 1, text: "Example line 111"},
@@ -75,7 +74,7 @@ class Dashboard extends React.Component {
     renderDashboard() {
         console.log("render", this.state.groundStationState);
 
-        let {rosnode, pinger, logbook, recording, topics, nodes} = this.state.groundStationState;
+        let {rosnode, ping, logbook, recording, topics, nodes, ssh} = this.state.groundStationState;
 
         return <main id="page-main">
             <div className="row">
@@ -89,7 +88,7 @@ class Dashboard extends React.Component {
                     <TopicsBlock topics={topics}/>
                 </div>
                 <div className="col-xs-12 col-xl-6 gutter-small ">
-                    <ComputeboxBlock rosnode_up={rosnode.up}  pinger={pinger}/>
+                    <ComputeboxBlock rosnode_up={rosnode.up}  ping={ping} ssh={ssh}/>
                     <ServicesBlock/>
                     <GitBlock/>
                 </div>

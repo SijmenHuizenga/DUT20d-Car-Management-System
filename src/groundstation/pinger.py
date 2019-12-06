@@ -2,13 +2,13 @@ import os
 import threading
 import time
 from database import database as db
+from sshclient import ssh
 from state import statemanager as state
 
 
 class Pinger:
-    def __init__(self, devicename, deviceaddress):
-        self.devicename = devicename
-        self.deviceaddress = deviceaddress
+    def __init__(self, host):
+        self.host = host
 
         thread = threading.Thread(target=self.ping_forever)
         thread.daemon = True
@@ -19,23 +19,27 @@ class Pinger:
             try:
                 self.ping()
             except Exception, e:
-                print("[pinger] Someting unexpected happend while pinging the %s: %s" % (self.devicename, str(e)))
-                pass
+                print("[pinger] Someting unexpected happend while pinging %s: %s" % (self.host, str(e)))
             time.sleep(1)
 
     def ping(self):
-        response = os.system("ping -c 1 -w 1 -W 1 %s > /dev/null 2>&1" % self.deviceaddress)
-        success = response == 0
+        success = os.system("ping -c 1 -w 1 -W 1 %s > /dev/null 2>&1" % self.host) == 0
 
         now = time.time()
-        db.insert('INSERT INTO pings VALUES (:now, :device, :success)',
-                  {'now': now, 'device': self.devicename, 'success': success})
+        db.insert('INSERT INTO pings VALUES (:now, :host, :success)',
+                  {'now': now, 'host': self.host, 'success': success})
+
+        try:
+            (exitcode, uptimestr) = ssh.run_command("uptime -p")
+            if exitcode != 0:
+                raise Exception("uptime exit code was not 0")
+        except Exception, e:
+            uptimestr = str(e)
 
         state.update({
-            'pinger': {
-                self.devicename: {
-                    'timestamp': now,
-                    'success': success,
-                }
+            'ping': {
+                'timestamp': now,
+                'success': success,
+                'uptime': uptimestr
             },
         })
