@@ -6,12 +6,13 @@ class StateManager:
     def __init__(self):
         self.state = {
             'ping': {
-                # 'uptime': 'up 11 hours, 52 minutes',
                 # 'timestamp': 0.0,
                 # 'success': False,
             },
             'ssh': {
                 # 'connected': False,
+                # 'uptime': 'up 11 hours, 52 minutes',
+                # 'lastping': 123456
             },
             'rosnode': {
                 # 'up': False,

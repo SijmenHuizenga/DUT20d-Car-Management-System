@@ -2,9 +2,9 @@
 import threading
 from groundstation import sshclient
 
-luke_host = "128.199.39.87"
-luke_user = "root"
-luke_password = "fruasldufkhbukeasndfusa"
+luke_host = "grace"
+luke_user = "grace"
+luke_password = ""
 sshclient.init(luke_host, luke_user, luke_password)
 
 from groundstation import webserver, pinger, rosnode

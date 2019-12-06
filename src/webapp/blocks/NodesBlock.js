@@ -1,4 +1,5 @@
 import React from 'react';
+import TimebasedIndicator from "../util/TimebasedIndicator";
 
 class NodesBlock extends React.Component {
     render() {
@@ -19,7 +20,9 @@ class NodeIndicator extends React.Component {
         return (
             <div>
                 <span className="text-small">
-                    <span className="indicator circle success"/>
+                    <TimebasedIndicator
+                        hover="Last seen {timesincelastseen} seconds ago"
+                        timestamp={lastseen} success={true} />
                     <span className="pl-1">{node}</span>
                 </span>
             </div>

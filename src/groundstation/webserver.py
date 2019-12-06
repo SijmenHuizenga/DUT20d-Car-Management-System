@@ -15,6 +15,7 @@ log.setLevel(logging.ERROR)
 
 sio = socketio.Server(async_mode='threading')
 app = Flask(__name__, static_folder='../../operator/build/', static_url_path='')
+app.config['PROPAGATE_EXCEPTIONS'] = True
 app.wsgi_app = socketio.WSGIApp(sio, app.wsgi_app)
 state.set_sio(sio)
 
@@ -52,6 +53,7 @@ def logbook_create():
 
 @app.route('/logbook/<int:rowid>', methods=['PUT'])
 def logbook_update(rowid):
+    abort(123)
     try:
         changes = request.get_json()
         if 'text' in changes:
@@ -68,7 +70,9 @@ def logbook_update(rowid):
 @app.route('/rebootluke')
 def reboot_luke():
     try:
-        ssh.run_command("reboot")
-    except:
-        pass
-    return "ok", 200
+        code, output = ssh.run_command("sudo reboot")
+        if code != 0:
+            raise Exception("Return code from 'sudo reboot' was " + str(code) + ": " + output)
+    except Exception, e:
+        return str(e), 400
+    return "ok: " + output, 200

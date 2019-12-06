@@ -9,11 +9,17 @@ function execute(uri, method, body) {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(body)
         }).then((response) => {
-            if (response.status !== 201 || !response.ok) {
+            if ((response.status !== 201 || response.status !== 200) || !response.ok) {
                 console.log("Put failed", response);
-                reject(`Request failed with code ${response.status}: ${response.statusText}`);
+                response.text().then((body) => {
+                    let errString = `Request failed with code ${response.status}: ${response.statusText}`;
+                    if(body !== ""){
+                        errString += '\n' + body;
+                    }
+                    reject(errString);
+                });
             } else {
-                resolve();
+                resolve(response.body);
             }
         })
     })

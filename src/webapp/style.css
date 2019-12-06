@@ -278,3 +278,27 @@ textarea:focus {
   max-height: 45vh;
   overflow-y: auto;
 }
+
+.tooltp {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltp .tooltptext {
+  visibility: hidden;
+  width: 220px;
+  background-color: rgb(34, 34, 34);
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 2px;
+  position: absolute;
+  z-index: 100;
+  top: 150%;
+  left: 50%;
+  /*margin-left: -60px;*/
+}
+
+.tooltp:hover .tooltptext {
+  visibility: visible;
+}

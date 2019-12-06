@@ -55,7 +55,7 @@ class RosNode:
         rospy.Timer(rospy.Duration(3), self.rosmeta.timercallback)
 
     def callback(self, msg):
-        print(msg)
+        print('callback', msg)
 
     @staticmethod
     def is_master_disconnected():

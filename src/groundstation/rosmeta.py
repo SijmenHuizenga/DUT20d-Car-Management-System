@@ -28,7 +28,8 @@ class RosMeta:
             self.update_nodes_state(all_nodes)
 
         except Exception, e:
-            print(e)
+            # todo: also print stacktrace
+            print('rosmeta exception', e)
 
     def process_new_rosinformation(self, lastseen, publishers, subscriptions, topictypes):
         all_topics = {}
@@ -50,7 +51,8 @@ class RosMeta:
                 else:
                     all_nodes[node] = {
                         'lastseen': lastseen,
-                        'subscriptions': [topic]
+                        'subscriptions': [topic],
+                        'publications': []
                     }
             if topic not in all_topics:
                 all_topics[topic] = {
@@ -68,7 +70,8 @@ class RosMeta:
                 else:
                     all_nodes[node] = {
                         'lastseen': lastseen,
-                        'publications': [topic]
+                        'publications': [topic],
+                        'subscriptions': []
                     }
             if topic not in all_topics:
                 all_topics[topic] = {

@@ -16,7 +16,7 @@ class SSHClient:
         self.thread.daemon = True
         self.thread.start()
 
-    def run_command(self, command, connection_timeout=2, execution_timeout=5):
+    def run_command(self, command, connection_timeout=2, execution_timeout=2):
         self.ensure_transport()
         channel = self.transport.open_session(timeout=connection_timeout)
         channel.set_combine_stderr(True)
@@ -57,13 +57,21 @@ class SSHClient:
         try:
             self.ensure_transport()
             self.transport.send_ignore()
-            state.update({
-                'ssh': {
-                    'connected': self.transport.is_active()
-                }
-            })
-        except Exception:
-            state.update({'ssh': {'connected': False}})
+
+            (exitcode, uptimestr) = ssh.run_command("uptime -p")
+            if exitcode != 0:
+                raise Exception("uptime exit code was not 0")
+            connected = self.transport.is_active()
+        except Exception, e:
+            uptimestr = str(e)
+            connected = False
+        state.update({
+            'ssh': {
+                'connected': connected,
+                'uptime': uptimestr,
+                'lastping': time.time()
+            },
+        })
 
 
 ssh = None

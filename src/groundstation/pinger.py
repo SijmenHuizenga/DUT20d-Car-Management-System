@@ -2,7 +2,6 @@ import os
 import threading
 import time
 from database import database as db
-from sshclient import ssh
 from state import statemanager as state
 
 
@@ -29,17 +28,9 @@ class Pinger:
         db.insert('INSERT INTO pings VALUES (:now, :host, :success)',
                   {'now': now, 'host': self.host, 'success': success})
 
-        try:
-            (exitcode, uptimestr) = ssh.run_command("uptime -p")
-            if exitcode != 0:
-                raise Exception("uptime exit code was not 0")
-        except Exception, e:
-            uptimestr = str(e)
-
         state.update({
             'ping': {
                 'timestamp': now,
                 'success': success,
-                'uptime': uptimestr
             },
         })
