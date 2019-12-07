@@ -1,20 +1,23 @@
 import paramiko
 import threading
 import time
-from state import statemanager as state
 
 
 class SSHClient:
 
-    def __init__(self, host, username, password):
+    def __init__(self, host, state, username, password):
         self.host = host
+        self.state = state
         self.username = username
         self.password = password
         self.transport = None
 
-        self.thread = threading.Thread(target=self.ping_forever)
-        self.thread.daemon = True
-        self.thread.start()
+        self.start()
+
+    def start(self):
+        thread = threading.Thread(target=self.ping_forever)
+        thread.daemon = True
+        thread.start()
 
     def run_command(self, command, connection_timeout=2, execution_timeout=2):
         self.ensure_transport()
@@ -58,26 +61,17 @@ class SSHClient:
             self.ensure_transport()
             self.transport.send_ignore()
 
-            (exitcode, uptimestr) = ssh.run_command("uptime -p")
+            (exitcode, uptimestr) = self.run_command("uptime -p")
             if exitcode != 0:
                 raise Exception("uptime exit code was not 0")
             connected = self.transport.is_active()
         except Exception, e:
             uptimestr = str(e)
             connected = False
-        state.update({
+        self.state.update({
             'ssh': {
                 'connected': connected,
                 'uptime': uptimestr,
                 'lastping': time.time()
             },
         })
-
-
-ssh = None
-
-
-def init(host, user, password):
-    global ssh
-    ssh = SSHClient(host, user, password)
-    print "ssh client initialized"

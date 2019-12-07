@@ -1,14 +1,17 @@
 import os
 import threading
 import time
-from database import database as db
-from state import statemanager as state
 
 
 class Pinger:
-    def __init__(self, host):
+    def __init__(self, host, db, state):
         self.host = host
+        self.db = db
+        self.state = state
 
+        self.start()
+
+    def start(self):
         thread = threading.Thread(target=self.ping_forever)
         thread.daemon = True
         thread.start()
@@ -25,10 +28,10 @@ class Pinger:
         success = os.system("ping -c 1 -w 1 -W 1 %s > /dev/null 2>&1" % self.host) == 0
 
         now = time.time()
-        db.insert('INSERT INTO pings VALUES (:now, :host, :success)',
+        self.db.insert('INSERT INTO pings VALUES (:now, :host, :success)',
                   {'now': now, 'host': self.host, 'success': success})
 
-        state.update({
+        self.state.update({
             'ping': {
                 'timestamp': now,
                 'success': success,

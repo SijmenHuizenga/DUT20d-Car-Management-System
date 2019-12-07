@@ -1,19 +1,23 @@
 #!/usr/bin/env python
 import threading
-from groundstation import sshclient
+from groundstation import webserver, pinger, rosnode, sshclient, database, state, logbook
 
-luke_host = "grace"
-luke_user = "grace"
-luke_password = ""
-sshclient.init(luke_host, luke_user, luke_password)
+luke_host = "128.199.39.87"
+luke_user = "root"
+luke_password = "fruasldufkhbukeasndfusa"
 
-from groundstation import webserver, pinger, rosnode
+db = database.Database()
+stat = state.StateManager(db)
+ssh = sshclient.SSHClient(luke_host, stat, luke_user, luke_password)
+pingrr = pinger.Pinger(luke_host, db, stat)
+logbok = logbook.Logbook(db, stat)
+websrver = webserver.Webserver(stat, logbok, ssh)
 
+ssh.start()
+pingrr.start()
 
-pinger.Pinger(luke_host)
-
-webserverThread = threading.Thread(target=webserver.start_server)
+webserverThread = threading.Thread(target=websrver.start)
 webserverThread.daemon = True
 webserverThread.start()
 
-rosnode.RosNode().run()
+rosnode.RosNode(db, stat, logbok).run()

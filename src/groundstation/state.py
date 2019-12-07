@@ -1,9 +1,9 @@
 from utils.dict_merge import dict_merge
-from database import database as db
 
 
 class StateManager:
-    def __init__(self):
+    def __init__(self, db):
+        self.db = db
         self.state = {
             'ping': {
                 # 'timestamp': 0.0,
@@ -54,9 +54,9 @@ class StateManager:
         self.sio.emit('state', self.state, broadcast=True)
 
     def populate_memory_state(self):
-        self.state['logbook'] = db.select_all("SELECT rowid, * FROM logbook", {})
+        self.state['logbook'] = self.db.select_all("SELECT rowid, * FROM logbook", {})
 
-        alltimetopics = db.select_all("SELECT name FROM topics GROUP BY name", {})
+        alltimetopics = self.db.select_all("SELECT name FROM topics GROUP BY name", {})
         for topic in alltimetopics:
             self.state['topics'][topic['name']] = {
                 'lastseen': -1,
@@ -65,6 +65,3 @@ class StateManager:
 
     def set_sio(self, sio):
         self.sio = sio
-
-
-statemanager = StateManager()
