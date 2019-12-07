@@ -39,7 +39,7 @@ const fakeDashboard = {
     },
     recording: {
         is_recording: false,
-        bagname: "sysid_corner1_vioenabled",
+        filename: "sysid_corner1_vioenabled",
         bagfilename: "sysid_corner1_vioenabled_20190804172203.bag.active",
         recordingduration: "03:42",
         selected_topics: [

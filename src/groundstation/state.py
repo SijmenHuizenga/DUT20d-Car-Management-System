@@ -33,8 +33,8 @@ class StateManager:
             'recording': {
                 'is_recording': False,
                 'bagname': "sysid_corner1_vioenabled",
-                'bagfilename': "sysid_corner1_vioenabled_20190804172203.bag.active",
-                'recordingduration': "03:42",
+                'bagfilename': "fakedata.bag.active",
+                'recordingduration': "00:00",
                 'selected_topics': [
                     "/rosout"
                     "/planning_ReferencePath",

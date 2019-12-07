@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import threading
-from groundstation import webserver, pinger, rosnode, sshclient, database, state, logbook, systemdservices
+from groundstation import webserver, pinger, rosnode, sshclient, database, state, logbook, systemdservices, rosrecording
 
 luke_host = "128.199.39.87"
 luke_user = "root"
@@ -13,6 +13,7 @@ pingrr = pinger.Pinger(luke_host, db, stat)
 logbok = logbook.Logbook(db, stat)
 websrver = webserver.Webserver(stat, logbok, ssh)
 systemd = systemdservices.SystemdServices(ssh, stat)
+rosrecorder = rosrecording.RosRecorder(stat, ssh)
 
 ssh.start()
 pingrr.start()

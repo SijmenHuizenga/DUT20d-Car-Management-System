@@ -8,6 +8,21 @@ services = [
 ]
 
 
+def statusnr_to_string(statusnr):
+    #  0: program is running or service is OK
+    #  1: program is dead and /run PID file exists
+    #  2: program is dead and /run/lock lock file exists
+    #  3: program is not running
+    #  4: program or service status is unknown
+    if statusnr == 0:
+        return "running"
+    if 1 <= statusnr <= 3:
+        return "stopped"
+    if statusnr == 4:
+        return "error"
+    raise Exception("Unkown status code " + statusnr)
+
+
 class SystemdServices:
     def __init__(self, ssh, state):
         self.ssh = ssh
@@ -35,7 +50,7 @@ class SystemdServices:
             statusnr, _ = self.ssh.run_command("systemctl is-enabled --quiet " + service)
             enabled = statusnr == 0
             statusnr, statustext = self.ssh.run_command("systemctl status " + service)
-            status = self.statusnr_to_string(statusnr)
+            status = statusnr_to_string(statusnr)
 
         except Exception, e:
             status = "error"
@@ -51,17 +66,3 @@ class SystemdServices:
                 }
             }
         })
-
-    def statusnr_to_string(self, statusnr):
-        #  0: program is running or service is OK
-        #  1: program is dead and /run PID file exists
-        #  2: program is dead and /run/lock lock file exists
-        #  3: program is not running
-        #  4: program or service status is unknown
-        if statusnr == 0:
-            return "running"
-        if 1 <= statusnr <= 3:
-            return "stopped"
-        if statusnr == 4:
-            return "error"
-        raise Exception("Unkown status code " + statusnr)

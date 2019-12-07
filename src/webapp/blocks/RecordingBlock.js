@@ -1,6 +1,7 @@
 import React from "react";
 import EditableText from "../util/EditableText";
 import Requestor from "../util/Requestor"
+import {lastPingWasRecent} from "../util/Timing";
 
 class RecordingContainer extends React.Component {
     render() {
@@ -10,7 +11,7 @@ class RecordingContainer extends React.Component {
 
 class RecordingBlock extends React.Component {
     constructor(props) {
-        super(props)
+        super(props);
         this.state = {
             error: null
         }
@@ -23,10 +24,11 @@ class RecordingBlock extends React.Component {
     }
 
     getTopicState(topicname) {
-        if (this.props.topics.hasOwnProperty(topicname)) {
-            return this.props.topics[topicname].state;
+        if (!this.props.topics.hasOwnProperty(topicname)) {
+            console.log(this.props.topics, topicname);
+            return "OFFLINE";
         }
-        return "OFFLINE";
+        return lastPingWasRecent(this.props.topics[topicname].lastseen) ? "ACTIVE" : "OFFLINE"
     }
 
     isTopicSelected(topicname) {
@@ -52,15 +54,15 @@ class RecordingBlock extends React.Component {
 
 class InactiveRecordingBlock extends RecordingBlock {
     render() {
-        let {bagname} = this.props;
+        let {filename} = this.props;
 
         return <div className="block">
             {this.renderErrorblock()}
             <div className="d-flex">
                 <div className="text-large">Idle</div>
                 <div className="flex-grow-1 pl-1">
-                    <EditableText value={bagname} save={this.updateFilename.bind(this)} multiline={false} >
-                        <span className="pl-1 text-small">{bagname}</span>
+                    <EditableText value={filename} save={this.updateFilename.bind(this)} multiline={false} >
+                        <span className="pl-1 text-small">{filename}</span>
                     </EditableText>
                 </div>
                 <div>
@@ -72,16 +74,24 @@ class InactiveRecordingBlock extends RecordingBlock {
                 </div>
             </div>
             <div>
-                {this.allTopics().map((topicname) =>
-                    <TopicSelector key={topicname}
-                                   topicname={topicname}
-                                   setError={this.setError.bind(this)}
-                                   selected={this.isTopicSelected(topicname)}
-                                   topicstate={this.getTopicState(topicname)}/>
-                )}
+                {this.renderTopics()}
             </div>
         </div>
     }
+
+    renderTopics() {
+        if(!Array.isArray(this.props.selected_topics)) {
+            return "ERROR: " + this.props.selected_topics
+        }
+        return this.allTopics().map((topicname) =>
+            <TopicSelector key={topicname}
+                           topicname={topicname}
+                           setError={this.setError.bind(this)}
+                           selected={this.isTopicSelected(topicname)}
+                           topicstate={this.getTopicState(topicname)}/>
+        )
+    }
+
     updateFilename(newname) {
         return Requestor.put("/recording/", {filename: newname})
             .then(() => this.setError(null))
