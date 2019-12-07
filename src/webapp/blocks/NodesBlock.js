@@ -23,7 +23,7 @@ class NodeIndicator extends React.Component {
                     <TimebasedIndicator
                         hover="Last seen {timesincelastseen} seconds ago"
                         timestamp={lastseen} success={true} />
-                    <span className="pl-1">{node}</span>
+                    <span className="pl-1">{node.substr(1)}</span>
                 </span>
             </div>
         );

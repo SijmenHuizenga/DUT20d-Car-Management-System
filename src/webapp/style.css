@@ -257,8 +257,10 @@ textarea:focus {
   outline: none;
 }
 .logtable .timestamp {
-    color: rgba(255, 255, 255, 0.4);
     width: 1px;
+}
+.grayyed {
+  color: rgba(255, 255, 255, 0.4);
 }
 .logtable tr td:last-child {
   padding-left: 6px;
@@ -286,17 +288,17 @@ textarea:focus {
 
 .tooltp .tooltptext {
   visibility: hidden;
-  width: 220px;
-  background-color: rgb(34, 34, 34);
-  color: #fff;
-  text-align: center;
-  border-radius: 6px;
-  padding: 5px 2px;
   position: absolute;
+  display: block;
+  white-space: nowrap;
+  width: auto;
+  background-color: #4b5762;
+  color: #fff;
+  text-align: left;
+  padding: 3px 5px;
   z-index: 100;
   top: 150%;
   left: 50%;
-  /*margin-left: -60px;*/
 }
 
 .tooltp:hover .tooltptext {

@@ -74,7 +74,7 @@ class Dashboard extends React.Component {
     renderDashboard() {
         console.log("render", this.state.groundStationState);
 
-        let {rosnode, ping, logbook, recording, topics, nodes, ssh} = this.state.groundStationState;
+        let {rosnode, ping, logbook, recording, topics, nodes, ssh, systemdservices} = this.state.groundStationState;
 
         return <main id="page-main">
             <div className="row">
@@ -89,7 +89,7 @@ class Dashboard extends React.Component {
                 </div>
                 <div className="col-xs-12 col-xl-6 gutter-small ">
                     <ComputeboxBlock rosnode_up={rosnode.up}  ping={ping} ssh={ssh}/>
-                    <ServicesBlock/>
+                    <ServicesBlock systemdservices={systemdservices}/>
                     <GitBlock/>
                 </div>
 

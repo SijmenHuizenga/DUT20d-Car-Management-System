@@ -222,7 +222,7 @@ class LogbookLine extends React.Component {
         let {rowid, timestamp, text, updateLine} = this.props;
         return <tr onMouseLeave={this.onMouseLeave.bind(this)}
                    onMouseEnter={this.onMouseEnter.bind(this)}>
-            <td className="timestamp"
+            <td className="timestamp grayyed"
                 onMouseDown={this.onMouseDown.bind(this)}
                 onMouseUp={this.onMouseUp.bind(this)}>
                 {this.renderTimestamp(timestamp)}

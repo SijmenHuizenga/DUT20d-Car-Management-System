@@ -27,6 +27,9 @@ class StateManager:
                 #          'subscriptions': ['/rosout', '/statistics'],
                 #          'publications': ['/example']}
             },
+            'systemdservices': {
+
+            },
             'recording': {
                 'is_recording': False,
                 'bagname': "sysid_corner1_vioenabled",
