@@ -3,8 +3,9 @@ import time
 
 
 services = [
-    "cron.service",
-    "inspection-mission.service"
+    "inspection-mission.service",
+    "rosrecord.service",
+    "mavros.service"
 ]
 
 
@@ -47,8 +48,8 @@ class SystemdServices:
 
     def retreive_service(self, service):
         try:
-            statusnr, _ = self.ssh.run_command("systemctl is-enabled --quiet " + service)
-            enabled = statusnr == 0
+            statusnr, output = self.ssh.run_command("systemctl is-enabled " + service)
+            enabled = statusnr == 0 and output.strip() != "static"
             statusnr, statustext = self.ssh.run_command("systemctl status " + service)
             status = statusnr_to_string(statusnr)
 

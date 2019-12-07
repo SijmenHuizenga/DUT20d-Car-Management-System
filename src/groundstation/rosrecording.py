@@ -8,8 +8,6 @@ class RosRecorder:
         self.ssh = ssh
         self.state = state
 
-        self.start()
-
     def start(self):
         thread = threading.Thread(target=self.forever)
         thread.daemon = True
@@ -37,7 +35,7 @@ class RosRecorder:
 
     def is_recording(self):
         try:
-            statusnr, statustext = self.ssh.run_command("systemctl status rosrecording.service")
+            statusnr, statustext = self.ssh.run_command("systemctl status rosrecord.service")
             return systemdservices.statusnr_to_string(statusnr) == "running"
         except Exception, e:
             return False
@@ -58,3 +56,40 @@ class RosRecorder:
             return filename, topics
         except Exception, e:
             return "error", str(e)
+
+    def set_topic(self, topicname, selected):
+        newtopics = self.state.state['recording']['selected_topics'][:]
+        if topicname in newtopics:
+            newtopics.remove(topicname)
+        if selected:
+            newtopics.append(topicname)
+
+        self.save_configuration(newtopics, self.state.state['recording']['filename'])
+        self.updatestate()
+
+    def set_filename(self, newfilename):
+        self.save_configuration(self.state.state['recording']['selected_topics'], newfilename)
+        self.updatestate()
+
+    def save_configuration(self, selectedtopics, filename):
+        topicstr = ' '.join(selectedtopics)
+        statusnr, output = self.ssh.run_command('echo \"RECORD_TOPICS=' + topicstr + '\n' +
+                                                'RECORD_FILENAME=' + filename + '\n\" > /var/rosrecord.env')
+        if statusnr != 0:
+            raise Exception("Updating config file failed with code " + statusnr + ": " + output)
+        return
+
+    def recording_start(self):
+        statusnr, statustext = self.ssh.run_command("systemctl start rosrecord.service")
+        if statusnr != 0:
+            raise Exception("systemctl start rosrecord.service exited with error code " +
+                            str(statusnr) + ": " + statustext)
+        self.updatestate()
+
+    def recording_stop(self):
+        statusnr, statustext = self.ssh.run_command("systemctl stop rosrecord.service")
+        if statusnr != 0:
+            raise Exception("systemctl stop rosrecord.service exited with error code " +
+                            str(statusnr) + ": " + statustext)
+        self.updatestate()
+

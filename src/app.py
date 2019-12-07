@@ -11,13 +11,14 @@ stat = state.StateManager(db)
 ssh = sshclient.SSHClient(luke_host, stat, luke_user, luke_password)
 pingrr = pinger.Pinger(luke_host, db, stat)
 logbok = logbook.Logbook(db, stat)
-websrver = webserver.Webserver(stat, logbok, ssh)
-systemd = systemdservices.SystemdServices(ssh, stat)
 rosrecorder = rosrecording.RosRecorder(stat, ssh)
+websrver = webserver.Webserver(stat, logbok, ssh, rosrecorder)
+systemd = systemdservices.SystemdServices(ssh, stat)
 
 ssh.start()
 pingrr.start()
 systemd.start()
+rosrecorder.start()
 
 webserverThread = threading.Thread(target=websrver.start)
 webserverThread.daemon = True

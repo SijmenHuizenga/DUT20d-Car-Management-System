@@ -25,7 +25,6 @@ class RecordingBlock extends React.Component {
 
     getTopicState(topicname) {
         if (!this.props.topics.hasOwnProperty(topicname)) {
-            console.log(this.props.topics, topicname);
             return "OFFLINE";
         }
         return lastPingWasRecent(this.props.topics[topicname].lastseen) ? "ACTIVE" : "OFFLINE"
@@ -93,9 +92,15 @@ class InactiveRecordingBlock extends RecordingBlock {
     }
 
     updateFilename(newname) {
-        return Requestor.put("/recording/", {filename: newname})
-            .then(() => this.setError(null))
-            .catch((error) => this.setError("Failed to update recording filename: " + error));
+        return Requestor.put("/recording/filename", {filename: newname})
+            .then(() => {
+                this.setError(null);
+                return true;
+            })
+            .catch((error) => {
+                this.setError("Failed to update recording filename: " + error);
+                return false;
+            });
     }
 }
 
@@ -170,7 +175,7 @@ class TopicSelector extends React.Component {
             selected: e.target.checked
         })
             .then(() => this.props.setError(null))
-            .catch((error) => this.props.setError("Failed to update recording filename: " + error));
+            .catch((error) => this.props.setError("Failed to update selected topcs: " + error));
     }
 }
 

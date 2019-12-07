@@ -95,6 +95,7 @@ class RosMeta:
 
         except Exception, e:
             # todo: also print stacktrace
+            raise
             print('rosmeta exception', e)
 
     def process_new_rosinformation(self, lastseen, publishers, subscriptions, topictypes):
@@ -103,7 +104,7 @@ class RosMeta:
 
         for (topic, messagetype) in topictypes:
             all_topics[topic] = {
-                'lastseen': lastseen,
+                'lastseen': 1,
                 'type': messagetype
             }
 
@@ -125,6 +126,8 @@ class RosMeta:
                     'lastseen': lastseen,
                     'type': 'unknown'
                 }
+            else:
+                all_topics[topic]['lastseen'] = lastseen
 
         for (topic, nodes) in publishers:
             for node in nodes:
@@ -144,6 +147,8 @@ class RosMeta:
                     'lastseen': lastseen,
                     'type': 'unknown'
                 }
+            else:
+                all_topics[topic]['lastseen'] = lastseen
 
         return all_topics, all_nodes
 

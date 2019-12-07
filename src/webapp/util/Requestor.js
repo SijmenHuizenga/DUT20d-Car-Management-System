@@ -9,8 +9,10 @@ function execute(uri, method, body) {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(body)
         }).then((response) => {
-            if ((response.status !== 201 || response.status !== 200) || !response.ok) {
-                console.log("Put failed", response);
+            if ((response.status === 201 || response.status === 200) && response.ok) {
+                resolve(response.body);
+            } else {
+                console.log("request failed", response);
                 response.text().then((body) => {
                     let errString = `Request failed with code ${response.status}: ${response.statusText}`;
                     if(body !== ""){
@@ -18,8 +20,6 @@ function execute(uri, method, body) {
                     }
                     reject(errString);
                 });
-            } else {
-                resolve(response.body);
             }
         })
     })

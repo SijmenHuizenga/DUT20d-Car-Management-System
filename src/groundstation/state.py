@@ -32,17 +32,10 @@ class StateManager:
             },
             'recording': {
                 'is_recording': False,
-                'bagname': "sysid_corner1_vioenabled",
+                'filename': "unset",
                 'bagfilename': "fakedata.bag.active",
                 'recordingduration': "00:00",
-                'selected_topics': [
-                    "/rosout"
-                    "/planning_ReferencePath",
-                    "/visualization_markers/world_state",
-                    "/mavros/local_position/velocity_local",
-                    "/world_state",
-                    "/mavros/local_position/pose",
-                ],
+                'selected_topics': [],
             }
         }
 
