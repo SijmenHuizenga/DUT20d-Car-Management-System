@@ -35,7 +35,7 @@ class RosRecorder:
 
     def is_recording(self):
         try:
-            statusnr, statustext = self.ssh.run_command("systemctl status rosrecord.service")
+            statusnr, statustext = self.ssh.run_command("sudo systemctl status rosrecord.service")
             return systemdservices.statusnr_to_string(statusnr) == "running"
         except Exception, e:
             return False
@@ -80,14 +80,14 @@ class RosRecorder:
         return
 
     def recording_start(self):
-        statusnr, statustext = self.ssh.run_command("systemctl start rosrecord.service")
+        statusnr, statustext = self.ssh.run_command("sudo systemctl start rosrecord.service")
         if statusnr != 0:
             raise Exception("systemctl start rosrecord.service exited with error code " +
                             str(statusnr) + ": " + statustext)
         self.updatestate()
 
     def recording_stop(self):
-        statusnr, statustext = self.ssh.run_command("systemctl stop rosrecord.service")
+        statusnr, statustext = self.ssh.run_command("sudo systemctl stop rosrecord.service")
         if statusnr != 0:
             raise Exception("systemctl stop rosrecord.service exited with error code " +
                             str(statusnr) + ": " + statustext)

@@ -3,7 +3,7 @@ import time
 
 
 services = [
-    "inspection-mission.service",
+    "inspection_mission.service",
     "rosrecord.service",
     "mavros.service"
 ]
