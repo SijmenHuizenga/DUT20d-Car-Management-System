@@ -5,7 +5,8 @@ import time
 services = [
     "inspection_mission.service",
     "rosrecord.service",
-    "mavros.service"
+    "mavros.service",
+    "manualjoycontrol.service"
 ]
 
 
