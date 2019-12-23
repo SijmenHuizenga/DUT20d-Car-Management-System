@@ -24,10 +24,12 @@ To develop you have to run two processes: the webapp and the groundstation.
 For the **groundstation** you must first install the required python dependencies.
 Because these packages are non-ros we must do this via pip. 
 Run `pip install -r requirements.txt` from the current directory.
-After that, the groundstation is just like any rosnode. 
+After that, the groundstation is just like any rosnode.
 Just run `rosrun cms app.py` to run it.
+_If you want to connect to an existing ros master (e.g. the car) you must first export environment variables ROS_MASTER_URI and ROS_IP in your shell_
 
-For the **webapp** you must have the [npm](https://www.npmjs.com/) package manager installed.
+For the **webapp** you must have the [npm](https://linuxize.com/post/how-to-install-node-js-on-ubuntu-18.04/) package manager installed.
+_DO NOT RUN `apt-get install npm` because that will break ros!! Use the linked tutorial._
 Run `npm install` in the current working directory to get all dependencies installed.
 To run the app as a development server run `npm run start`.
 This will launch a webserver that serves the compiled html/css/js files on the printed port. 
