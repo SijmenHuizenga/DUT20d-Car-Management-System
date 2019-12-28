@@ -40,14 +40,15 @@ class StateManager:
         }
 
         self.populate_memory_state()
-        self.sio = None
+        self.socketio = None
 
     def update(self, changeset):
         dict_merge(self.state, changeset)
         self.emit_state()
 
     def emit_state(self):
-        self.sio.emit('state', self.state, broadcast=True)
+        assert self.socketio is not None, "sio was not set"
+        self.socketio.emit('state', self.state, broadcast=True)
 
     def populate_memory_state(self):
         self.state['logbook'] = self.db.select_all("SELECT rowid, * FROM logbook", {})
@@ -59,5 +60,5 @@ class StateManager:
                 'type': 'unkown',
             }
 
-    def set_sio(self, sio):
-        self.sio = sio
+    def set_socketio(self, sio):
+        self.socketio = sio

@@ -23,7 +23,7 @@ class Webserver:
         sio = socketio.Server(async_mode='threading')
         app.config['PROPAGATE_EXCEPTIONS'] = True
         app.wsgi_app = socketio.WSGIApp(sio, app.wsgi_app)
-        self.state.set_sio(sio)
+        self.state.set_socketio(sio)
 
         app.add_url_rule('/', 'root', self.root)
         app.add_url_rule('/state', 'state', self.state)

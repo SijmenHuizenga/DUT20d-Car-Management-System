@@ -7,6 +7,7 @@ class Database:
     def __init__(self):
         self.database = sqlite3.connect('development.db', check_same_thread=False)
         self.database.row_factory = dict_factory
+        # todo: figure out if we can do without locking (low priority)
         self.databaselock = threading.Lock()
         self.create_schema()
 

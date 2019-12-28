@@ -34,16 +34,13 @@ class RosNode:
         self.set_rosnode_health(True)
         self.logbook.add_line(time.time(), "Connected to ROS master", "groundstation")
         rate_1_second = rospy.Rate(1)
-        while 1:
-            if rospy.is_shutdown():
-                return
+        while not rospy.is_shutdown():
             if self.is_master_disconnected():
                 self.unregister_subscribers()
                 return
             rate_1_second.sleep()
 
     def register_subscribers(self):
-        self.subscrib = rospy.Subscriber("chatter", std_msgs.msg.String, self.callback)
         print("[rosnode] Registered subscribers")
 
     def unregister_subscribers(self):
@@ -52,9 +49,6 @@ class RosNode:
 
     def register_timers(self):
         rospy.Timer(rospy.Duration(3), self.rosmeta.timercallback)
-
-    def callback(self, msg):
-        print('callback', msg)
 
     def is_master_disconnected(self):
         try:
