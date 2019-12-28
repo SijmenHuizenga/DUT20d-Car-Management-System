@@ -2,11 +2,7 @@ import React from "react";
 import EditableText from "../util/EditableText";
 import Requestor from "../util/Requestor"
 import {lastPingWasRecent} from "../util/Timing";
-
-interface Topic {
-    type :string
-    lastseen :number
-}
+import {Topic} from "../statetypes";
 
 interface Props {
     selected_topics: string[]

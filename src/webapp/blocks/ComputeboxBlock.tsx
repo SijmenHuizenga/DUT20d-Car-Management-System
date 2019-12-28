@@ -2,17 +2,11 @@ import React from 'react';
 import Requestor from "../util/Requestor";
 import TimebasedIndicator from "../util/TimebasedIndicator";
 import Tooltip from "../util/Tooltip";
+import {Ping, SSH} from "../statetypes";
 
 interface Props {
-    ssh : {
-        uptime: string
-        connected :boolean
-        lastping :number
-    }
-    ping :{
-        timestamp :number
-        success :boolean
-    }
+    ssh : SSH
+    ping :Ping
     rosnode_up :boolean
 }
 

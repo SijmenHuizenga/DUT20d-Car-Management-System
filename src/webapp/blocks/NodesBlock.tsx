@@ -1,9 +1,6 @@
 import React from 'react';
 import TimebasedIndicator from "../util/TimebasedIndicator";
-
-interface Node {
-    lastseen :number
-}
+import {Node} from "../statetypes"
 
 interface Props {
     nodes :{[key: string]: Node}
@@ -22,7 +19,11 @@ class NodesBlock extends React.Component<Props, {}> {
     }
 }
 
-class NodeIndicator extends React.Component<{node :string, lastseen :number}, {}> {
+interface IndicatorProps extends Node {
+    node :string
+}
+
+class NodeIndicator extends React.Component<IndicatorProps, {}> {
     render() {
         let {node, lastseen} = this.props;
         return (

@@ -10,14 +10,14 @@ import GitBlock from "./blocks/GitBlock";
 import LogbookBlock from "./blocks/LogbookBlock";
 import RecordingBlock from "./blocks/RecordingBlock";
 import ReactTooltip from "react-tooltip";
+import {Dashboard} from "./statetypes";
 
-const devmode = false;
-const fakeDashboard = {
+const devmode = true;
+const fakeDashboard: Dashboard = {
     rosnode: {
         up: true,
     },
     ping: {
-        uptime: 'up for 20 hours and 11 minutes',
         timestamp: 1234,
         success: true
     },
@@ -30,12 +30,28 @@ const fakeDashboard = {
         {rowid: 666, timestamp: 66, text: "Example line 666"},
     ],
     topics: {
-        "/world_state": {state: "ACTIVE"},
-        "/planning_ReferencePath": {state: "ACTIVE"},
-        "/visualization_markers/world_state": {state: "IDLE"},
-        "/planning_BoundaryMarkers": {state: "OFFLINE"},
-        "/mavros/local_position/velocity_body": {state: "OFFLINE"},
-        "/visualization_markers/world_evidence": {state: "OFFLINE"}
+        "/world_state": {lastseen: 1577545897},
+        "/planning_ReferencePath": {lastseen: 1577545897},
+        "/visualization_markers/world_state": {lastseen: 1577545897},
+        "/planning_BoundaryMarkers": {lastseen: 1577545897},
+        "/mavros/local_position/velocity_body": {lastseen: 1577545897},
+        "/visualization_markers/world_evidence": {lastseen: 1577545897}
+    },
+    nodes: {
+        "/mavros": {lastseen: 1577545897}
+    },
+    ssh: {
+        connected: true,
+        lastping: 1577545897,
+        uptime: "up for -1 day"
+    },
+    systemdservices: {
+        "recording.service": {
+            statustext: "whaa this is a long text",
+            status: "ERROR",
+            lastupdate: 1577545897,
+            enabled: true,
+        }
     },
     recording: {
         is_recording: false,
@@ -53,15 +69,15 @@ const fakeDashboard = {
 };
 
 interface State {
-    groundStationState: any
+    groundStationState: Dashboard | null
     connectionerror: string | null
 }
 
 
-class Dashboard extends React.Component<{}, State> {
+class DashboardComponent extends React.Component<{}, State> {
     private socket: SocketIOClient.Socket;
 
-    constructor(props :{}){
+    constructor(props: {}) {
         super(props);
         this.state = {
             groundStationState: devmode ? fakeDashboard : null,
@@ -84,7 +100,7 @@ class Dashboard extends React.Component<{}, State> {
     renderDashboard() {
         console.log("render", this.state.groundStationState);
 
-        let {rosnode, ping, logbook, recording, topics, nodes, ssh, systemdservices} = this.state.groundStationState;
+        let {rosnode, ping, logbook, recording, topics, nodes, ssh, systemdservices} = this.state.groundStationState!;
 
         return <main id="page-main">
             <div className="row">
@@ -98,7 +114,7 @@ class Dashboard extends React.Component<{}, State> {
                     <TopicsBlock topics={topics}/>
                 </div>
                 <div className="col-xs-12 col-xl-6 gutter-small ">
-                    <ComputeboxBlock rosnode_up={rosnode.up}  ping={ping} ssh={ssh}/>
+                    <ComputeboxBlock rosnode_up={rosnode.up} ping={ping} ssh={ssh}/>
                     <ServicesBlock systemdservices={systemdservices}/>
                     <GitBlock/>
                 </div>
@@ -119,10 +135,10 @@ class Dashboard extends React.Component<{}, State> {
     }
 
     componentDidMount() {
-        if(devmode) {
+        if (devmode) {
             return;
         }
-        this.socket.on('state', (data :any) => {
+        this.socket.on('state', (data: any) => {
             this.setState({
                 groundStationState: data,
                 connectionerror: null,
@@ -136,4 +152,4 @@ class Dashboard extends React.Component<{}, State> {
     }
 }
 
-export default Dashboard;
+export default DashboardComponent;

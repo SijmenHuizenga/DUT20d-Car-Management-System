@@ -1,9 +1,6 @@
 import React from 'react';
 import TimebasedIndicator from "../util/TimebasedIndicator";
-
-interface Topic {
-    lastseen :number
-}
+import {Topic} from "../statetypes";
 
 interface Props {
     topics :{[key: string]: Topic}
@@ -21,7 +18,11 @@ class TopicsBlock extends React.Component<Props, {}> {
     }
 }
 
-class TopicIndicator extends React.Component<{topic :string, lastseen :number}, {}> {
+interface TopicProps extends Topic {
+    topic :string
+}
+
+class TopicIndicator extends React.Component<TopicProps, {}> {
     render() {
         let {topic, lastseen} = this.props;
         return <div>

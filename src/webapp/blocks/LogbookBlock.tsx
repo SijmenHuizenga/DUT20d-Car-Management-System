@@ -2,6 +2,7 @@ import React from "react";
 import Markdown from 'react-markdown';
 import EditableText from "../util/EditableText";
 import Requestor from "../util/Requestor";
+import {LogbookLine} from "../statetypes";
 
 interface Line {
     rowid :number
@@ -10,7 +11,7 @@ interface Line {
 }
 
 interface Props {
-    lines :Line[]
+    lines :LogbookLine[]
 }
 
 interface State {
@@ -56,7 +57,7 @@ class LogbookBlock extends React.Component<Props, State> {
                     {this.state.dragSelectedRowid != null ?
                         <style>{".logtable .timestamp {user-select: none;}"}</style> : null}
                     {lines.map((line) =>
-                        <LogbookLine {...line}
+                        <LogbookLineComponent {...line}
                                      key={line.rowid}
                                      onMouseDown={this.lineOnMouseDown.bind(this)}
                                      onMouseUp={this.lineOnMouseUp.bind(this)}
@@ -250,7 +251,7 @@ interface LineProps extends Line {
     onMouseEnter(rowid :number) :void
 }
 
-class LogbookLine extends React.Component<LineProps, {moving :boolean}> {
+class LogbookLineComponent extends React.Component<LineProps, {moving :boolean}> {
     constructor(props :LineProps) {
         super(props);
         this.state = {
