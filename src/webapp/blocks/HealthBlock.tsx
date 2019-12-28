@@ -1,6 +1,14 @@
 import React from 'react';
 
-class HealthBlock extends React.Component {
+interface Props {
+
+}
+
+interface State {
+
+}
+
+class HealthBlock extends React.Component<Props, State> {
 
     render() {
         return (

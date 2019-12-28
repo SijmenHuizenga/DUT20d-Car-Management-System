@@ -52,14 +52,24 @@ const fakeDashboard = {
     }
 };
 
-class Dashboard extends React.Component {
+interface State {
+    groundStationState: any
+    connectionerror: string | null
+}
 
-    constructor(props){
+
+class Dashboard extends React.Component<{}, State> {
+    private socket: SocketIOClient.Socket;
+
+    constructor(props :{}){
         super(props);
         this.state = {
             groundStationState: devmode ? fakeDashboard : null,
             connectionerror: devmode ? null : "groundstation offline"
         };
+        this.socket = io({
+            reconnectionDelayMax: 1000,
+        });
     }
 
     render() {
@@ -112,10 +122,7 @@ class Dashboard extends React.Component {
         if(devmode) {
             return;
         }
-        this.socket = io({
-            reconnectionDelayMax: 1000,
-        });
-        this.socket.on('state', (data) => {
+        this.socket.on('state', (data :any) => {
             this.setState({
                 groundStationState: data,
                 connectionerror: null,

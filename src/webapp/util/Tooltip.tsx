@@ -1,6 +1,10 @@
 import React from 'react';
 
-class Tooltip extends React.Component {
+interface Props {
+    tooltip: string
+}
+
+class Tooltip extends React.Component<Props, {}> {
 
     render() {
         return (

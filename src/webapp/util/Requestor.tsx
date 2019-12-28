@@ -1,8 +1,8 @@
-function put(uri, body) {
+function put(uri :string, body={}) {
     return execute(uri, "PUT", body)
 }
 
-function execute(uri, method, body) {
+function execute(uri :string, method :string, body={}) {
     return new Promise((resolve, reject) => {
         fetch(uri, {
             method: method,

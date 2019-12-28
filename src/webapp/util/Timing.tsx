@@ -1,15 +1,15 @@
-function lastPingWasRecent(timestamp, secondsRecent = 4) {
+function lastPingWasRecent(timestamp :number, secondsRecent = 4) {
     return new Date().getTime() / 1000 - timestamp < secondsRecent
 }
 
-function nicenumber(n) {
+function nicenumber(n :number) {
     n = Math.round(n * 10) / 10;
     if(n % 1 === 0)
         return n + '.0';
     return n + '';
 }
 
-function indicatorColorBasedOnTime(lastSeen, wasSuccessfull = true) {
+function indicatorColorBasedOnTime(lastSeen :number, wasSuccessfull = true) {
     if(!lastPingWasRecent(lastSeen)) {
         return "warning";
     }
@@ -17,7 +17,7 @@ function indicatorColorBasedOnTime(lastSeen, wasSuccessfull = true) {
 
 }
 
-function formatUnicorn(str, params) {
+function formatUnicorn(str :string, params :any) {
     if(!str){
         return ""
     }

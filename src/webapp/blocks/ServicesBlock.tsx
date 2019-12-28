@@ -2,7 +2,7 @@ import React from "react";
 import Tooltip from "../util/Tooltip";
 import {nicenumber} from "../util/Timing";
 
-class ServicesBlock extends React.Component {
+class ServicesBlock extends React.Component<{systemdservices: any}, {}> {
     render() {
         let services = this.props.systemdservices;
         return <div className="block">
@@ -13,7 +13,7 @@ class ServicesBlock extends React.Component {
     }
 }
 
-class ServiceIndicator extends React.Component {
+class ServiceIndicator extends React.Component<{name :string, statustext :string, status :string, lastupdate :number, enabled :boolean}, {}> {
     render() {
         let {name, statustext} = this.props;
         return (

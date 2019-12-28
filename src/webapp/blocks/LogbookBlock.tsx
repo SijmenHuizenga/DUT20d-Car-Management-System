@@ -3,9 +3,34 @@ import Markdown from 'react-markdown';
 import EditableText from "../util/EditableText";
 import Requestor from "../util/Requestor";
 
-class LogbookBlock extends React.Component {
-    constructor(props) {
+interface Line {
+    rowid :number
+    timestamp :number
+    text :string
+}
+
+interface Props {
+    lines :Line[]
+}
+
+interface State {
+    input :string
+    inputDisabled :boolean
+    error :string | null
+    scrollStickToBottom :boolean
+    dragSelectedRowid :number | null
+    dragLastHoveredRowid :number | null
+    dragCurrentHoverRowid :number | null
+}
+
+class LogbookBlock extends React.Component<Props, State> {
+    private scroller: HTMLDivElement | null;
+    private inputfield: HTMLInputElement | null;
+
+    constructor(props :Props) {
         super(props);
+        this.inputfield = null;
+        this.scroller = null;
         this.state = {
             input: '',
             inputDisabled: false,
@@ -32,7 +57,7 @@ class LogbookBlock extends React.Component {
                         <style>{".logtable .timestamp {user-select: none;}"}</style> : null}
                     {lines.map((line) =>
                         <LogbookLine {...line}
-                                     key={line.timestamp}
+                                     key={line.rowid}
                                      onMouseDown={this.lineOnMouseDown.bind(this)}
                                      onMouseUp={this.lineOnMouseUp.bind(this)}
                                      onMouseLeave={this.lineOnMouseLeave.bind(this)}
@@ -74,7 +99,7 @@ class LogbookBlock extends React.Component {
         </style>
     }
 
-    lineOnMouseDown(rowid) {
+    lineOnMouseDown(rowid :number) {
         if (this.state.dragSelectedRowid != null) {
             return;
         }
@@ -85,32 +110,39 @@ class LogbookBlock extends React.Component {
     }
 
     lineOnMouseUp() {
-        if(this.state.dragCurrentHoverRowid === this.state.dragSelectedRowid) {
+        const {dragLastHoveredRowid, dragSelectedRowid, dragCurrentHoverRowid} = this.state;
+        if(dragCurrentHoverRowid === dragSelectedRowid) {
             //did not move. Mouse released on same row as it was dragged from.
             this.resetDragging();
             return;
         }
 
-        let lastLineIndex = this.findIndexOfRow(this.state.dragLastHoveredRowid);
-        let currentLineIndex = this.findIndexOfRow(this.state.dragCurrentHoverRowid);
+        if(dragLastHoveredRowid == null || dragCurrentHoverRowid == null || dragSelectedRowid == null) {
+            return
+        }
+
+        let lastLineIndex = this.findIndexOfRow(dragLastHoveredRowid);
+        let currentLineIndex = this.findIndexOfRow(dragCurrentHoverRowid);
 
         let betweenBottomIndex, betweenTopIndex;
         if (lastLineIndex < currentLineIndex) {
             //moving down (positive)
             betweenBottomIndex = lastLineIndex + 1;
             betweenTopIndex = currentLineIndex + 1;
-        }
-        if (lastLineIndex > currentLineIndex) {
+        } else if (lastLineIndex > currentLineIndex) {
             //moving up (negative)
             betweenBottomIndex = lastLineIndex - 1;
             betweenTopIndex = currentLineIndex - 1;
+        } else {
+            //todo: is this correct?
+            return
         }
 
         let lineBetweenBottom = this.props.lines[betweenBottomIndex];
         let lineBetweenTop = this.props.lines[betweenTopIndex];
 
-        if((lineBetweenBottom !== undefined && lineBetweenBottom.rowid === this.state.dragSelectedRowid) ||
-            (lineBetweenTop !== undefined && lineBetweenTop.rowid === this.state.dragSelectedRowid)) {
+        if((lineBetweenBottom !== undefined && lineBetweenBottom.rowid === dragSelectedRowid) ||
+            (lineBetweenTop !== undefined && lineBetweenTop.rowid === dragSelectedRowid)) {
             //did not move. Placed directly under or directly above current line.
             this.resetDragging();
             return;
@@ -128,18 +160,18 @@ class LogbookBlock extends React.Component {
             return;
         }
 
-        console.log(`Moving ${this.state.dragSelectedRowid} to timestamp ${newTimestamp}`);
-        this.updateLine(this.state.dragSelectedRowid, {timestamp: newTimestamp});
+        console.log(`Moving ${dragSelectedRowid} to timestamp ${newTimestamp}`);
+        this.updateLine(dragSelectedRowid, {timestamp: newTimestamp});
         this.resetDragging();
     }
 
-    lineOnMouseEnter(rowid) {
+    lineOnMouseEnter(rowid :number) {
         this.setState({
             dragCurrentHoverRowid: rowid
         })
     }
 
-    lineOnMouseLeave(rowid) {
+    lineOnMouseLeave(rowid :number) {
         this.setState({
             dragLastHoveredRowid: rowid
         })
@@ -152,7 +184,7 @@ class LogbookBlock extends React.Component {
         })
     }
 
-    findIndexOfRow(rowid) {
+    findIndexOfRow(rowid :number) {
         return this.props.lines.findIndex((line) => line.rowid === rowid)
     }
 
@@ -171,15 +203,15 @@ class LogbookBlock extends React.Component {
     }
 
     isScrolledToBottom() {
-        return this.scroller.scrollTop === (this.scroller.scrollHeight - this.scroller.offsetHeight)
+        return this.scroller!.scrollTop === (this.scroller!.scrollHeight - this.scroller!.offsetHeight)
     }
 
     scrollToBottom() {
         if (this.state.scrollStickToBottom)
-            this.scroller.scrollTop = this.scroller.scrollHeight - this.scroller.offsetHeight;
+            this.scroller!.scrollTop = this.scroller!.scrollHeight - this.scroller!.offsetHeight;
     }
 
-    handleKeyDown(e) {
+    handleKeyDown(e :React.KeyboardEvent<HTMLInputElement>) {
         if (e.key === 'Enter') {
             this.storeNewLine()
         }
@@ -197,7 +229,7 @@ class LogbookBlock extends React.Component {
             }));
     }
 
-    updateLine(rowid, changeset) {
+    updateLine(rowid :number, changeset :any) {
         return Requestor.put(`/logbook/${rowid}`, changeset)
             .then(() => {
                 this.setState({error: null});
@@ -210,8 +242,16 @@ class LogbookBlock extends React.Component {
     }
 }
 
-class LogbookLine extends React.Component {
-    constructor(props) {
+interface LineProps extends Line {
+    updateLine(rowid :number, changeset :any) :Promise<boolean>
+    onMouseDown(rowid :number) :void
+    onMouseUp(rowid :number) :void
+    onMouseLeave(rowid :number) :void
+    onMouseEnter(rowid :number) :void
+}
+
+class LogbookLine extends React.Component<LineProps, {moving :boolean}> {
+    constructor(props :LineProps) {
         super(props);
         this.state = {
             moving: false
@@ -235,7 +275,7 @@ class LogbookLine extends React.Component {
         </tr>
     }
 
-    renderTimestamp(timestamp) {
+    renderTimestamp(timestamp :number) {
         let date = new Date(timestamp * 1000);
         let hours = date.getHours();
         let minutes = "0" + date.getMinutes();
@@ -243,22 +283,22 @@ class LogbookLine extends React.Component {
         return hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
     }
 
-    onMouseDown(e) {
+    onMouseDown(e :React.MouseEvent<HTMLTableDataCellElement>) {
         if (e.button !== 0) return;
         this.props.onMouseDown(this.props.rowid);
     }
 
-    onMouseUp(e) {
+    onMouseUp(e :React.MouseEvent<HTMLTableDataCellElement>) {
         if (e.button !== 0) return;
         this.props.onMouseUp(this.props.rowid);
     }
 
-    onMouseLeave(e) {
+    onMouseLeave(e :React.MouseEvent<HTMLTableRowElement>) {
         if (e.button !== 0) return;
         this.props.onMouseLeave(this.props.rowid);
     }
 
-    onMouseEnter(e) {
+    onMouseEnter(e :React.MouseEvent<HTMLTableRowElement>) {
         if (e.button !== 0) return;
         this.props.onMouseEnter(this.props.rowid);
     }

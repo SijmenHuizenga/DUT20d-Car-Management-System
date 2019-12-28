@@ -3,34 +3,52 @@ import EditableText from "../util/EditableText";
 import Requestor from "../util/Requestor"
 import {lastPingWasRecent} from "../util/Timing";
 
-class RecordingContainer extends React.Component {
+interface Topic {
+    type :string
+    lastseen :number
+}
+
+interface Props {
+    selected_topics: string[]
+    is_recording: boolean
+    filename: string
+    bagfilename :string
+    recordingduration :string
+    topics :{[key :string] :Topic}
+}
+
+interface State {
+    error: string | null
+}
+
+class RecordingContainer extends React.Component<Props, {}> {
     render() {
         return this.props.is_recording ? <ActiveRecordingBlock {...this.props}/> : <InactiveRecordingBlock {...this.props} />
     }
 }
 
-class RecordingBlock extends React.Component {
-    constructor(props) {
+class RecordingBlock extends React.Component<Props, State> {
+    constructor(props :Props) {
         super(props);
         this.state = {
             error: null
         }
     }
 
-    allTopics() {
+    allTopicNames() :string[]{
         let out = [...this.props.selected_topics, ...Object.keys(this.props.topics)];
         out.sort();
         return out.filter((value, index, self) => self.indexOf(value) === index);
     }
 
-    getTopicState(topicname) {
+    getTopicState(topicname :string) {
         if (!this.props.topics.hasOwnProperty(topicname)) {
             return "OFFLINE";
         }
         return lastPingWasRecent(this.props.topics[topicname].lastseen) ? "ACTIVE" : "OFFLINE"
     }
 
-    isTopicSelected(topicname) {
+    isTopicSelected(topicname :string) :boolean {
         return this.props.selected_topics.indexOf(topicname) !== -1
     }
 
@@ -44,7 +62,7 @@ class RecordingBlock extends React.Component {
         return this.state.error ? <div className="alert alert-danger" role="alert">{this.state.error}</div> : null;
     }
 
-    setError(error) {
+    setError(error :string | null) {
         this.setState({
             error: error
         })
@@ -82,7 +100,7 @@ class InactiveRecordingBlock extends RecordingBlock {
         if(!Array.isArray(this.props.selected_topics)) {
             return "ERROR: " + this.props.selected_topics
         }
-        return this.allTopics().map((topicname) =>
+        return this.allTopicNames().map((topicname) =>
             <TopicSelector key={topicname}
                            topicname={topicname}
                            setError={this.setError.bind(this)}
@@ -91,7 +109,7 @@ class InactiveRecordingBlock extends RecordingBlock {
         )
     }
 
-    updateFilename(newname) {
+    updateFilename(newname :string) {
         return Requestor.put("/recording/filename", {filename: newname})
             .then(() => {
                 this.setError(null);
@@ -121,7 +139,7 @@ class ActiveRecordingBlock extends RecordingBlock {
                 </div>
             </div>
             <div>
-                {this.allTopics().sort(this.sortTopics).map((topicname) =>
+                {this.allTopicNames().sort(this.sortTopics).map((topicname) =>
                         <TopicIndicator topicname={topicname}
                                         topicstate={this.getTopicState(topicname)}
                                         selected={this.isTopicSelected(topicname)}/>
@@ -130,18 +148,18 @@ class ActiveRecordingBlock extends RecordingBlock {
         </div>
     }
 
-    sortTopics = (a, b) => {
+    sortTopics = (a :string, b :string) => {
         //put selected topics on top, sort each list on alphabetical order
         let selectedA = this.isTopicSelected(a);
         let selectedB = this.isTopicSelected(b);
         if (selectedA === selectedB) {
-            return a - b;
+            return a.localeCompare(b);
         }
-        return selectedB - selectedA;
+        return Number(selectedB) - Number(selectedA);
     };
 }
 
-class TopicIndicator extends React.Component {
+class TopicIndicator extends React.Component<{topicname :string, selected :boolean, topicstate :string}, {}> {
     render() {
         let {topicname, selected, topicstate} = this.props;
         return <div>
@@ -152,7 +170,7 @@ class TopicIndicator extends React.Component {
     }
 }
 
-class TopicSelector extends React.Component {
+class TopicSelector extends React.Component<{topicname :string, selected :boolean, topicstate :string, setError(msg :string|null) :void}, {}> {
     render() {
         let {topicname, selected, topicstate} = this.props;
         return <div className="custom-control custom-checkbox">
@@ -169,17 +187,17 @@ class TopicSelector extends React.Component {
         </div>
     }
 
-    handleCheckboxChange(e) {
+    handleCheckboxChange(e :React.ChangeEvent<HTMLInputElement>) {
         return Requestor.put("/recording/toggletopic", {
             topicname: this.props.topicname,
-            selected: e.target.checked
+            selected: e.currentTarget.checked
         })
             .then(() => this.props.setError(null))
             .catch((error) => this.props.setError("Failed to update selected topcs: " + error));
     }
 }
 
-function topicStateToColor(state) {
+function topicStateToColor(state :string) {
     switch (state) {
         case "OFFLINE":
             return "danger";
@@ -191,7 +209,7 @@ function topicStateToColor(state) {
     }
 }
 
-function topicStateToDescription(state) {
+function topicStateToDescription(state :string) {
     switch (state) {
         case "OFFLINE":
             return "Offline: it has no attached publishers or subscribers";
@@ -203,7 +221,7 @@ function topicStateToDescription(state) {
     }
 }
 
-function topicDescription(selected, topicstate) {
+function topicDescription(selected :boolean, topicstate :string) {
     return `This topic is ${selected ? "" : "not"} selected for recording<br/> The topic is ${topicStateToDescription(topicstate)}`
 }
 

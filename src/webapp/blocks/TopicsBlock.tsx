@@ -1,19 +1,27 @@
 import React from 'react';
 import TimebasedIndicator from "../util/TimebasedIndicator";
 
-class TopicsBlock extends React.Component {
+interface Topic {
+    lastseen :number
+}
+
+interface Props {
+    topics :{[key: string]: Topic}
+}
+
+class TopicsBlock extends React.Component<Props, {}> {
     render() {
         return <div className="block y-50">
             {Object.keys(this.props.topics).map((topicname) =>
                 <TopicIndicator
                     key={topicname}
                     topic={topicname}
-                    {...this.props.topics[topicname]} />)}
+                    lastseen={this.props.topics[topicname].lastseen} />)}
         </div>
     }
 }
 
-class TopicIndicator extends React.Component {
+class TopicIndicator extends React.Component<{topic :string, lastseen :number}, {}> {
     render() {
         let {topic, lastseen} = this.props;
         return <div>

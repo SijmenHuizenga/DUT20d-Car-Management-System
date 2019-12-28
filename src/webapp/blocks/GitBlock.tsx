@@ -1,6 +1,14 @@
 import React from "react";
 
-class GitBlock extends React.Component {
+interface Props {
+
+}
+
+interface State {
+
+}
+
+class GitBlock extends React.Component<Props, State> {
     render() {
         return <div className="block">
                 {/*<div>*/}

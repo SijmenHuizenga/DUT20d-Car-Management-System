@@ -2,7 +2,14 @@ import React from 'react';
 import {formatUnicorn, indicatorColorBasedOnTime, nicenumber} from "./Timing";
 import Tooltip from "./Tooltip";
 
-class TimebasedIndicator extends React.Component {
+interface Props {
+    timestamp: number
+    success: boolean
+    hover: string
+}
+
+class TimebasedIndicator extends React.Component<Props, {}> {
+    private interval: NodeJS.Timeout | undefined;
 
     render() {
         let {timestamp, success} = this.props;
@@ -15,7 +22,7 @@ class TimebasedIndicator extends React.Component {
         )
     }
 
-    getTitle() {
+    getTitle() :string {
         let now = (new Date()).getTime() / 1000;
         return formatUnicorn(this.props.hover, {...this.props, timesincelastseen: nicenumber(now - this.props.timestamp)})
     }
@@ -26,7 +33,7 @@ class TimebasedIndicator extends React.Component {
     }
 
     componentWillUnmount() {
-        clearInterval(this.interval);
+        clearInterval(this.interval!);
     }
 }
 

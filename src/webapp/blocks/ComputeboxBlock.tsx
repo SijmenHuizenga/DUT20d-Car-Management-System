@@ -3,9 +3,26 @@ import Requestor from "../util/Requestor";
 import TimebasedIndicator from "../util/TimebasedIndicator";
 import Tooltip from "../util/Tooltip";
 
-class ComputeboxBlock extends React.Component {
+interface Props {
+    ssh : {
+        uptime: string
+        connected :boolean
+        lastping :number
+    }
+    ping :{
+        timestamp :number
+        success :boolean
+    }
+    rosnode_up :boolean
+}
 
-    constructor(props) {
+interface State {
+    rebootbtnDisabled: boolean
+}
+
+class ComputeboxBlock extends React.Component<Props, State> {
+
+    constructor(props :Props) {
         super(props);
         this.state = {
             rebootbtnDisabled: false
@@ -55,7 +72,7 @@ class ComputeboxBlock extends React.Component {
         this.setState({
             rebootbtnDisabled: true
         });
-        Requestor.execute("/rebootluke")
+        Requestor.execute("/rebootluke", "POST")
             .then(() =>
                 alert("Reboot initialized")
             )

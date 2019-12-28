@@ -1,9 +1,22 @@
 import React from "react";
 import TextareaAutosize from "react-autosize-textarea";
 
-class EditableText extends React.Component {
+interface Props {
+    multiline: boolean
+    value: string
+    save(input: string): Promise<boolean>
+}
 
-    constructor(props) {
+interface State {
+    editing: boolean
+    input: string | null
+    inputDisabled: boolean
+}
+
+class EditableText extends React.Component<Props, State> {
+    private inputref: React.RefObject<HTMLTextAreaElement>;
+
+    constructor(props :Props) {
         super(props);
         this.state = {
             editing: false,
@@ -18,9 +31,9 @@ class EditableText extends React.Component {
             return <TextareaAutosize
                     maxRows={this.props.multiline ? 10 : 1}
                     className="pl-1 d-flex"
-                    value={this.state.input}
+                    value={this.state.input || ""}
                     onKeyDown={this.onKey.bind(this)}
-                    onChange={(e) => this.setState({input: e.target.value})}
+                    onChange={(e :React.FormEvent<HTMLTextAreaElement>) => this.setState({input: e.currentTarget.value})}
                     disabled={this.state.inputDisabled}
                     ref={this.inputref}
                 />
@@ -30,7 +43,7 @@ class EditableText extends React.Component {
         </div>;
     }
 
-    onKey(e) {
+    onKey(e :React.KeyboardEvent) {
         if (e.key === "Escape") {
             this.stopEditing();
             return;
@@ -65,8 +78,8 @@ class EditableText extends React.Component {
         this.setState({
             inputDisabled: true,
         }, () => {
-            this.props.save(this.state.input)
-                .then((success) => {
+            this.props.save(this.state.input || "")
+                .then((success :boolean) => {
                     if (success) {
                         this.setState({
                             editing: false,
@@ -83,7 +96,7 @@ class EditableText extends React.Component {
     }
 
     focusEditor() {
-        this.inputref.current.focus();
+        this.inputref.current!.focus()
     }
 
 }
