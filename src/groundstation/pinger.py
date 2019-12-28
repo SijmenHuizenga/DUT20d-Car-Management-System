@@ -2,9 +2,16 @@ import os
 import threading
 import time
 
+from .database import Database
+from .state import State
+
 
 class Pinger:
-    def __init__(self, host, db, state):
+    def __init__(self,
+                 host,  # type: str
+                 db,  # type: Database
+                 state  # type: State
+                 ):
         self.host = host
         self.db = db
         self.state = state
@@ -29,11 +36,8 @@ class Pinger:
 
         now = time.time()
         self.db.insert('INSERT INTO pings VALUES (:now, :host, :success)',
-                  {'now': now, 'host': self.host, 'success': success})
+                       {'now': now, 'host': self.host, 'success': success})
 
-        self.state.update({
-            'ping': {
-                'timestamp': now,
-                'success': success,
-            },
-        })
+        self.state.ping.timestamp = now
+        self.state.ping.success = success
+        self.state.emit_state()

@@ -1,6 +1,7 @@
 import React from 'react';
 import io from 'socket.io-client';
 import './style.css';
+import './react-contextmenu.css';
 import HealthBlock from './blocks/HealthBlock'
 import NodesBlock from "./blocks/NodesBlock";
 import TopicsBlock from "./blocks/TopicsBlock";
@@ -9,25 +10,24 @@ import ServicesBlock from "./blocks/ServicesBlock";
 import GitBlock from "./blocks/GitBlock";
 import LogbookBlock from "./blocks/LogbookBlock";
 import RecordingBlock from "./blocks/RecordingBlock";
-import ReactTooltip from "react-tooltip";
-import {Dashboard} from "./statetypes";
+import {Dashboard, SystemdServiceEnabled, SystemdServiceRunning} from "./statetypes";
 
 const devmode = true;
 const fakeDashboard: Dashboard = {
     rosnode: {
-        up: true,
+        up: false,
     },
     ping: {
         timestamp: 1234,
         success: true
     },
     logbook: [
-        {rowid: 111, timestamp: 1, text: "Example line 111"},
-        {rowid: 222, timestamp: 2, text: "Example line 222"},
-        {rowid: 333, timestamp: 3, text: "Example line 333"},
-        {rowid: 444, timestamp: 4, text: "Example line 444"},
-        {rowid: 555, timestamp: 5, text: "Example line 555"},
-        {rowid: 666, timestamp: 66, text: "Example line 666"},
+        {rowid: 111, timestamp: 1, text: "Example line 111", source: "example"},
+        {rowid: 222, timestamp: 2, text: "Example line 222", source: "example"},
+        {rowid: 333, timestamp: 3, text: "Example line 333", source: "example"},
+        {rowid: 444, timestamp: 4, text: "Example line 444", source: "example"},
+        {rowid: 555, timestamp: 5, text: "Example line 555", source: "example"},
+        {rowid: 666, timestamp: 66, text: "Example line 666", source: "example"},
     ],
     topics: {
         "/world_state": {lastseen: 1577545897},
@@ -35,7 +35,29 @@ const fakeDashboard: Dashboard = {
         "/visualization_markers/world_state": {lastseen: 1577545897},
         "/planning_BoundaryMarkers": {lastseen: 1577545897},
         "/mavros/local_position/velocity_body": {lastseen: 1577545897},
-        "/visualization_markers/world_evidence": {lastseen: 1577545897}
+        "/visualization_markers/world_evidence": {lastseen: 1577545897},
+        "/mavros/lo4cal_position/velocity_local": {lastseen: 1577545897},
+        "/world_st5ate": {lastseen: 1577545897},
+        "/mavros/lhgocal_position/pose": {lastseen: 1577545897},
+        "/planning_sReferencePath1": {lastseen: 1577545897},
+        "/visualizatio2n_markers/world_state": {lastseen: 1577545897},
+        "/mavros/lofcal3_position/velocity_local": {lastseen: 1577545897},
+        "/world_stab4te": {lastseen: 1577545897},
+        "/ma5vros/logcal_position/pose": {lastseen: 1577545897},
+        "/world_astate": {lastseen: 1577545897},
+        "/planninag_ReferencePath": {lastseen: 1577545897},
+        "/visuaaliazation_markers/world_state": {lastseen: 1577545897},
+        "/planning_aBoundaryMarkers": {lastseen: 1577545897},
+        "/mavroas/loacal_position/velocity_body": {lastseen: 1577545897},
+        "/visualizatiaon_markers/world_evidence": {lastseen: 1577545897},
+        "/mavros/lo4caal_position/velocity_local": {lastseen: 1577545897},
+        "/worldb_st5ate": {lastseen: 1577545897},
+        "/mavrosb/lhgocal_position/pose": {lastseen: 1577545897},
+        "/planninbg_sReferencePath1": {lastseen: 1577545897},
+        "/visualizbatio2n_markers/world_state": {lastseen: 1577545897},
+        "/mavros/lobfcal3_position/velocity_local": {lastseen: 1577545897},
+        "/world_stabb4te": {lastseen: 1577545897},
+        "/ma5vros/logdcal_position/pose": {lastseen: 1577545897},
     },
     nodes: {
         "/mavros": {lastseen: 1577545897}
@@ -45,15 +67,16 @@ const fakeDashboard: Dashboard = {
         lastping: 1577545897,
         uptime: "up for -1 day"
     },
-    systemdservices: {
-        "recording.service": {
-            statustext: "whaa this is a long text",
-            status: "ERROR",
+    systemdservices: [{
+            name: "recording.service",
+            statustext: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, \nsed do eiusmod tempor \nincididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
+            running: SystemdServiceRunning.running,
             lastupdate: 1577545897,
-            enabled: true,
+            enabled: SystemdServiceEnabled.enabled,
         }
-    },
+    ],
     recording: {
+        lastrefresh: 0,
         is_recording: false,
         filename: "sysid_corner1_vioenabled",
         bagfilename: "sysid_corner1_vioenabled_20190804172203.bag.active",
@@ -64,6 +87,13 @@ const fakeDashboard: Dashboard = {
             "/mavros/local_position/velocity_local",
             "/world_state",
             "/mavros/local_position/pose",
+            "/planning_ReferencePath1",
+            "/visualizatio2n_markers/world_state",
+            "/mavros/local3_position/velocity_local",
+            "/world_sta4te",
+            "/ma5vros/local_position/pose",
+            "/planning_Reference2Path",
+            "/visualization_3markers/world_state",
         ],
     }
 };
@@ -128,9 +158,6 @@ class DashboardComponent extends React.Component<{}, State> {
                     <RecordingBlock {...recording} topics={topics}/>
                 </div>
             </div>
-            <ReactTooltip place="bottom"
-                          multiline={true}
-                          delayShow={300}/>
         </main>
     }
 
@@ -140,7 +167,7 @@ class DashboardComponent extends React.Component<{}, State> {
         }
         this.socket.on('state', (data: any) => {
             this.setState({
-                groundStationState: data,
+                groundStationState: JSON.parse(data),
                 connectionerror: null,
             })
         });

@@ -1,11 +1,19 @@
-import paramiko
 import threading
 import time
+
+import paramiko
+
+from .state import State
 
 
 class SSHClient:
 
-    def __init__(self, host, state, username, password):
+    def __init__(self,
+                 host,  # type: str
+                 state,  # type: State
+                 username,  # type: str
+                 password  # type: str
+                 ):
         self.host = host
         self.state = state
         self.username = username
@@ -68,10 +76,8 @@ class SSHClient:
         except Exception, e:
             uptimestr = str(e)
             connected = False
-        self.state.update({
-            'ssh': {
-                'connected': connected,
-                'uptime': uptimestr,
-                'lastping': time.time()
-            },
-        })
+
+        self.state.ssh.connected = connected
+        self.state.ssh.uptime = uptimestr
+        self.state.ssh.lastping = time.time()
+        self.state.emit_state()

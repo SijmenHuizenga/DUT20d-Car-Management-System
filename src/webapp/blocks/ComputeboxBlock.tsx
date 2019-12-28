@@ -1,8 +1,8 @@
 import React from 'react';
 import Requestor from "../util/Requestor";
-import TimebasedIndicator from "../util/TimebasedIndicator";
 import Tooltip from "../util/Tooltip";
 import {Ping, SSH} from "../statetypes";
+import {Indicator, IndicatorColor} from "../util/Indicator";
 
 interface Props {
     ssh : SSH
@@ -45,20 +45,22 @@ class ComputeboxBlock extends React.Component<Props, State> {
 
     renderSshIndicator() {
         let {connected, lastping} = this.props.ssh;
-        return <TimebasedIndicator timestamp={lastping} success={connected}
-                                   hover={`SSH ${connected ? "connected" : "disconnected"}. Last seen: {timesincelastseen}`}/>
+        return <Indicator color={connected ? IndicatorColor.active : IndicatorColor.danger}
+                                 dataTimestamp={lastping}
+                                 tooltip={`SSH ${connected ? "connected" : "disconnected"}.`}/>
     }
 
     renderPingIndicator() {
         let {timestamp, success} = this.props.ping;
-        return <TimebasedIndicator timestamp={timestamp} success={success}
-                                   hover={`Ping {timesincelastseen} seconds ago was ${success ? "successfull" : "fail"}`}/>
+        return <Indicator color={success ? IndicatorColor.active : IndicatorColor.danger}
+                          dataTimestamp={timestamp}
+                          tooltip={`Last ping ${success ? "succeeded" : "failed"}`}/>
     }
 
     renderRosnodeIndicator() {
         let up = this.props.rosnode_up;
         return <Tooltip tooltip={`Ros connection ${up ? "up" : "down"}.`}>
-            <span className={"indicator circle " + (up ? "success" : "danger")}/>
+            <Indicator color={up ? IndicatorColor.active : IndicatorColor.danger} />
         </Tooltip>
     }
 

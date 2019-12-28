@@ -42,3 +42,12 @@ Never done this, need to figure this out someday.
 Groundstation stores all live data in a SQLite database. 
 The database file is called `development.db` in current working directory. 
 Later this name and location will be configurable. 
+
+## The meaning of colors
+
+| Color | Description |
+| --- | --- |
+| GREEN | Active: Something is actively in use. A process, service or node is running. A topic is actively processing messages. A network device is reachable. |
+| GRAY | Idle: Something exists but not running. This color is only used for things that can exist without running. A systemd service is stopped, a topic exists but is not receiving messages |
+| RED | Danger: Something is wrong and requires immediate action from a user. A process, service or node crashed. A topic that is being recorded is not sending any data.  |   
+| ORANGE | Fault: CMS is unsure about the status. The last received update about something took place a long time ago, cms received unknown responses from ros, cms has a bug. | 

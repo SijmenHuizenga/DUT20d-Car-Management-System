@@ -1,3 +1,5 @@
+export const OUTDATED_AFTER_SECONDS = 5;
+
 export interface Dashboard {
     rosnode :{
         up :boolean
@@ -8,7 +10,7 @@ export interface Dashboard {
     topics :{[key :string] :Topic}
     nodes :{[key :string] :Node}
     recording :Recording
-    systemdservices: {[key :string]: SystemdService}
+    systemdservices: SystemdService[]
 }
 
 export interface Ping {
@@ -20,6 +22,7 @@ export interface LogbookLine {
     rowid :number
     timestamp :number
     text :string
+    source :string
 }
 
 export interface Topic {
@@ -32,6 +35,7 @@ export interface Recording {
     bagfilename :string
     recordingduration :string
     selected_topics :string[]
+    lastrefresh :number
 }
 
 export interface Node {
@@ -44,9 +48,22 @@ export interface SSH {
     uptime: string
 }
 
+export enum SystemdServiceRunning {
+    running = "running",
+    stopped = "stopped",
+    error = "error"
+}
+
+export enum SystemdServiceEnabled {
+    enabled = "enabled",
+    disabled = "disabled",
+    error = "error"
+}
+
 export interface SystemdService {
+    name :string
+    running :SystemdServiceRunning
+    enabled :SystemdServiceEnabled
     statustext :string
-    status :string
     lastupdate :number
-    enabled :boolean
 }

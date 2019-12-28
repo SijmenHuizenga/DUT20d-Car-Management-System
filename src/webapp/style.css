@@ -88,7 +88,7 @@ a.link-sf:active:before {
   color: #2ecc71;
 }
 
-.text-warning{
+.text-fault{
   color: #bd9110;
 }
 
@@ -195,31 +195,35 @@ a.link-sf:active:before {
   background-color: #e74c3c;
 }
 
-.indicator.warning{
+.indicator.fault{
   background-color: #bd9110;
 }
 
-.indicator.success {
+.indicator.active {
   background-color: #2ecc71;
+}
+
+.indicator.idle {
+  background-color: #000000;
 }
 
 .custom-control-input:checked ~ .custom-control-label::before {
   border: none;
 }
 
-.custom-control-input.success:checked ~ .custom-control-label::before {
+.custom-control-input.active:checked ~ .custom-control-label::before {
   background-color: #2ecc71;
 }
 
-.custom-control-input.success:disabled:checked ~ .custom-control-label::before {
+.custom-control-input.active:disabled:checked ~ .custom-control-label::before {
   background-color: #2ecc71;
 }
 
-.custom-control-input.warning:checked ~ .custom-control-label::before {
+.custom-control-input.fault:checked ~ .custom-control-label::before {
   background-color: #bd9110;
 }
 
-.custom-control-input.warning:disabled:checked ~ .custom-control-label::before {
+.custom-control-input.fault:disabled:checked ~ .custom-control-label::before {
   background-color: #bd9110;
 }
 

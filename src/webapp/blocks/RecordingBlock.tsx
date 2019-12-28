@@ -1,15 +1,12 @@
 import React from "react";
 import EditableText from "../util/EditableText";
 import Requestor from "../util/Requestor"
-import {lastPingWasRecent} from "../util/Timing";
-import {Topic} from "../statetypes";
+import {isRecent} from "../util/Timing";
+import {Recording, Topic} from "../statetypes";
+import {Indicator, IndicatorColor} from "../util/Indicator";
+import Tooltip from "../util/Tooltip";
 
-interface Props {
-    selected_topics: string[]
-    is_recording: boolean
-    filename: string
-    bagfilename :string
-    recordingduration :string
+interface Props extends Recording {
     topics :{[key :string] :Topic}
 }
 
@@ -41,7 +38,7 @@ class RecordingBlock extends React.Component<Props, State> {
         if (!this.props.topics.hasOwnProperty(topicname)) {
             return "OFFLINE";
         }
-        return lastPingWasRecent(this.props.topics[topicname].lastseen) ? "ACTIVE" : "OFFLINE"
+        return isRecent(this.props.topics[topicname].lastseen) ? "ACTIVE" : "OFFLINE"
     }
 
     isTopicSelected(topicname :string) :boolean {
@@ -72,7 +69,10 @@ class InactiveRecordingBlock extends RecordingBlock {
         return <div className="block">
             {this.renderErrorblock()}
             <div className="d-flex">
-                <div className="text-large">Idle</div>
+                <div className="text-large">
+                    <Indicator color={IndicatorColor.idle} dataTimestamp={this.props.lastrefresh}/>
+                    Idle
+                </div>
                 <div className="flex-grow-1 pl-1">
                     <EditableText value={filename} save={this.updateFilename.bind(this)} multiline={false} >
                         <span className="pl-1 text-small">{filename}</span>
@@ -159,8 +159,9 @@ class TopicIndicator extends React.Component<{topicname :string, selected :boole
     render() {
         let {topicname, selected, topicstate} = this.props;
         return <div>
-            <span className={`indicator circle ${selected ? topicStateToColor(topicstate) : ""}`}
-                  data-tip={topicDescription(selected, topicstate)}/>
+            <Tooltip tooltip={topicDescription(selected, topicstate)}>
+                <span className={`indicator circle ${selected ? topicStateToColor(topicstate) : ""}`}/>
+            </Tooltip>
             <span className="text-small pl-2">{topicname}</span>
         </div>
     }
@@ -170,16 +171,18 @@ class TopicSelector extends React.Component<{topicname :string, selected :boolea
     render() {
         let {topicname, selected, topicstate} = this.props;
         return <div className="custom-control custom-checkbox">
-            <input type="checkbox"
+            <Tooltip tooltip={topicDescription(selected, topicstate)}>
+                <input type="checkbox"
                    className={`custom-control-input ${topicStateToColor(topicstate)}`}
                    id={`recordtopic_${topicname}`}
                    checked={selected}
                    onChange={this.handleCheckboxChange.bind(this)}
-            />
-            <label
-                className="custom-control-label"
-                data-tip={topicDescription(selected, topicstate)}
-                htmlFor={`recordtopic_${topicname}`}>{topicname}</label>
+                />
+                <label
+                    className="custom-control-label"
+                    htmlFor={`recordtopic_${topicname}`}>{topicname}</label>
+            </Tooltip>
+
         </div>
     }
 
@@ -194,6 +197,7 @@ class TopicSelector extends React.Component<{topicname :string, selected :boolea
 }
 
 function topicStateToColor(state :string) {
+    //todo: enumify topic state
     switch (state) {
         case "OFFLINE":
             return "danger";
@@ -218,7 +222,7 @@ function topicStateToDescription(state :string) {
 }
 
 function topicDescription(selected :boolean, topicstate :string) {
-    return `This topic is ${selected ? "" : "not"} selected for recording<br/> The topic is ${topicStateToDescription(topicstate)}`
+    return `This topic is ${selected ? "" : "not"} selected for recording\nThe topic is ${topicStateToDescription(topicstate)}`
 }
 
 export default RecordingContainer;

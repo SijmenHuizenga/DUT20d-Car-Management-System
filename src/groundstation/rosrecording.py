@@ -1,10 +1,16 @@
 import threading
 import time
+
 import systemdservices
+from .sshclient import SSHClient
+from .state import State
 
 
 class RosRecorder:
-    def __init__(self, state, ssh):
+    def __init__(self,
+                 state,  # type: State
+                 ssh  # type: SSHClient
+                 ):
         self.ssh = ssh
         self.state = state
 
@@ -23,15 +29,14 @@ class RosRecorder:
 
     def updatestate(self):
         (filename, selectedtopics) = self.read_configfile()
-        self.state.update({
-            'recording': {
-                'is_recording': self.is_recording(),
-                'filename': filename,
-                'bagfilename': "fakedata.bag.active",
-                'recordingduration': "00:00",
-                'selected_topics': selectedtopics,
-            }
-        })
+
+        self.state.recording.is_recording = self.is_recording()
+        self.state.recording.lastrefresh = time.time()
+        self.state.recording.filename = filename
+        self.state.recording.bagfilename = "fakedata.bag.active"
+        self.state.recording.recordingduration = "00:00"
+        self.state.recording.selected_topics = selectedtopics
+        self.state.emit_state()
 
     def is_recording(self):
         try:
@@ -58,17 +63,17 @@ class RosRecorder:
             return "error", str(e)
 
     def set_topic(self, topicname, selected):
-        newtopics = self.state.state['recording']['selected_topics'][:]
+        newtopics = self.state.recording.selected_topics[:]
         if topicname in newtopics:
             newtopics.remove(topicname)
         if selected:
             newtopics.append(topicname)
 
-        self.save_configuration(newtopics, self.state.state['recording']['filename'])
+        self.save_configuration(newtopics, self.state.recording.filename)
         self.updatestate()
 
     def set_filename(self, newfilename):
-        self.save_configuration(self.state.state['recording']['selected_topics'], newfilename)
+        self.save_configuration(self.state.recording.selected_topics, newfilename)
         self.updatestate()
 
     def save_configuration(self, selectedtopics, filename):
@@ -92,4 +97,3 @@ class RosRecorder:
             raise Exception("systemctl stop rosrecord.service exited with error code " +
                             str(statusnr) + ": " + statustext)
         self.updatestate()
-

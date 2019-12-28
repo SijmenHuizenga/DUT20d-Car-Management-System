@@ -6,22 +6,22 @@ luke_host = "grace"
 luke_user = "grace"
 luke_password = ""
 
-db = database.Database()
-stat = state.StateManager(db)
-ssh = sshclient.SSHClient(luke_host, stat, luke_user, luke_password)
-pingrr = pinger.Pinger(luke_host, db, stat)
-logbok = logbook.Logbook(db, stat)
-rosrecorder = rosrecording.RosRecorder(stat, ssh)
-websrver = webserver.Webserver(stat, logbok, ssh, rosrecorder)
-systemd = systemdservices.SystemdServices(ssh, stat)
+database_ = database.Database()
+state_ = state.State(database_)
+sshclient_ = sshclient.SSHClient(luke_host, state_, luke_user, luke_password)
+pinger_ = pinger.Pinger(luke_host, database_, state_)
+logbook_ = logbook.Logbook(database_, state_)
+rosrecorder_ = rosrecording.RosRecorder(state_, sshclient_)
+webserver_ = webserver.Webserver(state_, logbook_, sshclient_, rosrecorder_)
+systemdservices_ = systemdservices.SystemdServices(sshclient_, state_)
 
-ssh.start()
-pingrr.start()
-systemd.start()
-rosrecorder.start()
+sshclient_.start()
+pinger_.start()
+systemdservices_.start()
+rosrecorder_.start()
 
-webserverThread = threading.Thread(target=websrver.start)
+webserverThread = threading.Thread(target=webserver_.start)
 webserverThread.daemon = True
 webserverThread.start()
 
-rosnode.RosNode(db, stat, logbok).run()
+rosnode.RosNode(database_, state_, logbook_).run()

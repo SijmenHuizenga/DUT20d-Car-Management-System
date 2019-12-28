@@ -1,6 +1,6 @@
 import React from 'react';
-import TimebasedIndicator from "../util/TimebasedIndicator";
 import {Node} from "../statetypes"
+import {Indicator, IndicatorColor} from "../util/Indicator";
 
 interface Props {
     nodes :{[key: string]: Node}
@@ -29,9 +29,10 @@ class NodeIndicator extends React.Component<IndicatorProps, {}> {
         return (
             <div>
                 <span className="text-small">
-                    <TimebasedIndicator
-                        hover="Last seen {timesincelastseen} seconds ago"
-                        timestamp={lastseen} success={true} />
+                    <Indicator
+                        color={IndicatorColor.fault}
+                        tooltip="Work in progress"
+                        dataTimestamp={lastseen} />
                     <span className="pl-1">{node.substr(1)}</span>
                 </span>
             </div>

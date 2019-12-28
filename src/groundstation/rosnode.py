@@ -1,13 +1,21 @@
-import rospy
-import time
 import socket
-import std_msgs.msg
+import time
+
 import rosgraph
+import rospy
+
+from .database import Database
+from .logbook import Logbook
+from .state import State
 
 
 class RosNode:
 
-    def __init__(self, db, state, logbook):
+    def __init__(self,
+                 db,  # type: Database
+                 state,  # type: State
+                 logbook  # type: Logbook
+                 ):
         self.subscrib = None
         self.rosmeta = RosMeta(db, state)
         self.db = db
@@ -59,12 +67,16 @@ class RosNode:
 
     def set_rosnode_health(self, up):
         self.db.insert('INSERT INTO rosnodehealth VALUES (:now, :up)',
-                  {'now': time.time(), 'up': up})
-        self.state.update({'rosnode': {'up': up}})
+                       {'now': time.time(), 'up': up})
+        self.state.rosnode.up = up
+        self.state.emit_state()
 
 
 class RosMeta:
-    def __init__(self, db, state):
+    def __init__(self,
+                 db,  # type: Database
+                 state,  # type: State
+                 ):
         self.db = db
         self.state = state
         pass
@@ -90,7 +102,6 @@ class RosMeta:
         except Exception, e:
             # todo: also print stacktrace
             raise
-            print('rosmeta exception', e)
 
     def process_new_rosinformation(self, lastseen, publishers, subscriptions, topictypes):
         all_topics = {}
@@ -163,11 +174,11 @@ class RosMeta:
                                {'lastseen': lastseen, 'node': nodename, 'topic': topicname})
 
     def update_topics_state(self, all_topics):
-        topicstate = self.state.state['topics']
+        topicstate = self.state.topics
         for topicname in all_topics:
             topicstate[topicname] = all_topics[topicname]
 
     def update_nodes_state(self, all_nodes):
-        nodestate = self.state.state['nodes']
+        nodestate = self.state.nodes
         for nodename in all_nodes:
             nodestate[nodename] = all_nodes[nodename]

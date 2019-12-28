@@ -1,4 +1,7 @@
-function lastPingWasRecent(timestamp :number, secondsRecent = 4) {
+import {OUTDATED_AFTER_SECONDS} from "../statetypes";
+import {IndicatorColor} from "./Indicator";
+
+function isRecent(timestamp :number, secondsRecent = OUTDATED_AFTER_SECONDS) {
     return new Date().getTime() / 1000 - timestamp < secondsRecent
 }
 
@@ -9,12 +12,11 @@ function nicenumber(n :number) {
     return n + '';
 }
 
-function indicatorColorBasedOnTime(lastSeen :number, wasSuccessfull = true) {
-    if(!lastPingWasRecent(lastSeen)) {
-        return "warning";
+function indicatorColorBasedOnTime(lastSeen :number, wasSuccessfull = true) :IndicatorColor{
+    if(!isRecent(lastSeen)) {
+        return IndicatorColor.fault;
     }
-    return wasSuccessfull ? "success" : "danger"
-
+    return wasSuccessfull ? IndicatorColor.active : IndicatorColor.idle
 }
 
 function formatUnicorn(str :string, params :any) {
@@ -28,4 +30,4 @@ function formatUnicorn(str :string, params :any) {
     return str;
 }
 
-export {indicatorColorBasedOnTime, nicenumber, lastPingWasRecent, formatUnicorn}
+export {indicatorColorBasedOnTime, nicenumber, isRecent, formatUnicorn}

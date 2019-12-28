@@ -1,14 +1,26 @@
-import time
 import logging
-from flask import Flask, send_from_directory, request, abort
+import time
+
 import socketio
+import jsonpickle
+from flask import Flask, request, abort, jsonify
+
+from .logbook import Logbook
+from .rosrecording import RosRecorder
+from .sshclient import SSHClient
+from .state import State
 
 app = Flask(__name__, static_folder='../../operator/build/', static_url_path='')
 
 
 class Webserver:
 
-    def __init__(self, state, logbook, ssh, recorder):
+    def __init__(self,
+                 state,  # type: State
+                 logbook,  # type: Logbook
+                 ssh,  # type: SSHClient
+                 recorder  # type: RosRecorder
+                 ):
         self.state = state
         self.app = None
         self.logbook = logbook
@@ -26,7 +38,7 @@ class Webserver:
         self.state.set_socketio(sio)
 
         app.add_url_rule('/', 'root', self.root)
-        app.add_url_rule('/state', 'state', self.state)
+        app.add_url_rule('/state', 'state', self.request_state, methods=['GET'])
         app.add_url_rule('/logbook', 'logbook_create', self.logbook_create, methods=['POST'])
         app.add_url_rule('/logbook/<int:rowid>', 'logbook_update', self.logbook_update, methods=['PUT'])
         app.add_url_rule('/rebootluke', 'reboot_luke', self.reboot_luke)
@@ -40,8 +52,8 @@ class Webserver:
     def root(self):
         return self.app.send_static_file('index.html')
 
-    def state(self):
-        return self.state.state
+    def request_state(self):
+        return jsonpickle.encode(self.state)
 
     def logbook_create(self):
         try:
