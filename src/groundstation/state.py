@@ -223,7 +223,10 @@ class State:
         self.socketio.emit('state', self.to_json(), broadcast=True)
 
     def populate_memory_state(self):
-        self.logbook = self.db.select_all("SELECT rowid, * FROM logbook", {})
+        self.logbook = map(self.logline_fromdict, self.db.select_all("SELECT rowid, * FROM logbook", {}))
+
+    def logline_fromdict(self, d):
+        return LogbookLine(d['timestamp'], d['text'], d['source'], d['rowid'])
 
     def set_socketio(self, sio):
         self.socketio = sio

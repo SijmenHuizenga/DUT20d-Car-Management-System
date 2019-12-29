@@ -4,13 +4,10 @@ import Requestor from "../util/Requestor"
 import {Recording, Topic} from "../statetypes";
 import {Indicator, IndicatorColor} from "../util/Indicator";
 import Tooltip from "../util/Tooltip";
+import {toast} from "react-toastify";
 
 interface Props extends Recording {
     topics :Topic[]
-}
-
-interface State {
-    error: string | null
 }
 
 class RecordingContainer extends React.Component<Props, {}> {
@@ -19,13 +16,7 @@ class RecordingContainer extends React.Component<Props, {}> {
     }
 }
 
-class RecordingBlock extends React.Component<Props, State> {
-    constructor(props :Props) {
-        super(props);
-        this.state = {
-            error: null
-        }
-    }
+class RecordingBlock extends React.Component<Props> {
 
     allTopicNames() :string[]{
         let out = [...this.props.selected_topics, ...this.props.topics.map((topic) => topic.name)];
@@ -48,19 +39,9 @@ class RecordingBlock extends React.Component<Props, State> {
 
     onRecordingToggle() {
         return Requestor.put("/recording/" + (this.props.is_recording ? "stop" : "start"), {})
-            .then(() => this.setError(null))
-            .catch((error) => this.setError("Couldn't start/stop recording: " + error))
+            .catch((error) => toast("Couldn't start/stop recording: " + error, {type: 'error'}))
     }
 
-    renderErrorblock() {
-        return this.state.error ? <div className="alert alert-danger" role="alert">{this.state.error}</div> : null;
-    }
-
-    setError(error :string | null) {
-        this.setState({
-            error: error
-        })
-    }
 }
 
 class InactiveRecordingBlock extends RecordingBlock {
@@ -68,7 +49,6 @@ class InactiveRecordingBlock extends RecordingBlock {
         let {filename} = this.props;
 
         return <div className="block">
-            {this.renderErrorblock()}
             <div className="d-flex">
                 <div className="text-large">
                     <Indicator color={IndicatorColor.idle} dataTimestamp={this.props.lastrefresh}/>
@@ -100,7 +80,6 @@ class InactiveRecordingBlock extends RecordingBlock {
         return this.allTopicNames().map((topicname) =>
             <TopicSelector key={topicname}
                            topicname={topicname}
-                           setError={this.setError.bind(this)}
                            selected={this.isTopicSelected(topicname)}
                            topicstate={this.getTopicState(topicname)}/>
         )
@@ -109,11 +88,10 @@ class InactiveRecordingBlock extends RecordingBlock {
     updateFilename(newname :string) {
         return Requestor.put("/recording/filename", {filename: newname})
             .then(() => {
-                this.setError(null);
                 return true;
             })
             .catch((error) => {
-                this.setError("Failed to update recording filename: " + error);
+                toast("Failed to update recording filename: " + error, {type: 'error'})
                 return false;
             });
     }
@@ -122,7 +100,6 @@ class InactiveRecordingBlock extends RecordingBlock {
 class ActiveRecordingBlock extends RecordingBlock {
     render() {
         return <div className="block">
-            {this.renderErrorblock()}
             <div className="mb-2 ">
                 <span className="text-large">Recording</span>
                 <span className="pl-1 text-small">| {this.props.bagfilename}</span>
@@ -168,7 +145,7 @@ class TopicIndicator extends React.Component<{topicname :string, selected :boole
     }
 }
 
-class TopicSelector extends React.Component<{topicname :string, selected :boolean, topicstate :string, setError(msg :string|null) :void}, {}> {
+class TopicSelector extends React.Component<{topicname :string, selected :boolean, topicstate :string}, {}> {
     render() {
         let {topicname, selected, topicstate} = this.props;
         return <div className="custom-control custom-checkbox">
@@ -191,9 +168,7 @@ class TopicSelector extends React.Component<{topicname :string, selected :boolea
         return Requestor.put("/recording/toggletopic", {
             topicname: this.props.topicname,
             selected: e.currentTarget.checked
-        })
-            .then(() => this.props.setError(null))
-            .catch((error) => this.props.setError("Failed to update selected topcs: " + error));
+        }).catch((error) => toast("Failed to update selected topcs: " + error, {type: 'error'}));
     }
 }
 

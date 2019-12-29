@@ -18,6 +18,7 @@ class Logbook:
         return None
 
     def add_line(self, timestamp, text, source):
+        assert text, "Text cannot be empty"
         line = LogbookLine(timestamp=timestamp, text=text, source=source)
         line.rowid = self.db.insert('INSERT INTO logbook VALUES (:timestamp, :text, :source)', {
             'timestamp': line.timestamp,
@@ -28,6 +29,7 @@ class Logbook:
         self.state.emit_state()
 
     def update_line_text(self, rowid, text):
+        assert text, "Text cannot be empty"
         line = self.get_line(rowid)
         if line is None:
             raise Exception("Line does not exit")
@@ -38,13 +40,13 @@ class Logbook:
         })
         self.state.emit_state()
 
-    def update_line_timestamp(self, rowid, timestmap):
+    def update_line_timestamp(self, rowid, timestamp):
         line = self.get_line(rowid)
         if line is None:
             raise Exception("Line does not exit")
-        line.timestamp = timestmap
-        self.db.query("UPDATE logbook SET timestmap=:timestmap WHERE rowid=:rowid", {
+        line.timestamp = timestamp
+        self.db.query("UPDATE logbook SET timestamp=:timestamp WHERE rowid=:rowid", {
             'rowid': line.rowid,
-            'timestmap': line.timestamp
+            'timestamp': line.timestamp
         })
         self.state.emit_state()

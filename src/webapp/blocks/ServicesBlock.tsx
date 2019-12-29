@@ -1,6 +1,6 @@
 import React from "react";
 import Tooltip from "../util/Tooltip";
-import {SystemdService, SystemdServiceRunning, SystemdServiceEnabled, OUTDATED_AFTER_SECONDS} from "../statetypes";
+import {SystemdService, SystemdServiceRunning, SystemdServiceEnabled} from "../statetypes";
 import {ContextMenu, ContextMenuTrigger, MenuItem} from "react-contextmenu";
 import {Indicator, IndicatorColor} from "../util/Indicator";
 

@@ -3,6 +3,7 @@ import Markdown from 'react-markdown';
 import EditableText from "../util/EditableText";
 import Requestor from "../util/Requestor";
 import {LogbookLine} from "../statetypes";
+import {toast} from "react-toastify";
 
 interface Line {
     rowid :number
@@ -17,7 +18,6 @@ interface Props {
 interface State {
     input :string
     inputDisabled :boolean
-    error :string | null
     scrollStickToBottom :boolean
     dragSelectedRowid :number | null
     dragLastHoveredRowid :number | null
@@ -35,7 +35,6 @@ class LogbookBlock extends React.Component<Props, State> {
         this.state = {
             input: '',
             inputDisabled: false,
-            error: null,
             scrollStickToBottom: true,
             dragSelectedRowid: null,
             dragLastHoveredRowid: null,
@@ -44,11 +43,10 @@ class LogbookBlock extends React.Component<Props, State> {
     }
 
     render() {
-        let {input, inputDisabled, error} = this.state;
+        let {input, inputDisabled} = this.state;
         let {lines} = this.props;
         lines.sort((a, b) => a.timestamp - b.timestamp);
         return <div className="block y-50 d-flex flex-column">
-            {error ? <div className="alert alert-danger" role="alert">{error}</div> : null}
             <div className="flex-row overflow-auto" ref={(el) => this.scroller = el}
                  onScroll={this.handleUserScroll.bind(this)}>
                 <table className="logtable" onMouseLeave={this.resetDragging.bind(this)}>
@@ -122,40 +120,45 @@ class LogbookBlock extends React.Component<Props, State> {
             return
         }
 
+        // The last line that was hoved over before the current line was hovered.
         let lastLineIndex = this.findIndexOfRow(dragLastHoveredRowid);
-        let currentLineIndex = this.findIndexOfRow(dragCurrentHoverRowid);
 
-        let betweenBottomIndex, betweenTopIndex;
-        if (lastLineIndex < currentLineIndex) {
+        // The line on which the mouse was released.
+        let releasedLineIndex = this.findIndexOfRow(dragCurrentHoverRowid);
+
+        let betweenAboveIndex, betweenBelowIndex;
+        if (lastLineIndex < releasedLineIndex) {
             //moving down (positive)
-            betweenBottomIndex = lastLineIndex + 1;
-            betweenTopIndex = currentLineIndex + 1;
-        } else if (lastLineIndex > currentLineIndex) {
+            betweenAboveIndex = releasedLineIndex;
+            betweenBelowIndex = releasedLineIndex + 1;
+        } else if (lastLineIndex > releasedLineIndex) {
             //moving up (negative)
-            betweenBottomIndex = lastLineIndex - 1;
-            betweenTopIndex = currentLineIndex - 1;
+            betweenAboveIndex = releasedLineIndex - 1;
+            betweenBelowIndex = releasedLineIndex;
         } else {
-            //todo: is this correct?
+            // Cannot determen if we are moving up or down.
+            // So we assume we did not move and do nothing.
+            this.resetDragging();
             return
         }
 
-        let lineBetweenBottom = this.props.lines[betweenBottomIndex];
-        let lineBetweenTop = this.props.lines[betweenTopIndex];
+        let loglineAboveTarget = this.props.lines[betweenAboveIndex];
+        let loglineBelowTarget = this.props.lines[betweenBelowIndex];
 
-        if((lineBetweenBottom !== undefined && lineBetweenBottom.rowid === dragSelectedRowid) ||
-            (lineBetweenTop !== undefined && lineBetweenTop.rowid === dragSelectedRowid)) {
+        if((loglineAboveTarget !== undefined && loglineAboveTarget.rowid === dragSelectedRowid) ||
+            (loglineBelowTarget !== undefined && loglineBelowTarget.rowid === dragSelectedRowid)) {
             //did not move. Placed directly under or directly above current line.
             this.resetDragging();
             return;
         }
 
         let newTimestamp;
-        if (lineBetweenBottom !== undefined && lineBetweenTop !== undefined) {
-            newTimestamp = Math.min(lineBetweenBottom.timestamp, lineBetweenTop.timestamp) + Math.abs(lineBetweenBottom.timestamp - lineBetweenTop.timestamp) / 2;
-        } else if (lineBetweenBottom !== undefined) {
-            newTimestamp = lineBetweenBottom.timestamp - 1
-        } else if (lineBetweenTop !== undefined) {
-            newTimestamp = lineBetweenTop.timestamp + 1;
+        if (loglineAboveTarget !== undefined && loglineBelowTarget !== undefined) {
+            newTimestamp = Math.min(loglineAboveTarget.timestamp, loglineBelowTarget.timestamp) + Math.abs(loglineAboveTarget.timestamp - loglineBelowTarget.timestamp) / 2;
+        } else if (loglineAboveTarget !== undefined) {
+            newTimestamp = loglineAboveTarget.timestamp + 1
+        } else if (loglineBelowTarget !== undefined) {
+            newTimestamp = loglineBelowTarget.timestamp - 1;
         } else {
             this.resetDragging();
             return;
@@ -223,21 +226,22 @@ class LogbookBlock extends React.Component<Props, State> {
         this.setState({inputDisabled: true, scrollStickToBottom: true});
 
         Requestor.execute('/logbook', 'POST', {text: this.state.input, source: 'human'})
-            .then(() => this.setState({inputDisabled: false, input: '', error: null}))
-            .catch((error) => this.setState({
-                inputDisabled: false,
-                error: 'Failed to store logline: ' + error
-            }));
+            .then(() => this.setState({inputDisabled: false, input: ''}))
+            .catch((error) => {
+                toast('Failed to store logline: ' + error, {type: 'error'});
+                this.setState({
+                    inputDisabled: false,
+                })
+            });
     }
 
     updateLine(rowid :number, changeset :any) {
         return Requestor.put(`/logbook/${rowid}`, changeset)
             .then(() => {
-                this.setState({error: null});
                 return true;
             })
             .catch((error) => {
-                this.setState({error: 'Failed to update logline: ' + error});
+                toast('Failed to update logline: ' + error, {type: 'error'});
                 return false;
             });
     }

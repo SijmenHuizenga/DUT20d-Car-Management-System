@@ -13,8 +13,8 @@ class NodesBlock extends React.Component<Props> {
         return <div className="block y-50">
             {this.props.nodes.map((node) =>
                 <NodeIndicator key={node.name} {...node}
-                               subscriptions={this.props.subscriptions.filter(sub => sub.nodename == node.name)}
-                               publications={this.props.publications.filter(pub => pub.nodename == node.name)}
+                               subscriptions={this.props.subscriptions.filter(sub => sub.nodename === node.name)}
+                               publications={this.props.publications.filter(pub => pub.nodename === node.name)}
                 />
             )}
         </div>

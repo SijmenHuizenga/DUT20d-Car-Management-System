@@ -40,7 +40,7 @@ class Webserver:
         app.add_url_rule('/state', 'state', self.request_state, methods=['GET'])
         app.add_url_rule('/logbook', 'logbook_create', self.logbook_create, methods=['POST'])
         app.add_url_rule('/logbook/<int:rowid>', 'logbook_update', self.logbook_update, methods=['PUT'])
-        app.add_url_rule('/rebootluke', 'reboot_luke', self.reboot_luke)
+        app.add_url_rule('/rebootluke', 'reboot_luke', self.reboot_luke, methods=['POST'])
         app.add_url_rule('/recording/toggletopic', 'recording_toggle', self.recording_toggle, methods=['PUT'])
         app.add_url_rule('/recording/filename', 'recording_setfilename', self.recording_setfilename, methods=['PUT'])
         app.add_url_rule('/recording/start', 'recording_start', self.recording_start, methods=['PUT'])

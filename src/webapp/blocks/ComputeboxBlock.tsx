@@ -3,6 +3,7 @@ import Requestor from "../util/Requestor";
 import Tooltip from "../util/Tooltip";
 import {Ping, SSH} from "../statetypes";
 import {Indicator, IndicatorColor} from "../util/Indicator";
+import {toast} from "react-toastify";
 
 interface Props {
     ssh : SSH
@@ -70,10 +71,10 @@ class ComputeboxBlock extends React.Component<Props, State> {
         });
         Requestor.execute("/rebootluke", "POST")
             .then(() =>
-                alert("Reboot initialized")
+                toast("Reboot started")
             )
             .catch((error) =>
-                alert("Reboot failed: \n" + error)
+                toast("Reboot fialed: "+error, {type: 'error'})
             ).then(() =>
             this.setState({
                 rebootbtnDisabled: false

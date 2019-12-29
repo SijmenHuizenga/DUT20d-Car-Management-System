@@ -1,5 +1,7 @@
 import React from 'react';
 import io from 'socket.io-client';
+import {toast, ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './style.css';
 import './react-contextmenu.css';
 import HealthBlock from './blocks/HealthBlock'
@@ -161,6 +163,7 @@ class DashboardComponent extends React.Component<{}, State> {
                     <RecordingBlock {...recording} topics={topics}/>
                 </div>
             </div>
+            <ToastContainer position={toast.POSITION.BOTTOM_RIGHT} autoClose={false}/>
         </main>
     }
 
