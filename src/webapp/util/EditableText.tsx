@@ -13,7 +13,7 @@ interface State {
     inputDisabled: boolean
 }
 
-class EditableText extends React.Component<Props, State> {
+class EditableText extends React.PureComponent<Props, State> {
     private inputref: React.RefObject<HTMLTextAreaElement>;
 
     constructor(props :Props) {

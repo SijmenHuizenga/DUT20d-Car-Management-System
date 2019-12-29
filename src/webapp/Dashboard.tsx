@@ -109,7 +109,7 @@ interface State {
 }
 
 
-class DashboardComponent extends React.Component<{}, State> {
+export default class DashboardStateLoader extends React.PureComponent<{}, State> {
     private socket: SocketIOClient.Socket;
 
     constructor(props: {}) {
@@ -127,16 +127,37 @@ class DashboardComponent extends React.Component<{}, State> {
         return <div className="container-fluid">
             {this.state.groundStationState === null || this.state.connectionerror !== null
                 ? <div className="overlay error text-center">{this.state.connectionerror}</div>
-                : this.renderDashboard()}
+                : <DashboardComponent {...this.state.groundStationState} />}
+            <ToastContainer position={toast.POSITION.BOTTOM_RIGHT} autoClose={false}/>
         </div>
-
     }
 
-    renderDashboard() {
-        console.log("render", this.state.groundStationState);
+    componentDidMount() {
+        if (devmode) {
+            return;
+        }
+        this.socket.on('state', (data: any) => {
+            this.setState({
+                groundStationState: JSON.parse(data),
+                connectionerror: null,
+            })
+        });
+        this.socket.on('disconnect', () => {
+            this.setState({
+                connectionerror: "groundstation disconnected",
+            })
+        });
+    }
+}
+
+
+class DashboardComponent extends React.Component<Dashboard, {}> {
+
+    render() {
+        console.log("render", this.props);
 
         let {rosnode, ping, logbook, recording, topics, nodes, ssh,
-            systemdservices, subscriptions, publications, topicstatistics} = this.state.groundStationState!;
+            systemdservices, subscriptions, publications, topicstatistics} = this.props;
 
         return <main id="page-main">
             <div className="row">
@@ -165,26 +186,6 @@ class DashboardComponent extends React.Component<{}, State> {
                     <RecordingBlock {...recording} topics={topics}/>
                 </div>
             </div>
-            <ToastContainer position={toast.POSITION.BOTTOM_RIGHT} autoClose={false}/>
         </main>
     }
-
-    componentDidMount() {
-        if (devmode) {
-            return;
-        }
-        this.socket.on('state', (data: any) => {
-            this.setState({
-                groundStationState: JSON.parse(data),
-                connectionerror: null,
-            })
-        });
-        this.socket.on('disconnect', () => {
-            this.setState({
-                connectionerror: "groundstation disconnected",
-            })
-        });
-    }
 }
-
-export default DashboardComponent;

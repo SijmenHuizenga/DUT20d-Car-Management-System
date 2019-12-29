@@ -19,7 +19,8 @@
     "react-scripts": "3.2.0",
     "react-toastify": "^5.4.1",
     "socket.io-client": "^2.3.0",
-    "typescript": "^3.7.4"
+    "typescript": "^3.7.4",
+    "deep-equal": "latest"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -42,5 +43,8 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:5000"
+  "proxy": "http://localhost:5000",
+  "devDependencies": {
+    "@types/deep-equal": "^1.0.1"
+  }
 }
