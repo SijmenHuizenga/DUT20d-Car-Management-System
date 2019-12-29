@@ -12,7 +12,7 @@ import LogbookBlock from "./blocks/LogbookBlock";
 import RecordingBlock from "./blocks/RecordingBlock";
 import {Dashboard, SystemdServiceEnabled, SystemdServiceRunning} from "./statetypes";
 
-const devmode = true;
+const devmode = false;
 const fakeDashboard: Dashboard = {
     rosnode: {
         up: false,
@@ -29,39 +29,42 @@ const fakeDashboard: Dashboard = {
         {rowid: 555, timestamp: 5, text: "Example line 555", source: "example"},
         {rowid: 666, timestamp: 66, text: "Example line 666", source: "example"},
     ],
-    topics: {
-        "/world_state": {lastseen: 1577545897},
-        "/planning_ReferencePath": {lastseen: 1577545897},
-        "/visualization_markers/world_state": {lastseen: 1577545897},
-        "/planning_BoundaryMarkers": {lastseen: 1577545897},
-        "/mavros/local_position/velocity_body": {lastseen: 1577545897},
-        "/visualization_markers/world_evidence": {lastseen: 1577545897},
-        "/mavros/lo4cal_position/velocity_local": {lastseen: 1577545897},
-        "/world_st5ate": {lastseen: 1577545897},
-        "/mavros/lhgocal_position/pose": {lastseen: 1577545897},
-        "/planning_sReferencePath1": {lastseen: 1577545897},
-        "/visualizatio2n_markers/world_state": {lastseen: 1577545897},
-        "/mavros/lofcal3_position/velocity_local": {lastseen: 1577545897},
-        "/world_stab4te": {lastseen: 1577545897},
-        "/ma5vros/logcal_position/pose": {lastseen: 1577545897},
-        "/world_astate": {lastseen: 1577545897},
-        "/planninag_ReferencePath": {lastseen: 1577545897},
-        "/visuaaliazation_markers/world_state": {lastseen: 1577545897},
-        "/planning_aBoundaryMarkers": {lastseen: 1577545897},
-        "/mavroas/loacal_position/velocity_body": {lastseen: 1577545897},
-        "/visualizatiaon_markers/world_evidence": {lastseen: 1577545897},
-        "/mavros/lo4caal_position/velocity_local": {lastseen: 1577545897},
-        "/worldb_st5ate": {lastseen: 1577545897},
-        "/mavrosb/lhgocal_position/pose": {lastseen: 1577545897},
-        "/planninbg_sReferencePath1": {lastseen: 1577545897},
-        "/visualizbatio2n_markers/world_state": {lastseen: 1577545897},
-        "/mavros/lobfcal3_position/velocity_local": {lastseen: 1577545897},
-        "/world_stabb4te": {lastseen: 1577545897},
-        "/ma5vros/logdcal_position/pose": {lastseen: 1577545897},
-    },
-    nodes: {
-        "/mavros": {lastseen: 1577545897}
-    },
+    topics: [
+        {name: "/world_state", lastseen: 1577545897},
+        {name: "/planning_ReferencePath", lastseen: 1577545897},
+        {name: "/visualization_markers/world_state", lastseen: 1577545897},
+        {name: "/planning_BoundaryMarkers", lastseen: 1577545897},
+        {name: "/mavros/local_position/velocity_body", lastseen: 1577545897},
+        {name: "/visualization_markers/world_evidence", lastseen: 1577545897},
+        {name: "/mavros/lo4cal_position/velocity_local", lastseen: 1577545897},
+        {name: "/world_st5ate", lastseen: 1577545897},
+        {name: "/mavros/lhgocal_position/pose", lastseen: 1577545897},
+        {name: "/planning_sReferencePath1", lastseen: 1577545897},
+        {name: "/visualizatio2n_markers/world_state", lastseen: 1577545897},
+        {name: "/mavros/lofcal3_position/velocity_local", lastseen: 1577545897},
+        {name: "/world_stab4te", lastseen: 1577545897},
+        {name: "/ma5vros/logcal_position/pose", lastseen: 1577545897},
+        {name: "/world_astate", lastseen: 1577545897},
+        {name: "/planninag_ReferencePath", lastseen: 1577545897},
+        {name: "/visuaaliazation_markers/world_state", lastseen: 1577545897},
+        {name: "/planning_aBoundaryMarkers", lastseen: 1577545897},
+        {name: "/mavroas/loacal_position/velocity_body", lastseen: 1577545897},
+        {name: "/visualizatiaon_markers/world_evidence", lastseen: 1577545897},
+        {name: "/mavros/lo4caal_position/velocity_local", lastseen: 1577545897},
+        {name: "/worldb_st5ate", lastseen: 1577545897},
+        {name: "/mavrosb/lhgocal_position/pose", lastseen: 1577545897},
+        {name: "/planninbg_sReferencePath1", lastseen: 1577545897},
+        {name: "/visualizbatio2n_markers/world_state", lastseen: 1577545897},
+        {name: "/mavros/lobfcal3_position/velocity_local", lastseen: 1577545897},
+        {name: "/world_stabb4te", lastseen: 1577545897},
+        {name: "/ma5vros/logdcal_position/pose", lastseen: 1577545897},
+    ],
+    nodes: [
+        {name: "/mavros", lastseen: 1577545897}
+    ],
+    publications: [],
+    subscriptions: [],
+    topicstatistics: [],
     ssh: {
         connected: true,
         lastping: 1577545897,
@@ -130,7 +133,7 @@ class DashboardComponent extends React.Component<{}, State> {
     renderDashboard() {
         console.log("render", this.state.groundStationState);
 
-        let {rosnode, ping, logbook, recording, topics, nodes, ssh, systemdservices} = this.state.groundStationState!;
+        let {rosnode, ping, logbook, recording, topics, nodes, ssh, systemdservices, subscriptions, publications} = this.state.groundStationState!;
 
         return <main id="page-main">
             <div className="row">
@@ -138,7 +141,7 @@ class DashboardComponent extends React.Component<{}, State> {
                     <HealthBlock/>
                 </div>
                 <div className="col-xl-2 col-lg-4 col-sm-6 col-xs-12 gutter-small">
-                    <NodesBlock nodes={nodes}/>
+                    <NodesBlock nodes={nodes} subscriptions={subscriptions} publications={publications}/>
                 </div>
                 <div className="col-xl-2 col-lg-4 col-sm-6 col-xs-12 gutter-small">
                     <TopicsBlock topics={topics}/>

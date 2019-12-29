@@ -2,8 +2,7 @@ import logging
 import time
 
 import socketio
-import jsonpickle
-from flask import Flask, request, abort, jsonify
+from flask import Flask, request, abort, jsonify, Response
 
 from .logbook import Logbook
 from .rosrecording import RosRecorder
@@ -53,7 +52,7 @@ class Webserver:
         return self.app.send_static_file('index.html')
 
     def request_state(self):
-        return jsonpickle.encode(self.state)
+        return Response(response=self.state.to_json(), status=200, mimetype='application/json')
 
     def logbook_create(self):
         try:

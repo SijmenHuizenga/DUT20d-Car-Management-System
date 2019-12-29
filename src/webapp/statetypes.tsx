@@ -7,10 +7,13 @@ export interface Dashboard {
     logbook :LogbookLine[]
     ping :Ping
     ssh :SSH
-    topics :{[key :string] :Topic}
-    nodes :{[key :string] :Node}
     recording :Recording
     systemdservices: SystemdService[]
+    topics :Topic[]
+    nodes :Node[]
+    subscriptions :TopicSubscription[]
+    publications :TopicPublication[]
+    topicstatistics :TopicStatistic[]
 }
 
 export interface Ping {
@@ -26,7 +29,42 @@ export interface LogbookLine {
 }
 
 export interface Topic {
+    name :string
     lastseen: number
+}
+
+export interface TopicType {
+    topicname :string
+    messagetype: string
+    lastseen :number
+}
+
+export interface Node {
+    name :string
+    lastseen :number
+}
+
+export interface TopicPublication {
+    nodename :string
+    topicname :string
+    lastseen :string
+}
+
+export interface TopicSubscription {
+    nodename :string
+    topicname :string
+    lastseen :string
+}
+
+export interface TopicStatistic {
+    node_sub :string
+    node_pub :string
+    window_start :number
+    window_stop :number
+    delivered_msgs :number
+    dropped_msgs :number
+    traffic :number
+    lastseen :number
 }
 
 export interface Recording {
@@ -36,10 +74,6 @@ export interface Recording {
     recordingduration :string
     selected_topics :string[]
     lastrefresh :number
-}
-
-export interface Node {
-    lastseen :number
 }
 
 export interface SSH {

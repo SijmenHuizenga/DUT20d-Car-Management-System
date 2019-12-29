@@ -204,7 +204,8 @@ a.link-sf:active:before {
 }
 
 .indicator.idle {
-  background-color: #000000;
+  background-color: transparent;
+  border: 2px solid #28a158;
 }
 
 .custom-control-input:checked ~ .custom-control-label::before {

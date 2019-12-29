@@ -19,7 +19,11 @@ class Logbook:
 
     def add_line(self, timestamp, text, source):
         line = LogbookLine(timestamp=timestamp, text=text, source=source)
-        line.rowid = self.db.insert('INSERT INTO logbook VALUES (:timestamp, :text, :source)', line)
+        line.rowid = self.db.insert('INSERT INTO logbook VALUES (:timestamp, :text, :source)', {
+            'timestamp': line.timestamp,
+            'text': line.text,
+            'source': line.source
+        })
         self.state.logbook.append(line)
         self.state.emit_state()
 
@@ -28,7 +32,10 @@ class Logbook:
         if line is None:
             raise Exception("Line does not exit")
         line.text = text
-        self.db.query("UPDATE logbook SET text=:text WHERE rowid=:rowid", line)
+        self.db.query("UPDATE logbook SET text=:text WHERE rowid=:rowid", {
+            'text': line.text,
+            'rowid': line.rowid
+        })
         self.state.emit_state()
 
     def update_line_timestamp(self, rowid, timestmap):
@@ -36,5 +43,8 @@ class Logbook:
         if line is None:
             raise Exception("Line does not exit")
         line.timestamp = timestmap
-        self.db.query("UPDATE logbook SET text=:text WHERE timestamp=:timestamp", line)
+        self.db.query("UPDATE logbook SET timestmap=:timestmap WHERE rowid=:rowid", {
+            'rowid': line.rowid,
+            'timestmap': line.timestamp
+        })
         self.state.emit_state()

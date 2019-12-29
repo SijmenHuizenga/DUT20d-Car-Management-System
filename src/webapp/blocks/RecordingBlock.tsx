@@ -1,13 +1,12 @@
 import React from "react";
 import EditableText from "../util/EditableText";
 import Requestor from "../util/Requestor"
-import {isRecent} from "../util/Timing";
 import {Recording, Topic} from "../statetypes";
 import {Indicator, IndicatorColor} from "../util/Indicator";
 import Tooltip from "../util/Tooltip";
 
 interface Props extends Recording {
-    topics :{[key :string] :Topic}
+    topics :Topic[]
 }
 
 interface State {
@@ -29,16 +28,18 @@ class RecordingBlock extends React.Component<Props, State> {
     }
 
     allTopicNames() :string[]{
-        let out = [...this.props.selected_topics, ...Object.keys(this.props.topics)];
+        let out = [...this.props.selected_topics, ...this.props.topics.map((topic) => topic.name)];
         out.sort();
         return out.filter((value, index, self) => self.indexOf(value) === index);
     }
 
     getTopicState(topicname :string) {
-        if (!this.props.topics.hasOwnProperty(topicname)) {
-            return "OFFLINE";
-        }
-        return isRecent(this.props.topics[topicname].lastseen) ? "ACTIVE" : "OFFLINE"
+        // if (!this.props.topics.hasOwnProperty(topicname)) {
+        //     return "OFFLINE";
+        // }
+        // return isRecent(this.props.topics[topicname].lastseen) ? "ACTIVE" : "OFFLINE"
+        //todo: lastseen is not a good enough indicator to get state.
+        return "OFFLINE"
     }
 
     isTopicSelected(topicname :string) :boolean {

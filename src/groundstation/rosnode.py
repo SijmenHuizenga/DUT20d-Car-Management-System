@@ -6,7 +6,7 @@ import rospy
 
 from .database import Database
 from .logbook import Logbook
-from .state import State
+from .state import State, TopicType, Topic, TopicSubscription, Node, TopicPublication
 
 
 class RosNode:
@@ -83,102 +83,83 @@ class RosMeta:
 
     def timercallback(self, event):
         try:
-            code, msg, val = rospy.get_master().getSystemState()
-            if code != 1:
-                raise Exception("rosmaster.getSystemState failed: ", code, msg)
-            pubs, subs, srvs = val
-
-            code, msg, types = rospy.get_master().getTopicTypes()
-            if code != 1:
-                raise Exception("rosmaster.getSystemState failed: ", code, msg)
-            now = time.time()
-            all_topics, all_nodes = self.process_new_rosinformation(now, pubs, subs, types)
-            self.store_topics(now, all_topics)
-            self.store_nodes(now, all_nodes)
-
-            self.update_topics_state(all_topics)
-            self.update_nodes_state(all_nodes)
+            self.update_topictypes()
+            self.update_pubsubs()
 
         except Exception, e:
             # todo: also print stacktrace
             raise
 
-    def process_new_rosinformation(self, lastseen, publishers, subscriptions, topictypes):
-        all_topics = {}
-        all_nodes = {}
+    def update_pubsubs(self):
+        code, msg, val = rospy.get_master().getSystemState()
+        now = time.time()
+        if code != 1:
+            raise Exception("rosmaster.getSystemState failed: ", code, msg)
+        publishers, subscribers, srvs = val
+        self.process_subscriptions(subscribers, now)
+        self.process_publications(publishers, now)
 
-        for (topic, messagetype) in topictypes:
-            all_topics[topic] = {
-                'lastseen': 1,
-                'type': messagetype
-            }
-
-        for (topic, nodes) in subscriptions:
+    def process_subscriptions(self, subscribers, lastseen):
+        for (topic, nodes) in subscribers:
             for node in nodes:
-                if node in all_nodes:
-                    if 'subscriptions' in all_nodes[node]:
-                        all_nodes[node]['subscriptions'].append(topic)
-                    else:
-                        all_nodes[node]['subscriptions'] = [topic]
-                else:
-                    all_nodes[node] = {
-                        'lastseen': lastseen,
-                        'subscriptions': [topic],
-                        'publications': []
-                    }
-            if topic not in all_topics:
-                all_topics[topic] = {
-                    'lastseen': lastseen,
-                    'type': 'unknown'
-                }
-            else:
-                all_topics[topic]['lastseen'] = lastseen
+                self.process_subscription(topic, node, lastseen)
 
-        for (topic, nodes) in publishers:
+    def process_subscription(self, topic, node, lastseen):
+        for s in self.state.subscriptions:
+            if s.topicname == topic and s.nodename == node:
+                s.lastseen = lastseen
+                break
+        else:
+            self.state.subscriptions.append(TopicSubscription(node, topic, lastseen))
+
+        self.update_topic(topic, lastseen)
+        self.update_node(node, lastseen)
+
+    def process_publications(self, publications, lastseen):
+        for (topic, nodes) in publications:
             for node in nodes:
-                if node in all_nodes:
-                    if 'publications' in all_nodes[node]:
-                        all_nodes[node]['publications'].append(topic)
-                    else:
-                        all_nodes[node]['publications'] = [topic]
-                else:
-                    all_nodes[node] = {
-                        'lastseen': lastseen,
-                        'publications': [topic],
-                        'subscriptions': []
-                    }
-            if topic not in all_topics:
-                all_topics[topic] = {
-                    'lastseen': lastseen,
-                    'type': 'unknown'
-                }
+                self.process_publication(topic, node, lastseen)
+
+    def process_publication(self, topic, node, lastseen):
+        for s in self.state.publications:
+            if s.topicname == topic and s.nodename == node:
+                s.lastseen = lastseen
+                break
+        else:
+            self.state.publications.append(TopicPublication(node, topic, lastseen))
+
+        self.update_topic(topic, lastseen)
+        self.update_node(node, lastseen)
+
+    def update_topictypes(self):
+        code, msg, types = rospy.get_master().getTopicTypes()
+        now = time.time()
+        if code != 1:
+            raise Exception("rosmaster.getSystemState failed: ", code, msg)
+        for (topic, messagetype) in types:
+            for s in self.state.topictypes:
+                if s.topicname == topic:
+                    s.lastseen = now
+                    s.messagetype = messagetype
+                    break
             else:
-                all_topics[topic]['lastseen'] = lastseen
+                self.state.topictypes.append(TopicType(topic, now, messagetype))
+            self.update_topic(topic, now)
 
-        return all_topics, all_nodes
+    def update_topic(self, topic, lastseen):
+        for s in self.state.topics:
+            if s.name == topic:
+                if s.lastseen < lastseen:
+                    s.lastseen = lastseen
+                break
+        else:
+            self.state.topics.append(Topic(topic, lastseen))
 
-    def store_topics(self, lastseen, all_topics):
-        for topicname in all_topics:
-            self.db.insert("INSERT INTO topics VALUES (:lastseen, :name, :type)",
-                           {'lastseen': lastseen, 'name': topicname, 'type': all_topics[topicname]['type']})
-
-    def store_nodes(self, lastseen, all_nodes):
-        for nodename in all_nodes:
-            self.db.insert("INSERT INTO nodes VALUES (:lastseen, :name)",
-                           {'lastseen': lastseen, 'name': nodename})
-            for topicname in all_nodes[nodename]['subscriptions']:
-                self.db.insert("INSERT INTO node_topic_subscription VALUES (:lastseen, :node, :topic)",
-                               {'lastseen': lastseen, 'node': nodename, 'topic': topicname})
-            for topicname in all_nodes[nodename]['publications']:
-                self.db.insert("INSERT INTO node_topic_publication VALUES (:lastseen, :node, :topic)",
-                               {'lastseen': lastseen, 'node': nodename, 'topic': topicname})
-
-    def update_topics_state(self, all_topics):
-        topicstate = self.state.topics
-        for topicname in all_topics:
-            topicstate[topicname] = all_topics[topicname]
-
-    def update_nodes_state(self, all_nodes):
-        nodestate = self.state.nodes
-        for nodename in all_nodes:
-            nodestate[nodename] = all_nodes[nodename]
+    def update_node(self, node, lastseen):
+        for s in self.state.nodes:
+            if s.name == node:
+                if s.lastseen < lastseen:
+                    s.lastseen = lastseen
+                break
+        else:
+            self.state.nodes.append(Node(node, lastseen))

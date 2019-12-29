@@ -1,6 +1,5 @@
 import React from "react";
 import Tooltip from "./Tooltip";
-import {isRecent} from "./Timing";
 import {OUTDATED_AFTER_SECONDS} from "../statetypes";
 
 export enum IndicatorColor {
@@ -48,7 +47,7 @@ export class Indicator extends React.PureComponent<Props> {
 
     render() {
         const {dataTimestamp, tooltip} = this.props;
-        const isDataRecent = dataTimestamp == null ? true : isRecent(dataTimestamp);
+        const isDataRecent = dataTimestamp == null ? true : this.isRecent(dataTimestamp);
 
         if(!isDataRecent) {
             return <Tooltip tooltip={
@@ -69,5 +68,9 @@ export class Indicator extends React.PureComponent<Props> {
 
     renderCircle(color = this.props.color) {
         return <span className={`indicator circle mr-1 ${color}`}/>
+    }
+
+    isRecent(timestamp :number, secondsRecent = OUTDATED_AFTER_SECONDS) {
+        return new Date().getTime() / 1000 - timestamp < secondsRecent
     }
 }

@@ -3,34 +3,27 @@ import {Topic} from "../statetypes";
 import {Indicator, IndicatorColor} from "../util/Indicator";
 
 interface Props {
-    topics :{[key: string]: Topic}
+    topics :Topic[]
 }
 
 class TopicsBlock extends React.Component<Props, {}> {
     render() {
         return <div className="block y-50">
-            {Object.keys(this.props.topics).map((topicname) =>
-                <TopicIndicator
-                    key={topicname}
-                    topic={topicname}
-                    lastseen={this.props.topics[topicname].lastseen} />)}
+            {this.props.topics.map((topic) =>
+                <TopicIndicator key={topic.name} {...topic} />)}
         </div>
     }
 }
 
-interface TopicProps extends Topic {
-    topic :string
-}
-
-class TopicIndicator extends React.Component<TopicProps, {}> {
+class TopicIndicator extends React.Component<Topic, {}> {
     render() {
-        let {topic, lastseen} = this.props;
+        let {name, lastseen} = this.props;
         return <div>
             <Indicator
                 color={IndicatorColor.fault}
                 tooltip="Work in progress"
                 dataTimestamp={lastseen} />
-            <span className="pl-1 text-small">{topic}</span>
+            <span className="pl-1 text-small">{name}</span>
         </div>
     }
 }
