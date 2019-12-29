@@ -75,6 +75,8 @@ class RosNode:
 
     def statistics_callback(self, stats):
         for s in self.state.topicstatistics:
+            if is_topic_ignored(s.topic):
+                continue
             if s.topic == stats.topic and s.node_pub == stats.node_pub and s.node_sub == stats.node_sub:
                 s.lastseen = time.time()
                 s.window_start = stats.window_start.to_time()
@@ -130,7 +132,10 @@ class RosMeta:
                 self.process_subscription(topic, node, lastseen)
 
     def process_subscription(self, topic, node, lastseen):
-        if self.is_topic_ignored(topic) or self.is_node_ignored(node):
+        self.update_topic(topic, lastseen)
+        self.update_node(node, lastseen)
+
+        if is_topic_ignored(topic) or is_node_ignored(node):
             return
         for s in self.state.subscriptions:
             if s.topicname == topic and s.nodename == node:
@@ -139,16 +144,15 @@ class RosMeta:
         else:
             self.state.subscriptions.append(TopicSubscription(node, topic, lastseen))
 
-        self.update_topic(topic, lastseen)
-        self.update_node(node, lastseen)
-
     def process_publications(self, publications, lastseen):
         for (topic, nodes) in publications:
             for node in nodes:
                 self.process_publication(topic, node, lastseen)
 
     def process_publication(self, topic, node, lastseen):
-        if self.is_topic_ignored(topic) or self.is_node_ignored(node):
+        self.update_topic(topic, lastseen)
+        self.update_node(node, lastseen)
+        if is_topic_ignored(topic) or is_node_ignored(node):
             return
         for s in self.state.publications:
             if s.topicname == topic and s.nodename == node:
@@ -157,17 +161,14 @@ class RosMeta:
         else:
             self.state.publications.append(TopicPublication(node, topic, lastseen))
 
-        self.update_topic(topic, lastseen)
-        self.update_node(node, lastseen)
-
     def update_topictypes(self):
         code, msg, types = rospy.get_master().getTopicTypes()
         now = time.time()
         if code != 1:
             raise Exception("rosmaster.getSystemState failed: ", code, msg)
         for (topic, messagetype) in types:
-            if self.is_topic_ignored(topic):
-                return
+            if is_topic_ignored(topic):
+                continue
             for s in self.state.topictypes:
                 if s.topicname == topic:
                     s.lastseen = now
@@ -178,6 +179,8 @@ class RosMeta:
             self.update_topic(topic, now)
 
     def update_topic(self, topic, lastseen):
+        if is_topic_ignored(topic):
+            return
         for s in self.state.topics:
             if s.name == topic:
                 if s.lastseen < lastseen:
@@ -187,6 +190,8 @@ class RosMeta:
             self.state.topics.append(Topic(topic, lastseen))
 
     def update_node(self, node, lastseen):
+        if is_node_ignored(node):
+            return
         for s in self.state.nodes:
             if s.name == node:
                 if s.lastseen < lastseen:
@@ -195,14 +200,18 @@ class RosMeta:
         else:
             self.state.nodes.append(Node(node, lastseen))
 
-    def is_topic_ignored(self, topicname):
-        if topicname.startswith("/rosout"):
-            return True
-        return False
 
-    def is_node_ignored(self, nodename):
-        if nodename.startswith("/rostopic"):
-            return True
-        if nodename == "rosout":
-            return True
-        return False
+def is_topic_ignored(topicname):
+    if topicname.startswith("/rosout"):
+        return True
+    if topicname == "/statistics":
+        return True
+    return False
+
+
+def is_node_ignored(nodename):
+    if nodename.startswith("/rostopic"):
+        return True
+    if nodename == "/rosout":
+        return True
+    return False
