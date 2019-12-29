@@ -8,7 +8,7 @@ class ServicesBlock extends React.Component<{ systemdservices: SystemdService[] 
     render() {
         return <div className="block">
             {this.props.systemdservices.map((service) =>
-                <ServiceIndicator {...service}/>
+                <ServiceIndicator key={service.name} {...service}/>
             )}
         </div>
     }

@@ -3,10 +3,11 @@ import time
 
 import rosgraph
 import rospy
+from rosgraph_msgs.msg import TopicStatistics
 
 from .database import Database
 from .logbook import Logbook
-from .state import State, TopicType, Topic, TopicSubscription, Node, TopicPublication
+from .state import State, TopicType, Topic, TopicSubscription, Node, TopicPublication, TopicStatistic
 
 
 class RosNode:
@@ -16,7 +17,7 @@ class RosNode:
                  state,  # type: State
                  logbook  # type: Logbook
                  ):
-        self.subscrib = None
+        self.statistics_subscriber = None
         self.rosmeta = RosMeta(db, state)
         self.db = db
         self.state = state
@@ -49,10 +50,11 @@ class RosNode:
             rate_1_second.sleep()
 
     def register_subscribers(self):
+        self.statistics_subscriber = rospy.Subscriber("/statistics", TopicStatistics, self.statistics_callback)
         print("[rosnode] Registered subscribers")
 
     def unregister_subscribers(self):
-        self.subscrib.unregister()
+        self.statistics_subscriber.unregister()
         print("[rosnode] Unregistered subscribers")
 
     def register_timers(self):
@@ -70,6 +72,29 @@ class RosNode:
                        {'now': time.time(), 'up': up})
         self.state.rosnode.up = up
         self.state.emit_state()
+
+    def statistics_callback(self, stats):
+        for s in self.state.topicstatistics:
+            if s.topic == stats.topic and s.node_pub == stats.node_pub and s.node_sub == stats.node_sub:
+                s.lastseen = time.time()
+                s.window_start = stats.window_start.to_time()
+                s.window_stop = stats.window_stop.to_time()
+                s.delivered_msgs = stats.delivered_msgs
+                s.dropped_msgs = stats.dropped_msgs
+                s.traffic = stats.traffic
+                break
+        else:
+            self.state.topicstatistics.append(TopicStatistic(
+                topic=stats.topic,
+                node_pub=stats.node_pub,
+                node_sub=stats.node_sub,
+                lastseen=time.time(),
+                window_start=stats.window_start,
+                window_stop=stats.window_stop,
+                delivered_msgs=stats.delivered_msgs,
+                dropped_msgs=stats.dropped_msgs,
+                traffic=stats.traffic
+            ))
 
 
 class RosMeta:
@@ -105,6 +130,8 @@ class RosMeta:
                 self.process_subscription(topic, node, lastseen)
 
     def process_subscription(self, topic, node, lastseen):
+        if self.is_topic_ignored(topic) or self.is_node_ignored(node):
+            return
         for s in self.state.subscriptions:
             if s.topicname == topic and s.nodename == node:
                 s.lastseen = lastseen
@@ -121,6 +148,8 @@ class RosMeta:
                 self.process_publication(topic, node, lastseen)
 
     def process_publication(self, topic, node, lastseen):
+        if self.is_topic_ignored(topic) or self.is_node_ignored(node):
+            return
         for s in self.state.publications:
             if s.topicname == topic and s.nodename == node:
                 s.lastseen = lastseen
@@ -137,6 +166,8 @@ class RosMeta:
         if code != 1:
             raise Exception("rosmaster.getSystemState failed: ", code, msg)
         for (topic, messagetype) in types:
+            if self.is_topic_ignored(topic):
+                return
             for s in self.state.topictypes:
                 if s.topicname == topic:
                     s.lastseen = now
@@ -163,3 +194,15 @@ class RosMeta:
                 break
         else:
             self.state.nodes.append(Node(node, lastseen))
+
+    def is_topic_ignored(self, topicname):
+        if topicname.startswith("/rosout"):
+            return True
+        return False
+
+    def is_node_ignored(self, nodename):
+        if nodename.startswith("/rostopic"):
+            return True
+        if nodename == "rosout":
+            return True
+        return False

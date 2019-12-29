@@ -306,6 +306,6 @@ textarea:focus {
   left: 50%;
 }
 
-.tooltp:hover .tooltptext {
+.tooltp:hover>.tooltptext {
   visibility: visible;
 }

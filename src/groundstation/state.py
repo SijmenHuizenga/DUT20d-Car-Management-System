@@ -176,7 +176,11 @@ class TopicSubscription:
 
 
 class TopicStatistic:
-    def __init__(self, node_pub, node_sub, window_start, window_stop, delivered_msgs, dropped_msgs, traffic, lastseen):
+    def __init__(self, topic, node_pub, node_sub, window_start, window_stop,
+                 delivered_msgs, dropped_msgs, traffic, lastseen):
+        # Duh... The topic that these statistics are about.
+        self.topic = topic
+
         # node name of the publisher
         self.node_sub = node_sub
 

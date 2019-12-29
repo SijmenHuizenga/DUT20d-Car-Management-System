@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface Props {
-    tooltip: string
+    tooltip: string | JSX.Element
 }
 
 class Tooltip extends React.Component<Props, {}> {
@@ -11,9 +11,11 @@ class Tooltip extends React.Component<Props, {}> {
             <div className="tooltp">
                 {this.props.children}
                 <div className="tooltptext">
-                    {this.props.tooltip.split('\n').map((item, key) => {
-                        return <React.Fragment key={key}>{item}<br/></React.Fragment>
-                    })}
+                    { typeof this.props.tooltip == "string" ?
+                        this.props.tooltip.split('\n').map((item, key) => {
+                            return <React.Fragment key={key}>{item}<br/></React.Fragment>
+                        }) : this.props.tooltip
+                    }
                 </div>
             </div>
         )

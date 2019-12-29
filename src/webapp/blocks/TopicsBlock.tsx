@@ -1,9 +1,11 @@
 import React from 'react';
-import {Topic} from "../statetypes";
+import {Topic, TopicPublication, TopicSubscription} from "../statetypes";
 import {Indicator, IndicatorColor} from "../util/Indicator";
 
 interface Props {
     topics :Topic[]
+    subscriptions :TopicSubscription[]
+    publications :TopicPublication[]
 }
 
 class TopicsBlock extends React.Component<Props, {}> {

@@ -44,19 +44,18 @@ export interface Node {
     lastseen :number
 }
 
-export interface TopicPublication {
+export interface TopicPubSub {
     nodename :string
     topicname :string
-    lastseen :string
+    lastseen :number
 }
 
-export interface TopicSubscription {
-    nodename :string
-    topicname :string
-    lastseen :string
-}
+export interface TopicPublication extends TopicPubSub {}
+
+export interface TopicSubscription extends TopicPubSub {}
 
 export interface TopicStatistic {
+    topic : string
     node_sub :string
     node_pub :string
     window_start :number

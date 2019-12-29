@@ -135,7 +135,8 @@ class DashboardComponent extends React.Component<{}, State> {
     renderDashboard() {
         console.log("render", this.state.groundStationState);
 
-        let {rosnode, ping, logbook, recording, topics, nodes, ssh, systemdservices, subscriptions, publications} = this.state.groundStationState!;
+        let {rosnode, ping, logbook, recording, topics, nodes, ssh,
+            systemdservices, subscriptions, publications, topicstatistics} = this.state.groundStationState!;
 
         return <main id="page-main">
             <div className="row">
@@ -143,10 +144,11 @@ class DashboardComponent extends React.Component<{}, State> {
                     <HealthBlock/>
                 </div>
                 <div className="col-xl-2 col-lg-4 col-sm-6 col-xs-12 gutter-small">
-                    <NodesBlock nodes={nodes} subscriptions={subscriptions} publications={publications}/>
+                    <NodesBlock nodes={nodes} subscriptions={subscriptions} publications={publications}
+                                topicstatistics={topicstatistics}/>
                 </div>
                 <div className="col-xl-2 col-lg-4 col-sm-6 col-xs-12 gutter-small">
-                    <TopicsBlock topics={topics}/>
+                    <TopicsBlock topics={topics} subscriptions={subscriptions} publications={publications}/>
                 </div>
                 <div className="col-xs-12 col-xl-6 gutter-small ">
                     <ComputeboxBlock rosnode_up={rosnode.up} ping={ping} ssh={ssh}/>

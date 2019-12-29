@@ -36,7 +36,7 @@ interface Props {
 
     // The tooltip. If null no tooltip is shown.
     // When the information is outdated according to dataTimestamp a tooltip will always be shown.
-    tooltip :string | null
+    tooltip :string | null | JSX.Element
 }
 
 export class Indicator extends React.PureComponent<Props> {
@@ -47,7 +47,7 @@ export class Indicator extends React.PureComponent<Props> {
 
     render() {
         const {dataTimestamp, tooltip} = this.props;
-        const isDataRecent = dataTimestamp == null ? true : this.isRecent(dataTimestamp);
+        const isDataRecent = dataTimestamp == null ? true : isRecent(dataTimestamp);
 
         if(!isDataRecent) {
             return <Tooltip tooltip={
@@ -70,7 +70,8 @@ export class Indicator extends React.PureComponent<Props> {
         return <span className={`indicator circle mr-1 ${color}`}/>
     }
 
-    isRecent(timestamp :number, secondsRecent = OUTDATED_AFTER_SECONDS) {
-        return new Date().getTime() / 1000 - timestamp < secondsRecent
-    }
+}
+
+export function isRecent(timestamp :number, secondsRecent = OUTDATED_AFTER_SECONDS) {
+    return new Date().getTime() / 1000 - timestamp < secondsRecent
 }
