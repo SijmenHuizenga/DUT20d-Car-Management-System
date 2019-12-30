@@ -48,7 +48,7 @@ class LogbookBlock extends RecursivePureComponent<Props, State> {
         let {input, inputDisabled} = this.state;
         let lines = this.lines();
         return <div className="block y-50 d-flex flex-column">
-            <div className="flex-row overflow-auto" ref={(el) => this.scroller = el}
+            <div className="overflow-auto flex-lg-grow-1" ref={(el) => this.scroller = el}
                  onScroll={this.handleUserScroll.bind(this)}>
                 <table className="logtable" onMouseLeave={this.resetDragging.bind(this)}>
                     <tbody>
@@ -67,14 +67,12 @@ class LogbookBlock extends RecursivePureComponent<Props, State> {
                     </tbody>
                 </table>
             </div>
-            <div className="flex-row flex-grow-1">
-                <div className="input-group pt-1 input-group-sm">
-                    <input type="text" className="form-control" value={input}
-                           onChange={(e) => this.setState({input: e.target.value})}
-                           onKeyDown={this.handleKeyDown.bind(this)}
-                           disabled={inputDisabled}
-                           ref={(el) => this.inputfield = el}/>
-                </div>
+            <div className="input-group pt-1 input-group-sm">
+                <input type="text" className="form-control" value={input}
+                       onChange={(e) => this.setState({input: e.target.value})}
+                       onKeyDown={this.handleKeyDown.bind(this)}
+                       disabled={inputDisabled}
+                       ref={(el) => this.inputfield = el}/>
             </div>
         </div>
     }

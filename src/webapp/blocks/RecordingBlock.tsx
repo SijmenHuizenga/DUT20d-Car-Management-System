@@ -48,15 +48,15 @@ class InactiveRecordingBlock extends RecordingBlock {
     render() {
         let {filename} = this.props;
 
-        return <div className="block">
+        return <div className="block y-50 d-flex flex-fill flex-column">
             <div className="d-flex">
                 <div className="text-large">
                     <Indicator color={IndicatorColor.idle} dataTimestamp={this.props.lastrefresh}/>
                     Idle
                 </div>
-                <div className="flex-grow-1 pl-1">
+                <div className="flex-grow-1 pl-2 d-flex align-items-center">
                     <EditableText value={filename} save={this.updateFilename.bind(this)} multiline={false} >
-                        <span className="pl-1 text-small">{filename}</span>
+                        {filename}
                     </EditableText>
                 </div>
                 <div>
@@ -67,7 +67,7 @@ class InactiveRecordingBlock extends RecordingBlock {
                     </button>
                 </div>
             </div>
-            <div>
+            <div className="overflow-auto mt-1">
                 {this.renderTopics()}
             </div>
         </div>
@@ -99,7 +99,7 @@ class InactiveRecordingBlock extends RecordingBlock {
 
 class ActiveRecordingBlock extends RecordingBlock {
     render() {
-        return <div className="block">
+        return <div className="block y-50 d-flex flex-fill flex-column">
             <div className="mb-2 ">
                 <span className="text-large">Recording</span>
                 <span className="pl-1 text-small">| {this.props.bagfilename}</span>
@@ -112,7 +112,7 @@ class ActiveRecordingBlock extends RecordingBlock {
                     </button>
                 </div>
             </div>
-            <div>
+            <div className="overflow-auto mt-1">
                 {this.allTopicNames().sort(this.sortTopics).map((topicname) =>
                         <TopicIndicator topicname={topicname}
                                         topicstate={this.getTopicState(topicname)}

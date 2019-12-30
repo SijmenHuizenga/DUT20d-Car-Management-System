@@ -71,7 +71,7 @@ main
   font-size: 14px !important
 
 .text-large
-  font-size: 18px !important
+  font-size: 22px !important
 
 .text-grayyed
   color: colors.$text-dark
@@ -80,10 +80,12 @@ main
   margin: 0
 
 .y-50
-  height: 45vh
-  min-height: 45vh
   max-height: 45vh
   overflow-y: auto
+  @include media-breakpoint-up(lg)
+    height: 45vh
+    min-height: 45vh
+
 
 // Used by markdown in logbook
 h1, h2, h3, .h1, .h2, .h3
