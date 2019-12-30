@@ -278,7 +278,7 @@ class LogbookLineComponent extends React.PureComponent<LineProps, {moving :boole
         console.log("render");
         return <tr onMouseLeave={this.onMouseLeave.bind(this)}
                    onMouseEnter={this.onMouseEnter.bind(this)}>
-            <td className="timestamp grayyed"
+            <td className="timestamp text-grayyed"
                 onMouseDown={this.onMouseDown.bind(this)}
                 onMouseUp={this.onMouseUp.bind(this)}>
                 {this.renderTimestamp(timestamp)}

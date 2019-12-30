@@ -1,0 +1,207 @@
+// Required
+@use "./colors"
+@use "./contextmenu"
+
+@import "node_modules/bootstrap/scss/functions"
+@import "node_modules/bootstrap/scss/variables"
+@import "node_modules/bootstrap/scss/mixins"
+@import "node_modules/bootstrap/scss/root"
+@import "node_modules/bootstrap/scss/reboot"
+@import "node_modules/bootstrap/scss/type"
+@import "node_modules/bootstrap/scss/grid"
+@import "node_modules/bootstrap/scss/tables"
+@import "node_modules/bootstrap/scss/forms"
+@import "node_modules/bootstrap/scss/custom-forms"
+@import "node_modules/bootstrap/scss/buttons"
+@import "node_modules/bootstrap/scss/input-group"
+@import "node_modules/bootstrap/scss/utilities"
+
+html
+  height: 100%
+
+body
+  height: 100%
+  color: colors.$text
+  font-family: colors.$font
+  background-size: cover
+  background-attachment: fixed
+  background-repeat: no-repeat
+
+  ::-webkit-scrollbar
+    background-color: colors.$scrollbar
+    width: 10px
+
+  ::-webkit-scrollbar-thumb
+    background-color: colors.$scrollbar_thumb
+
+main
+  padding: 20px 20px 1px
+
+.container-fluid
+  &:before
+    position: fixed
+    top: 0
+    right: 0
+    bottom: 0
+    left: 0
+    content: ''
+    z-index: -1
+    background-color: colors.$background
+
+.block
+  margin-bottom: 20px
+  padding: 5px 10px
+  background-color: colors.$background_dark
+  border-left: 4px solid colors.$background_light
+
+.gutter-small
+  padding-left: 5px
+  padding-right: 5px
+
+.text-active
+  color: colors.$active
+
+.text-fault
+  color: colors.$fault
+
+.text-danger
+  color: colors.$danger
+
+.text-small
+  font-size: 14px !important
+
+.text-large
+  font-size: 18px !important
+
+.text-grayyed
+  color: colors.$text-dark
+
+.logline p
+  margin: 0
+
+.y-50
+  height: 45vh
+  min-height: 45vh
+  max-height: 45vh
+  overflow-y: auto
+
+// Used by markdown in logbook
+h1, h2, h3, .h1, .h2, .h3
+  font-family: colors.$font
+  margin: 0
+  color: colors.$text
+
+
+// Buttons
+.btn
+  border-left-width: 4px !important
+  border-right-width: 4px !important
+
+.btn-outline-primary 
+  color: colors.$text
+  border: 2px solid colors.$text-dark
+  background: transparent
+  &:hover, &:focus, &:active
+    color: colors.$text-bright
+    border-color: colors.$text
+    outline: 0
+    background: transparent
+
+.btn-outline-danger
+  color: colors.$text
+  border: 2px solid colors.$text-dark
+  background: transparent
+  &:hover, &:focus, &:active
+    border-color: colors.$danger
+
+// Disconnection error page overlay
+.erroroverlay
+  position: fixed
+  z-index: 9999
+  background-color: colors.$fault
+  left: 0
+  top: 0
+  font-size: 10vw
+  width: 100%
+  height: 100%
+  color: colors.$text
+
+// Colored Circles = indicators
+.indicator
+  display: inline-block
+  width: 15px
+  height: 15px
+  line-height: inherit
+  text-align: center
+  vertical-align: middle
+  &.circle
+    border-radius: 50%
+  &.danger
+    background-color: colors.$danger
+  &.fault
+    background-color: colors.$fault
+  &.active
+    background-color: colors.$active
+  &.idle
+    background-color: transparent
+    border: 2px solid colors.$active
+
+// Logbook
+.logtable 
+  width: 100%
+  tbody 
+    width: 100%
+
+  .timestamp 
+    width: 1px
+
+  tr td &:last-child
+        padding-left: 6px
+
+// Used by TextareaAutosize
+textarea
+  padding: 0
+  margin: 0
+  border: none
+  background-color: colors.$background_darker
+  color: colors.$text
+  width: 100%
+  &:focus 
+    outline: none
+
+
+// Tooltip
+.tooltip-initiator
+  display: inline-block
+
+.tooltip-body
+  position: absolute
+  display: block
+  white-space: nowrap
+  width: auto
+  background-color: colors.$background_light
+  color: colors.$text
+  text-align: left
+  padding: 3px 5px
+  z-index: 100
+
+// Checkboxes in recording selector
+.custom-control-label
+  &.danger:before
+    border-color: colors.$danger
+  &.warning:before
+    border-color: colors.$active
+  &.success:before
+    border-color: colors.$active
+
+.custom-control-input:checked~.custom-control-label
+  &.danger::before
+    border-color: colors.$danger
+    background-color: colors.$danger
+  &.warning::before
+    border-color: colors.$active
+    background-color: colors.$active
+  &.success::before
+    border-color: colors.$active
+    background-color: colors.$active
+

@@ -2,8 +2,7 @@ import React from 'react';
 import io from 'socket.io-client';
 import {toast, ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import './style.css';
-import './react-contextmenu.css';
+import './style/app.sass';
 import HealthBlock from './blocks/HealthBlock'
 import NodesBlock from "./blocks/NodesBlock";
 import TopicsBlock from "./blocks/TopicsBlock";
@@ -125,7 +124,7 @@ export default class DashboardStateLoader extends React.PureComponent<{}, State>
     render() {
         return <div className="container-fluid">
             {this.state.groundStationState === null || this.state.connectionerror !== null
-                ? <div className="overlay error text-center">{this.state.connectionerror}</div>
+                ? <div className="erroroverlay  text-center">{this.state.connectionerror}</div>
                 : <DashboardComponent {...this.state.groundStationState} />}
             <ToastContainer position={toast.POSITION.BOTTOM_RIGHT} autoClose={false}/>
         </div>
@@ -158,7 +157,7 @@ class DashboardComponent extends React.Component<Dashboard, {}> {
         let {rosnode, ping, logbook, recording, topics, nodes, ssh,
             systemdservices, subscriptions, publications, topicstatistics} = this.props;
 
-        return <main id="page-main">
+        return <main>
             <TooltipContainer>
             <div className="row">
                 <div className="col-xl-2 col-lg-4 col-sm-12 col-xs-12 gutter-small">

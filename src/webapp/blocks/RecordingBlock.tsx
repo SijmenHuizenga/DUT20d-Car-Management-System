@@ -157,10 +157,9 @@ class TopicSelector extends React.Component<{topicname :string, selected :boolea
                    onChange={this.handleCheckboxChange.bind(this)}
                 />
                 <label
-                    className="custom-control-label"
+                    className={`custom-control-label ${topicStateToColor(topicstate)}`}
                     htmlFor={`recordtopic_${topicname}`}>{topicname}</label>
             </Tooltip>
-
         </div>
     }
 

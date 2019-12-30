@@ -25,7 +25,7 @@ class ServiceIndicator extends React.Component<SystemdService> {
                            dataTimestamp={this.props.lastupdate}/>
                 <Tooltip tooltip={statustext.trim()}>{name.substr(0, name.length-8)}</Tooltip>
                 &nbsp;
-                <span className="grayyed">({this.renderEnabledDisabled()})</span>
+                <span className="text-grayyed">({this.renderEnabledDisabled()})</span>
                 {this.renderContextmenu()}
             </span>
         </ContextMenuTrigger>);
