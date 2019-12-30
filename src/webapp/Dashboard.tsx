@@ -13,6 +13,7 @@ import GitBlock from "./blocks/GitBlock";
 import LogbookBlock from "./blocks/LogbookBlock";
 import RecordingBlock from "./blocks/RecordingBlock";
 import {Dashboard, SystemdServiceEnabled, SystemdServiceRunning} from "./statetypes";
+import {TooltipContainer} from "./util/Tooltip";
 
 const devmode = false;
 const fakeDashboard: Dashboard = {
@@ -158,6 +159,7 @@ class DashboardComponent extends React.Component<Dashboard, {}> {
             systemdservices, subscriptions, publications, topicstatistics} = this.props;
 
         return <main id="page-main">
+            <TooltipContainer>
             <div className="row">
                 <div className="col-xl-2 col-lg-4 col-sm-12 col-xs-12 gutter-small">
                     <HealthBlock/>
@@ -184,6 +186,7 @@ class DashboardComponent extends React.Component<Dashboard, {}> {
                     <RecordingBlock {...recording} topics={topics}/>
                 </div>
             </div>
+            </TooltipContainer>
         </main>
     }
 }

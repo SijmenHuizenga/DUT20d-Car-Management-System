@@ -286,13 +286,11 @@ textarea:focus {
   overflow-y: auto;
 }
 
-.tooltp {
-  position: relative;
+.tooltip-initiator {
   display: inline-block;
 }
 
-.tooltp .tooltptext {
-  visibility: hidden;
+.tooltip-body {
   position: absolute;
   display: block;
   white-space: nowrap;
@@ -302,10 +300,4 @@ textarea:focus {
   text-align: left;
   padding: 3px 5px;
   z-index: 100;
-  top: 150%;
-  left: 50%;
-}
-
-.tooltp:hover>.tooltptext {
-  visibility: visible;
 }
