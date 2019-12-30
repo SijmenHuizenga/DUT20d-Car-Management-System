@@ -114,8 +114,8 @@ class RosMeta:
             self.update_pubsubs()
 
         except Exception, e:
-            # todo: also print stacktrace
-            raise
+            # todo: print stacktrace
+            return
 
     def update_pubsubs(self):
         code, msg, val = rospy.get_master().getSystemState()
