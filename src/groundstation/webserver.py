@@ -1,8 +1,14 @@
 import logging
 import time
 
-import socketio
+# Initializes the eventlet async webserver.
+# This is required for multithreaded message emitting over websocket.
+from eventlet import monkey_patch as monkey_patch
+monkey_patch()
+
+# from flask_socketio import SocketIO
 from flask import Flask, request, abort, jsonify, Response
+from flask_socketio import SocketIO
 
 from .logbook import Logbook
 from .rosrecording import RosRecorder
@@ -31,10 +37,9 @@ class Webserver:
         log = logging.getLogger('werkzeug')
         log.setLevel(logging.ERROR)
 
-        sio = socketio.Server(async_mode='threading')
         app.config['PROPAGATE_EXCEPTIONS'] = True
-        app.wsgi_app = socketio.WSGIApp(sio, app.wsgi_app)
-        self.state.set_socketio(sio)
+        socketio = SocketIO(app, cors_allowed_origins="*")
+        self.state.set_socketio(socketio)
 
         app.add_url_rule('/', 'root', self.root)
         app.add_url_rule('/state', 'state', self.request_state, methods=['GET'])
@@ -46,7 +51,7 @@ class Webserver:
         app.add_url_rule('/recording/start', 'recording_start', self.recording_start, methods=['PUT'])
         app.add_url_rule('/recording/stop', 'recording_stop', self.recording_stop, methods=['PUT'])
 
-        app.run(threaded=True)
+        socketio.run(app)
 
     def root(self):
         return self.app.send_static_file('index.html')

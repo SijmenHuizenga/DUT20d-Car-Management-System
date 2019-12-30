@@ -118,9 +118,7 @@ export default class DashboardStateLoader extends React.PureComponent<{}, State>
             groundStationState: devmode ? fakeDashboard : null,
             connectionerror: devmode ? null : "groundstation offline"
         };
-        this.socket = io({
-            reconnectionDelayMax: 1000,
-        });
+        this.socket = io(window.location.hostname + ':5000');
     }
 
     render() {

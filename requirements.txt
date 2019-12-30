@@ -1,6 +1,7 @@
 flask
-python-socketio
+flask_socketio
 paramiko
 enum34
 typing
 jsonpickle
+eventlet
