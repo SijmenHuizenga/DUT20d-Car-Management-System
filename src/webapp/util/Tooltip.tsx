@@ -28,6 +28,10 @@ export default class Tooltip extends React.PureComponent<{tooltip: TooltipConten
     onClick = (e :React.MouseEvent) => {
         this.context.showTip(this.props.tooltip, this.getPosition());
         this.hideOnLeave = false;
+        // When a user clicks the root app, a onclick is triggered and all tooltips are hidden. 
+        // When someone clicks on a tooltip trigger that click event should be exclusively by the tooltip trigger. 
+        // If the event was propagated to the root listener the tooltip would be hidden directly.
+        // This was a bug which is fixed using stopPropegation()
         e.stopPropagation()
     };
 
