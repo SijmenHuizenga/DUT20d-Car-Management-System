@@ -30,7 +30,7 @@ _If you want to connect to an existing ros master (e.g. the car) you must first 
 
 For the **webapp** you must have the [npm](https://linuxize.com/post/how-to-install-node-js-on-ubuntu-18.04/) package manager installed.
 _DO NOT RUN `apt-get install npm` because that will break ros!! Use the linked tutorial._
-Run `npm install` in the current working directory to get all dependencies installed.
+Run `npm install --dev` in the current working directory to get all dependencies installed.
 To run the app as a development server run `npm run start`.
 This will launch a webserver that serves the compiled html/css/js files on the printed port. 
 All requests to non-existing files will be forwarded to the groundstation of which it assumes runs on localhost.
