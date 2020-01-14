@@ -5,7 +5,8 @@ from .sshclient import SSHClient
 from .state import State, SystemdService, SystemdServiceRunning, SystemdServiceEnabled
 
 services = [
-    "inspection_mission.service",
+    "roscore.service",
+    "megamission.service",
     "rosrecord.service",
     "mavros.service",
     "manualjoycontrol.service"
