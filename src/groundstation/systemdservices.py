@@ -5,11 +5,16 @@ from .sshclient import SSHClient
 from .state import State, SystemdService, SystemdServiceRunning, SystemdServiceEnabled
 
 services = [
+    "manualjoycontrol.service",
+    "rosrecord.service",
+    "acceleration_dut18d.service",
+    "skidpad_dut18d.service",
+    "trackdrive_dut18d.service",
+    "sine_wave.service",
     "roscore.service",
     "megamission.service",
-    "rosrecord.service",
+    "vehicle_interface.service",
     "mavros.service",
-    "manualjoycontrol.service"
 ]
 
 
@@ -25,7 +30,7 @@ def statusnr_to_running(statusnr):
         return SystemdServiceRunning.STOPPED
     if statusnr == 4:
         raise Exception("program or service status is unknown")
-    raise Exception("Unkown status code " + statusnr)
+    raise Exception("Unkown status code " + str(statusnr))
 
 
 class SystemdServices:
@@ -46,11 +51,20 @@ class SystemdServices:
             try:
                 self.retreive_services()
             except Exception, e:
-                print("[pinger] Someting unexpected happend while retreiving services: " + str(e))
-            time.sleep(3)
+                print("[systemdservices] Someting unexpected happend while retreiving services: " + str(e))
+            time.sleep(1)
 
     def retreive_services(self):
-        self.state.systemdservices = map(self.retreive_service, services)
+        for service in services:
+            newservice = self.retreive_service(service)
+            index = 0
+            for s in self.state.systemdservices:
+                if s.name == service:
+                    self.state.systemdservices[index] = newservice
+                    break
+                index += 1
+            else:
+                self.state.systemdservices.append(newservice)
 
     def retreive_service(self, service):
         try:
@@ -65,5 +79,7 @@ class SystemdServices:
             running = SystemdServiceRunning.ERROR
             statustext = str(e)
             enabled = SystemdServiceEnabled.ERROR
+        print service
 
-        return SystemdService(name=service, running=running, statustext=statustext, enabled=enabled, lastupdate=time.time())
+        return SystemdService(name=service, running=running, statustext=statustext, enabled=enabled,
+                              lastupdate=time.time())

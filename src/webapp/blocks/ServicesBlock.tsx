@@ -3,6 +3,8 @@ import Tooltip from "../util/Tooltip";
 import {SystemdService, SystemdServiceRunning, SystemdServiceEnabled} from "../statetypes";
 import {ContextMenu, ContextMenuTrigger, MenuItem} from "react-contextmenu";
 import {Indicator, IndicatorColor} from "../util/Indicator";
+import Requestor from "../util/Requestor";
+import {toast} from "react-toastify";
 
 class ServicesBlock extends React.Component<{ systemdservices: SystemdService[] }, {}> {
     render() {
@@ -70,19 +72,19 @@ class ServiceIndicator extends React.Component<SystemdService> {
         switch (this.props.running) {
             case SystemdServiceRunning.running:
                 return <React.Fragment>
-                    <MenuItem onClick={() => this.handleClick(`systemctl restart ${this.props.name}`)}>
+                    <MenuItem onClick={() => this.handleClick(`sudo systemctl restart ${this.props.name}`, `Restarting ${this.props.name}`)}>
                         Restart
                     </MenuItem>
-                    <MenuItem onClick={() => this.handleClick(`systemctl stop ${this.props.name}`)}>
+                    <MenuItem onClick={() => this.handleClick(`sudo systemctl stop ${this.props.name}`, `Stopping ${this.props.name}`)}>
                         Stop
                     </MenuItem>
                 </React.Fragment>;
             case SystemdServiceRunning.stopped:
-                return <MenuItem onClick={() => this.handleClick(`systemctl start ${this.props.name}`)}>
+                return <MenuItem onClick={() => this.handleClick(`sudo systemctl start ${this.props.name}`, `Starting ${this.props.name}`)}>
                     Start
                 </MenuItem>;
             default:
-                return null
+                return <MenuItem>"Service status unkonwn, no actions available"</MenuItem>
         }
     }
 
@@ -90,19 +92,34 @@ class ServiceIndicator extends React.Component<SystemdService> {
         if(this.props.running === SystemdServiceRunning.error) {
             return null
         }
-        if(this.props.enabled) {
-            return <MenuItem onClick={() => this.handleClick(`systemctl disable ${this.props.name}`)}>
+        if(this.props.enabled === SystemdServiceEnabled.enabled) {
+            return <MenuItem onClick={() => this.handleClick(`sudo systemctl disable ${this.props.name}`, `Disabling ${this.props.name}`)}>
                     Disable (Make service no longer auto-start on boot)
                 </MenuItem>
-        } else {
-            return <MenuItem onClick={() => this.handleClick(`systemctl enable ${this.props.name}`)}>
+        } else if (this.props.enabled === SystemdServiceEnabled.disabled){
+            return <MenuItem onClick={() => this.handleClick(`sudo systemctl enable ${this.props.name}`, `Enabling ${this.props.name}`)}>
                 Enable (Make service will auto-start on boot)
             </MenuItem>
+        } else {
+            return null
         }
     }
 
-    handleClick(command :string) {
-        console.log("work in progress")
+    handleClick(command :string, title :string) {
+        const toastid = toast(`${title}...`, { autoClose: false });
+        Requestor.execute("/runcommand", "POST", {command})
+            .then((body :any) => body.json())
+            .then((body :any) => {
+                toast.update(toastid, {
+                    render: <span title={body.output}>{title} {body.statuscode === 0 ? 'ok' : 'failed'}</span>,
+                    type: body.statuscode === 0 ? toast.TYPE.SUCCESS : toast.TYPE.ERROR,
+                    autoClose: body.statuscode === 0 ? 5000 : 0
+                })}
+            )
+            .catch((error) => toast.update(toastid, {
+                render: <span title={error}>{title} error</span>,
+                type: toast.TYPE.WARNING,
+            }))
     }
 }
 

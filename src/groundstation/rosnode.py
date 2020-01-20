@@ -31,7 +31,7 @@ class RosNode:
                 return
             if self.is_master_disconnected():
                 print("[rosnode] master offline, retrying in 1 seconds")
-                time.sleep(1)
+                time.sleep(2)
                 continue
             self.run_node()
             self.logbook.add_line(time.time(), "Disconnected from ROS master", "groundstation")
@@ -58,7 +58,7 @@ class RosNode:
         print("[rosnode] Unregistered subscribers")
 
     def register_timers(self):
-        rospy.Timer(rospy.Duration(3), self.rosmeta.timercallback)
+        rospy.Timer(rospy.Duration(2), self.rosmeta.timercallback)
 
     def is_master_disconnected(self):
         try:
@@ -71,7 +71,6 @@ class RosNode:
         self.db.insert('INSERT INTO rosnodehealth VALUES (:now, :up)',
                        {'now': time.time(), 'up': up})
         self.state.rosnode.up = up
-        self.state.emit_state()
 
     def statistics_callback(self, stats):
         for s in self.state.topicstatistics:
@@ -97,6 +96,7 @@ class RosNode:
                 dropped_msgs=stats.dropped_msgs,
                 traffic=stats.traffic
             ))
+        print "statistics"
 
 
 class RosMeta:
@@ -112,6 +112,7 @@ class RosMeta:
         try:
             self.update_topictypes()
             self.update_pubsubs()
+            print "timer"
 
         except Exception, e:
             # todo: print stacktrace

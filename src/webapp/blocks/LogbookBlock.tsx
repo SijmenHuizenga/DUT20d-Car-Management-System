@@ -6,12 +6,6 @@ import {LogbookLine} from "../statetypes";
 import {toast} from "react-toastify";
 import RecursivePureComponent from "../util/RecursivePureComponent";
 
-interface Line {
-    rowid :number
-    timestamp :number
-    text :string
-}
-
 interface Props {
     lines :LogbookLine[]
 }
@@ -255,7 +249,7 @@ class LogbookBlock extends RecursivePureComponent<Props, State> {
 
 }
 
-interface LineProps extends Line {
+interface LineProps extends LogbookLine {
     updateLine(rowid :number, changeset :any) :Promise<boolean>
     onMouseDown(rowid :number) :void
     onMouseUp(rowid :number) :void
@@ -272,10 +266,11 @@ class LogbookLineComponent extends React.PureComponent<LineProps, {moving :boole
     }
 
     render() {
-        let {rowid, timestamp, text, updateLine} = this.props;
+        let {rowid, timestamp, text, updateLine, source} = this.props;
         console.log("render");
         return <tr onMouseLeave={this.onMouseLeave.bind(this)}
-                   onMouseEnter={this.onMouseEnter.bind(this)}>
+                   onMouseEnter={this.onMouseEnter.bind(this)}
+                   className={source !== "human" ? "text-small logbook-small" : ""}>
             <td className="timestamp text-grayyed"
                 onMouseDown={this.onMouseDown.bind(this)}
                 onMouseUp={this.onMouseUp.bind(this)}>

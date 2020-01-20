@@ -1,7 +1,10 @@
 import threading
 import time
+import socket
 
-import paramiko
+from ssh2.session import Session
+from ssh2.error_codes import LIBSSH2_ERROR_EAGAIN
+import ssh2
 
 from .state import State
 
@@ -18,43 +21,59 @@ class SSHClient:
         self.state = state
         self.username = username
         self.password = password
-        self.transport = None
-
-        self.start()
+        self.session = None
+        self.sock = None
 
     def start(self):
         thread = threading.Thread(target=self.ping_forever)
         thread.daemon = True
         thread.start()
 
-    def run_command(self, command, connection_timeout=2, execution_timeout=2):
-        self.ensure_transport()
-        channel = self.transport.open_session(timeout=connection_timeout)
-        channel.set_combine_stderr(True)
-        channel.settimeout(execution_timeout)
-        channel.exec_command(command)
-        output = self.receive(channel)
-        statuscode = channel.recv_exit_status()
-        channel.close()
-        return statuscode, output
+    def run_command(self, command, timeout=2):
+        try:
+            self.ensure_transport()
+            channel = self.session.open_session()
+            while channel == LIBSSH2_ERROR_EAGAIN:
+                raise ssh2.exceptions.ChannelError("Channel could not be opened")
+            channel.execute(command)
+            status = channel.wait_eof()
+            ssh2.utils.handle_error_codes(status)
+            channel.close()
+            channel.wait_closed()
+            output = self.receive(channel)
+            statuscode = channel.get_exit_status()
+            return statuscode, output
+        except ssh2.exceptions.SSH2Error, err:
+            self.sock.close()
+            self.sock = None
+            raise Exception("SSH Error: " + type(err).__name__)
 
-    def ensure_transport(self, timeout=3):
-        if self.transport and self.transport.is_active():
-            return
-        if self.transport:
-            self.transport.close()
-        self.transport = paramiko.Transport((self.host, 22))
-        self.transport.start_client(timeout=timeout)
-        self.transport.auth_password(self.username, self.password)
-        self.transport.set_keepalive(10)
+
+    def ensure_transport(self):
+        if self.sock is None or self.session is None:
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.settimeout(5)
+            self.sock.connect((self.host, 22))
+
+            self.session = Session()
+            self.session.keepalive_config(True, 2)
+            self.session.set_timeout(5000)
+            self.session.handshake(self.sock)
+            self.session.userauth_password(self.username, self.password)
 
     def receive(self, channel):
         data = ""
         while True:
-            x = channel.recv(1024)
-            if len(x) == 0:
-                return data
+            size, x = channel.read(size=1024*8)
+            if size <= 0:
+                break
             data += x
+        while True:
+            size, x = channel.read_stderr(size=1024*8)
+            if size <= 0:
+                break
+            data += x
+        return data
 
     def ping_forever(self):
         while 1:
@@ -67,12 +86,10 @@ class SSHClient:
     def ping(self):
         try:
             self.ensure_transport()
-            self.transport.send_ignore()
-
             (exitcode, uptimestr) = self.run_command("uptime -p")
             if exitcode != 0:
                 raise Exception("uptime exit code was not 0")
-            connected = self.transport.is_active()
+            connected = True
         except Exception, e:
             uptimestr = str(e)
             connected = False
@@ -80,4 +97,3 @@ class SSHClient:
         self.state.ssh.connected = connected
         self.state.ssh.uptime = uptimestr
         self.state.ssh.lastping = time.time()
-        self.state.emit_state()

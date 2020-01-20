@@ -3,7 +3,6 @@ import io from 'socket.io-client';
 import {toast, ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './style/app.sass';
-import HealthBlock from './blocks/HealthBlock'
 import NodesBlock from "./blocks/NodesBlock";
 import TopicsBlock from "./blocks/TopicsBlock";
 import ComputeboxBlock from "./blocks/ComputeboxBlock";
@@ -14,7 +13,7 @@ import RecordingBlock from "./blocks/RecordingBlock";
 import {Dashboard, SystemdServiceEnabled, SystemdServiceRunning} from "./statetypes";
 import {TooltipContainer} from "./util/Tooltip";
 
-const devmode = false;
+const devmode = true;
 const fakeDashboard: Dashboard = {
     rosnode: {
         up: false,
@@ -24,12 +23,12 @@ const fakeDashboard: Dashboard = {
         success: true
     },
     logbook: [
-        {rowid: 111, timestamp: 1, text: "Example line 111", source: "example"},
-        {rowid: 222, timestamp: 2, text: "Example line 222", source: "example"},
-        {rowid: 333, timestamp: 3, text: "Example line 333", source: "example"},
-        {rowid: 444, timestamp: 4, text: "Example line 444", source: "example"},
-        {rowid: 555, timestamp: 5, text: "Example line 555", source: "example"},
-        {rowid: 666, timestamp: 66, text: "Example line 666", source: "example"},
+        {rowid: 111, timestamp: 1, text: "Example line 111", source: "human"},
+        {rowid: 222, timestamp: 2, text: "Example line 222", source: "human"},
+        {rowid: 333, timestamp: 3, text: "Ros Connection open", source: "example"},
+        {rowid: 444, timestamp: 4, text: "Example line 333", source: "human"},
+        {rowid: 555, timestamp: 5, text: "Lost connection", source: "example"},
+        {rowid: 666, timestamp: 66, text: "Example line 666", source: "human"},
     ],
     topics: [
         {name: "/world_state", lastseen: 1577545897},
@@ -160,14 +159,14 @@ class DashboardComponent extends React.Component<Dashboard, {}> {
         return <main>
             <TooltipContainer>
             <div className="row">
-                <div className="col-xl-2 col-lg-4 col-sm-12 col-xs-12 gutter-small">
-                    <HealthBlock/>
-                </div>
-                <div className="col-xl-2 col-lg-4 col-sm-6 col-xs-12 gutter-small">
+                {/*<div className="col-xl-2 col-lg-4 col-sm-12 col-xs-12 gutter-small">*/}
+                {/*    <HealthBlock/>*/}
+                {/*</div>*/}
+                <div className="col-xl-3 col-lg-6 col-sm-6 col-xs-12 gutter-small">
                     <NodesBlock nodes={nodes} subscriptions={subscriptions} publications={publications}
                                 topicstatistics={topicstatistics}/>
                 </div>
-                <div className="col-xl-2 col-lg-4 col-sm-6 col-xs-12 gutter-small">
+                <div className="col-xl-3 col-lg-6 col-sm-6 col-xs-12 gutter-small">
                     <TopicsBlock topics={topics} subscriptions={subscriptions} publications={publications}/>
                 </div>
                 <div className="col-xs-12 col-xl-6 gutter-small ">

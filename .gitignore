@@ -23,3 +23,8 @@ yarn-debug.log*
 yarn-error.log*
 
 src/react-app-env.d.ts
+
+# Yes we know, this file is supposed to be committed.
+# but there are just too many changes and this app works just as good without it.
+# So we just don't include it yay
+package-lock.json

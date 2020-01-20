@@ -79,7 +79,7 @@ class NodeIndicator extends React.Component<NodeInfo> {
     // Get the health of a topic that is either published by or subscribed to this node.
     getPubSubTopicHealth(topicname :string, pubsub :'pub' | 'sub') :[IndicatorColor, string]{
         let stats = this.props.topicstatistics.filter(
-            (stat) => stat[pubsub == 'pub' ? 'node_pub' : 'node_sub'] === this.props.name && stat.topic === topicname);
+            (stat) => stat[pubsub === 'pub' ? 'node_pub' : 'node_sub'] === this.props.name && stat.topic === topicname);
         return stats.length === 0 ? [IndicatorColor.idle, "No statistics available"] : isStatisticHealthy(stats, pubsub);
     }
 }

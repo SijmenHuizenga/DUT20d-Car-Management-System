@@ -2,8 +2,8 @@
 import threading
 from groundstation import webserver, pinger, rosnode, sshclient, database, state, logbook, systemdservices, rosrecording
 
-luke_host = "raampje"
-luke_user = "grace"
+luke_host = "luke"
+luke_user = "luke"
 luke_password = ""
 
 database_ = database.Database()

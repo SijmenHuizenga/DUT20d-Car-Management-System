@@ -3,7 +3,7 @@ import time
 
 import systemdservices
 from .sshclient import SSHClient
-from .state import State
+from .state import State, SystemdServiceRunning
 
 
 class RosRecorder:
@@ -41,7 +41,7 @@ class RosRecorder:
     def is_recording(self):
         try:
             statusnr, statustext = self.ssh.run_command("sudo systemctl status rosrecord.service")
-            return systemdservices.statusnr_to_string(statusnr) == "running"
+            return systemdservices.statusnr_to_running(statusnr) == SystemdServiceRunning.RUNNING
         except Exception, e:
             return False
 

@@ -38,8 +38,21 @@ class RecordingBlock extends React.Component<Props> {
     }
 
     onRecordingToggle() {
-        return Requestor.put("/recording/" + (this.props.is_recording ? "stop" : "start"), {})
-            .catch((error) => toast("Couldn't start/stop recording: " + error, {type: 'error'}))
+        const startstop = this.props.is_recording ? "stop" : "start";
+        const toastid = toast(`${startstop} recording...`, { autoClose: false });
+
+        return Requestor.put("/recording/" + startstop, {})
+            .then(() =>
+                toast.update(toastid, {
+                    render: `${startstop} recording ok`,
+                    type: toast.TYPE.SUCCESS,
+                    autoClose: 5000
+                })
+            )
+            .catch((error) => toast.update(toastid, {
+                render: `Couldn't ${startstop} recording: ${error}`,
+                type: toast.TYPE.ERROR
+            }))
     }
 
 }

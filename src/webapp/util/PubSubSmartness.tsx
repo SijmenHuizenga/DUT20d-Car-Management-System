@@ -30,7 +30,7 @@ function onlyRecent(topic : {lastseen :number}) {
 
 function onlyActiveTopics(statistics :TopicStatistic[], pubsub :'pub' | 'sub') {
     return (topic : {topicname :string}) => {
-        let [healty, _] = isStatisticHealthy(statistics.filter((s) => s.topic === topic.topicname), pubsub)
+        let [healty] = isStatisticHealthy(statistics.filter((s) => s.topic === topic.topicname), pubsub)
         return healty === IndicatorColor.active;
     }
 }

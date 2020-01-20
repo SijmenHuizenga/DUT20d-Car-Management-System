@@ -10,7 +10,7 @@ function execute(uri :string, method :string, body={}) {
             body: JSON.stringify(body)
         }).then((response) => {
             if ((response.status === 201 || response.status === 200) && response.ok) {
-                resolve(response.body);
+                resolve(response);
             } else {
                 console.log("request failed", response);
                 response.text().then((body) => {

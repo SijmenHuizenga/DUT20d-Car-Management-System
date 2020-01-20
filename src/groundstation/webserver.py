@@ -1,5 +1,6 @@
 import logging
 import time
+import os
 
 # Initializes the eventlet async webserver.
 # This is required for multithreaded message emitting over websocket.
@@ -7,7 +8,7 @@ from eventlet import monkey_patch as monkey_patch
 monkey_patch()
 
 # from flask_socketio import SocketIO
-from flask import Flask, request, abort, jsonify, Response
+from flask import Flask, request, abort, jsonify, Response, current_app
 from flask_socketio import SocketIO
 
 from .logbook import Logbook
@@ -15,7 +16,7 @@ from .rosrecording import RosRecorder
 from .sshclient import SSHClient
 from .state import State
 
-app = Flask(__name__, static_folder='../../operator/build/', static_url_path='')
+app = Flask(__name__, static_folder='../../build', static_url_path='')
 
 
 class Webserver:
@@ -43,6 +44,7 @@ class Webserver:
 
         app.add_url_rule('/', 'root', self.root)
         app.add_url_rule('/state', 'state', self.request_state, methods=['GET'])
+        app.add_url_rule('/runcommand', 'runcommand', self.exec_ssh_command, methods=['POST'])
         app.add_url_rule('/logbook', 'logbook_create', self.logbook_create, methods=['POST'])
         app.add_url_rule('/logbook/<int:rowid>', 'logbook_update', self.logbook_update, methods=['PUT'])
         app.add_url_rule('/rebootluke', 'reboot_luke', self.reboot_luke, methods=['POST'])
@@ -51,10 +53,11 @@ class Webserver:
         app.add_url_rule('/recording/start', 'recording_start', self.recording_start, methods=['PUT'])
         app.add_url_rule('/recording/stop', 'recording_stop', self.recording_stop, methods=['PUT'])
 
-        socketio.run(app)
+        print app.static_folder
+        socketio.run(app, host="0.0.0.0")
 
     def root(self):
-        return self.app.send_static_file('index.html')
+        return current_app.send_static_file('index.html')
 
     def request_state(self):
         return Response(response=self.state.to_json(), status=200, mimetype='application/json')
@@ -134,4 +137,18 @@ class Webserver:
             return "ok", 200
         except Exception, e:
             print "error stopping recording:", e
+            abort(500, e)
+
+    def exec_ssh_command(self):
+        json = request.get_json()
+        if 'command' not in json:
+            abort(400)
+        try:
+            statuscode, output = self.ssh.run_command(json['command'])
+            return {
+                'statuscode': statuscode,
+                'output': output
+            }
+        except Exception, e:
+            print "error executing command:", e
             abort(500, e)

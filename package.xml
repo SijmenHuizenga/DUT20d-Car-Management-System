@@ -6,7 +6,12 @@
     <maintainer email="s.huizenga@dutracing.nl">sijmen</maintainer>
     <license>MIT</license>
 
+
     <buildtool_depend>catkin</buildtool_depend>
     <depend>rospy</depend>
+    <depend>roscpp</depend>
     <depend>std_msgs</depend>
+
+    <build_depend>message_generation</build_depend>
+    <depend>message_runtime</depend>
 </package>

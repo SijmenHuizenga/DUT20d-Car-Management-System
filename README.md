@@ -25,7 +25,7 @@ For the **groundstation** you must first install the required python dependencie
 Because these packages are non-ros we must do this via pip. 
 Run `pip install -r requirements.txt` from the current directory.
 After that, the groundstation is just like any rosnode.
-Just run `rosrun cms app.py` to run it.
+Just run `rosrun cms groundstation.py` to run it.
 _If you want to connect to an existing ros master (e.g. the car) you must first export environment variables ROS_MASTER_URI and ROS_IP in your shell_
 
 For the **webapp** you must have the [npm](https://linuxize.com/post/how-to-install-node-js-on-ubuntu-18.04/) package manager installed.
@@ -36,7 +36,12 @@ This will launch a webserver that serves the compiled html/css/js files on the p
 All requests to non-existing files will be forwarded to the groundstation of which it assumes runs on localhost.
  
 ## Deployment
-Never done this, need to figure this out someday.
+Run `npm run build`, wait for it to finish, then run `rosrun cms groundstation.py`. CMS is available on port 4000. 
+So go to `localhost:4000` or `<ip>:4000` to view cms!!
+
+On the car you can optionally have the cms/statistics node running. 
+To launch it use the [launch/statistics.launch](statistics.launch) file. 
+This launch file is available as systemd service named `cms_statistics`.
 
 ## Database
 Groundstation stores all live data in a SQLite database. 

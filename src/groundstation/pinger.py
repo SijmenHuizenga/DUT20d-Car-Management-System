@@ -16,8 +16,6 @@ class Pinger:
         self.db = db
         self.state = state
 
-        self.start()
-
     def start(self):
         thread = threading.Thread(target=self.ping_forever)
         thread.daemon = True
@@ -29,7 +27,7 @@ class Pinger:
                 self.ping()
             except Exception, e:
                 print("[pinger] Someting unexpected happend while pinging %s: %s" % (self.host, str(e)))
-            time.sleep(1)
+            time.sleep(0.7)
 
     def ping(self):
         success = os.system("ping -c 1 -w 1 -W 1 %s > /dev/null 2>&1" % self.host) == 0
@@ -41,3 +39,4 @@ class Pinger:
         self.state.ping.timestamp = now
         self.state.ping.success = success
         self.state.emit_state()
+        print("ping finished")
