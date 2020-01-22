@@ -34,7 +34,7 @@ void timerCallback(const ros::TimerEvent&) {
     for (auto const& topic_name : topics) {
         auto msg = cms::Statistic();
         msg.topic_name = topic_name;
-        msg.messages = topicCounter[topic_name];
+        msg.traffic = topicCounter[topic_name];
         statisticsMessages.push_back(msg);
         topicCounter[topic_name] = 0;
     }
@@ -49,6 +49,8 @@ int main(int argc, char** argv) {
 
     statistics_pub = nh.advertise<cms::Statistics>("/cms/statistics", 10);
 
+    std::vector<ros::Subscriber> subscribers = {};
+
     for (auto const& topic_name : topics) {
         topicCounter[topic_name] = 0;
 
@@ -59,7 +61,7 @@ int main(int argc, char** argv) {
             topicCallback(msg, topic_name);
         };
 
-        ros::Subscriber subscriber = nh.subscribe(topic_name, 10, callback);
+        subscribers.push_back(nh.subscribe(topic_name, 10, callback));
     }
 
     ros::Timer timer = nh.createTimer(ros::Duration(1), timerCallback);

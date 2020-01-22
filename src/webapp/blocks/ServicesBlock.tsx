@@ -23,9 +23,9 @@ class ServiceIndicator extends React.Component<SystemdService> {
         return (<ContextMenuTrigger id={`service${this.props.name}startstoptrigger`}>
             <span className="text-small text-nowrap pr-2">
                 <Indicator color={this.getIndicatorColor()}
-                           tooltip={this.getIndicatorTooltipText()}
+                           tooltip={this.getIndicatorTooltipText}
                            dataTimestamp={this.props.lastupdate}/>
-                <Tooltip tooltip={statustext.trim()}>{name.substr(0, name.length-8)}</Tooltip>
+                <Tooltip tooltip={() => statustext.trim()}>{name.substr(0, name.length-8)}</Tooltip>
                 &nbsp;
                 <span className="text-grayyed">({this.renderEnabledDisabled()})</span>
                 {this.renderContextmenu()}
@@ -46,18 +46,18 @@ class ServiceIndicator extends React.Component<SystemdService> {
         }
     }
 
-    getIndicatorTooltipText() {
+    getIndicatorTooltipText = () => {
         return `Service is ${this.props.running}.`
-    }
+    };
 
     renderEnabledDisabled() {
         switch (this.props.enabled) {
             case SystemdServiceEnabled.enabled:
-                return <Tooltip tooltip={"This service auto-starts on boot"}>enabled</Tooltip>;
+                return <Tooltip tooltip={() => "This service auto-starts on boot"}>enabled</Tooltip>;
             case SystemdServiceEnabled.disabled:
-                return <Tooltip tooltip={"This service does not start on boot"}>disabled</Tooltip>;
+                return <Tooltip tooltip={() => "This service does not start on boot"}>disabled</Tooltip>;
             case SystemdServiceEnabled.error:
-                return <Tooltip tooltip={"Could not retrieve enabled/disabled status"}>unkown</Tooltip>;
+                return <Tooltip tooltip={() => "Could not retrieve enabled/disabled status"}>unkown</Tooltip>;
         }
     }
 

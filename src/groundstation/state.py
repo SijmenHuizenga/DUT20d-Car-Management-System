@@ -114,7 +114,7 @@ class Recording:
 
 
 class Topic:
-    def __init__(self, name, lastseen):
+    def __init__(self, name, lastseen, statistics):
         # The name of the topic, including / prefix
         self.name = name  # type: str
 
@@ -124,6 +124,8 @@ class Topic:
         # but not have any publishers / subscribers for ages. However, if this timestamp is
         # set to a long time ago you can be sure this topic is not there.
         self.lastseen = lastseen  # type: float
+
+        self.statistics = statistics  # type: Optional[TopicStatistic]
 
 
 class TopicType:
@@ -176,27 +178,8 @@ class TopicSubscription:
 
 
 class TopicStatistic:
-    def __init__(self, topic, node_pub, node_sub, window_start, window_stop,
-                 delivered_msgs, dropped_msgs, traffic, lastseen):
-        # Duh... The topic that these statistics are about.
-        self.topic = topic
-
-        # node name of the publisher
-        self.node_sub = node_sub
-
-        # node name of the subscriber
-        self.node_pub = node_pub
-
-        # the statistics apply to this time window
-        self.window_start = window_start
-        self.window_stop = window_stop
-
-        # number of messages delivered during the window
-        self.delivered_msgs = delivered_msgs
-        # numbers of messages dropped during the window
-        self.dropped_msgs = dropped_msgs
-
-        # traffic during the window, in bytes
+    def __init__(self, traffic, lastseen):
+        # The amount of messages per second since the last statistic.
         self.traffic = traffic
 
         # The timestamp when the information about this node was last updated
@@ -215,7 +198,6 @@ class State:
     topictypes = []  # type: List[TopicType]
     subscriptions = []  # type: List[TopicSubscription]
     publications = []  # type: List[TopicPublication]
-    topicstatistics = []  # type: List[TopicStatistic]
 
     def __init__(self, db):
         self.db = db
@@ -252,5 +234,4 @@ class State:
             'topictypes': self.topictypes,
             'subscriptions': self.subscriptions,
             'publications': self.publications,
-            'topicstatistics': self.topicstatistics,
         }

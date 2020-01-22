@@ -15,6 +15,8 @@ services = [
     "megamission.service",
     "vehicle_interface.service",
     "mavros.service",
+    "cms_statistics.service",
+    "run_cameras.service",
 ]
 
 
@@ -79,7 +81,6 @@ class SystemdServices:
             running = SystemdServiceRunning.ERROR
             statustext = str(e)
             enabled = SystemdServiceEnabled.ERROR
-        print service
 
         return SystemdService(name=service, running=running, statustext=statustext, enabled=enabled,
                               lastupdate=time.time())

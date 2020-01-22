@@ -1,13 +1,19 @@
 import React from "react";
 import EditableText from "../util/EditableText";
 import Requestor from "../util/Requestor"
-import {Recording, Topic} from "../statetypes";
+import {
+    getTopicHealthPubs,
+    Recording,
+    Topic,
+    TopicPublication,
+} from "../statetypes";
 import {Indicator, IndicatorColor} from "../util/Indicator";
 import Tooltip from "../util/Tooltip";
 import {toast} from "react-toastify";
 
 interface Props extends Recording {
     topics :Topic[]
+    publications :TopicPublication[]
 }
 
 class RecordingContainer extends React.Component<Props, {}> {
@@ -20,17 +26,15 @@ class RecordingBlock extends React.Component<Props> {
 
     allTopicNames() :string[]{
         let out = [...this.props.selected_topics, ...this.props.topics.map((topic) => topic.name)];
-        out.sort();
+        out.sort(this.sortTopics);
         return out.filter((value, index, self) => self.indexOf(value) === index);
     }
 
-    getTopicState(topicname :string) {
-        // if (!this.props.topics.hasOwnProperty(topicname)) {
-        //     return "OFFLINE";
-        // }
-        // return isRecent(this.props.topics[topicname].lastseen) ? "ACTIVE" : "OFFLINE"
-        //todo: lastseen is not a good enough indicator to get state.
-        return "OFFLINE"
+    getTopicHealth(topicname :string) {
+        return getTopicHealthPubs(
+            this.props.topics.find((t) => t.name === topicname),
+            this.props.publications.filter((p) => p.topicname === topicname),
+        );
     }
 
     isTopicSelected(topicname :string) :boolean {
@@ -54,6 +58,16 @@ class RecordingBlock extends React.Component<Props> {
                 type: toast.TYPE.ERROR
             }))
     }
+
+    sortTopics = (a :string, b :string) => {
+        //put selected topics on top, sort each list on alphabetical order
+        let selectedA = this.isTopicSelected(a);
+        let selectedB = this.isTopicSelected(b);
+        if (selectedA === selectedB) {
+            return a.localeCompare(b);
+        }
+        return Number(selectedB) - Number(selectedA);
+    };
 
 }
 
@@ -90,12 +104,15 @@ class InactiveRecordingBlock extends RecordingBlock {
         if(!Array.isArray(this.props.selected_topics)) {
             return "ERROR: " + this.props.selected_topics
         }
-        return this.allTopicNames().map((topicname) =>
-            <TopicSelector key={topicname}
-                           topicname={topicname}
-                           selected={this.isTopicSelected(topicname)}
-                           topicstate={this.getTopicState(topicname)}/>
-        )
+
+        return this.allTopicNames().map((topicname) => {
+            let [healthColor, healthDescription] = this.getTopicHealth(topicname);
+            return <TopicSelector key={topicname}
+                                  topicname={topicname}
+                                  selected={this.isTopicSelected(topicname)}
+                                  healthColor={healthColor}
+                                  healthDescription={healthDescription}/>
+        });
     }
 
     updateFilename(newname :string) {
@@ -104,7 +121,7 @@ class InactiveRecordingBlock extends RecordingBlock {
                 return true;
             })
             .catch((error) => {
-                toast("Failed to update recording filename: " + error, {type: 'error'})
+                toast("Failed to update recording filename: " + error, {type: 'error'});
                 return false;
             });
     }
@@ -126,91 +143,70 @@ class ActiveRecordingBlock extends RecordingBlock {
                 </div>
             </div>
             <div className="overflow-auto mt-1">
-                {this.allTopicNames().sort(this.sortTopics).map((topicname) =>
-                        <TopicIndicator topicname={topicname}
-                                        topicstate={this.getTopicState(topicname)}
-                                        selected={this.isTopicSelected(topicname)}/>
-                )}
+                {this.allTopicNames().map((topicname) => {
+                    let [healthColor, healthDescription] = this.getTopicHealth(topicname);
+
+                    return <TopicIndicator topicname={topicname}
+                                           healthColor={healthColor}
+                                           healthDescription={healthDescription}
+                                           selected={this.isTopicSelected(topicname)}/>
+                })}
             </div>
         </div>
     }
-
-    sortTopics = (a :string, b :string) => {
-        //put selected topics on top, sort each list on alphabetical order
-        let selectedA = this.isTopicSelected(a);
-        let selectedB = this.isTopicSelected(b);
-        if (selectedA === selectedB) {
-            return a.localeCompare(b);
-        }
-        return Number(selectedB) - Number(selectedA);
-    };
 }
 
-class TopicIndicator extends React.Component<{topicname :string, selected :boolean, topicstate :string}, {}> {
+class TopicIndicator extends React.Component<{topicname :string, selected :boolean, healthColor :IndicatorColor, healthDescription :string}, {}> {
     render() {
-        let {topicname, selected, topicstate} = this.props;
+        let {topicname, selected, healthColor, healthDescription} = this.props;
         return <div>
-            <Tooltip tooltip={topicDescription(selected, topicstate)}>
-                <span className={`indicator circle ${selected ? topicStateToColor(topicstate) : ""}`}/>
+            <Tooltip tooltip={() => topicDescription(selected, healthDescription)}>
+                <span className={`indicator circle ${selected ? healthColor : ""}`}/>
             </Tooltip>
             <span className="text-small pl-2">{topicname}</span>
         </div>
     }
 }
 
-class TopicSelector extends React.Component<{topicname :string, selected :boolean, topicstate :string}, {}> {
+class TopicSelector extends React.PureComponent<{topicname :string, selected :boolean, healthColor :IndicatorColor, healthDescription :string}, {}> {
+
     render() {
-        let {topicname, selected, topicstate} = this.props;
+        let {topicname, selected, healthColor, healthDescription} = this.props;
         return <div className="custom-control custom-checkbox">
-            <Tooltip tooltip={topicDescription(selected, topicstate)}>
+            <Tooltip tooltip={() => topicDescription(selected, healthDescription)}>
                 <input type="checkbox"
-                   className={`custom-control-input ${topicStateToColor(topicstate)}`}
+                   className={`custom-control-input ${healthColor}`}
                    id={`recordtopic_${topicname}`}
                    checked={selected}
                    onChange={this.handleCheckboxChange.bind(this)}
                 />
                 <label
-                    className={`custom-control-label ${topicStateToColor(topicstate)}`}
+                    className={`custom-control-label ${healthColor}`}
                     htmlFor={`recordtopic_${topicname}`}>{topicname}</label>
             </Tooltip>
         </div>
     }
 
     handleCheckboxChange(e :React.ChangeEvent<HTMLInputElement>) {
+        const toastid = toast(`${e.currentTarget.checked ? 'un' : ''}selecting topic ${this.props.topicname} for recording`,
+            { autoClose: false });
+
         return Requestor.put("/recording/toggletopic", {
             topicname: this.props.topicname,
             selected: e.currentTarget.checked
-        }).catch((error) => toast("Failed to update selected topcs: " + error, {type: 'error'}));
+        }).then(() => toast.update(toastid, {
+            render: `${e.currentTarget.checked ? 'un' : ''}selected topic ${this.props.topicname} for recording`,
+            type: toast.TYPE.SUCCESS,
+            autoClose: 5000
+        })).catch((error) => toast.update(toastid, {
+            render: "Failed to update selected topcs: " + error,
+            type: toast.TYPE.ERROR,
+        }));
     }
 }
 
-function topicStateToColor(state :string) {
-    //todo: enumify topic state
-    switch (state) {
-        case "OFFLINE":
-            return "danger";
-        case "IDLE":
-            return "warning";
-        case "ACTIVE":
-            return "success";
-        default: return "danger";
-    }
-}
-
-function topicStateToDescription(state :string) {
-    switch (state) {
-        case "OFFLINE":
-            return "Offline: it has no attached publishers or subscribers";
-        case "IDLE":
-            return "Idle: no messages are being sent recently";
-        case "ACTIVE":
-            return "Active: messages are being sent on this topic frequently";
-        default: return `UNKOWN STATE ${state}`;
-    }
-}
-
-function topicDescription(selected :boolean, topicstate :string) {
-    return `This topic is ${selected ? "" : "not"} selected for recording\nThe topic is ${topicStateToDescription(topicstate)}`
+function topicDescription(selected :boolean, health :string) {
+    return `This topic is ${selected ? "" : "not"} selected for recording\n${health}`
 }
 
 export default RecordingContainer;

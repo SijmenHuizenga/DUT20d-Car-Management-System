@@ -81,7 +81,7 @@ class RosRecorder:
         statusnr, output = self.ssh.run_command('echo \"RECORD_TOPICS=' + topicstr + '\n' +
                                                 'RECORD_FILENAME=' + filename + '\n\" > /var/rosrecord.env')
         if statusnr != 0:
-            raise Exception("Updating config file failed with code " + statusnr + ": " + output)
+            raise Exception("Updating config file failed with code " + str(statusnr) + ": " + output)
         return
 
     def recording_start(self):

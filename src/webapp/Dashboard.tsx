@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {MouseEventHandler} from 'react';
 import io from 'socket.io-client';
 import {toast, ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -13,7 +13,7 @@ import RecordingBlock from "./blocks/RecordingBlock";
 import {Dashboard, SystemdServiceEnabled, SystemdServiceRunning} from "./statetypes";
 import {TooltipContainer} from "./util/Tooltip";
 
-const devmode = true;
+export const devmode = false;
 const fakeDashboard: Dashboard = {
     rosnode: {
         up: false,
@@ -31,41 +31,45 @@ const fakeDashboard: Dashboard = {
         {rowid: 666, timestamp: 66, text: "Example line 666", source: "human"},
     ],
     topics: [
-        {name: "/world_state", lastseen: 1577545897},
-        {name: "/planning_ReferencePath", lastseen: 1577545897},
-        {name: "/visualization_markers/world_state", lastseen: 1577545897},
-        {name: "/planning_BoundaryMarkers", lastseen: 1577545897},
-        {name: "/mavros/local_position/velocity_body", lastseen: 1577545897},
-        {name: "/visualization_markers/world_evidence", lastseen: 1577545897},
-        {name: "/mavros/lo4cal_position/velocity_local", lastseen: 1577545897},
-        {name: "/world_st5ate", lastseen: 1577545897},
-        {name: "/mavros/lhgocal_position/pose", lastseen: 1577545897},
-        {name: "/planning_sReferencePath1", lastseen: 1577545897},
-        {name: "/visualizatio2n_markers/world_state", lastseen: 1577545897},
-        {name: "/mavros/lofcal3_position/velocity_local", lastseen: 1577545897},
-        {name: "/world_stab4te", lastseen: 1577545897},
-        {name: "/ma5vros/logcal_position/pose", lastseen: 1577545897},
-        {name: "/world_astate", lastseen: 1577545897},
-        {name: "/planninag_ReferencePath", lastseen: 1577545897},
-        {name: "/visuaaliazation_markers/world_state", lastseen: 1577545897},
-        {name: "/planning_aBoundaryMarkers", lastseen: 1577545897},
-        {name: "/mavroas/loacal_position/velocity_body", lastseen: 1577545897},
-        {name: "/visualizatiaon_markers/world_evidence", lastseen: 1577545897},
-        {name: "/mavros/lo4caal_position/velocity_local", lastseen: 1577545897},
-        {name: "/worldb_st5ate", lastseen: 1577545897},
-        {name: "/mavrosb/lhgocal_position/pose", lastseen: 1577545897},
-        {name: "/planninbg_sReferencePath1", lastseen: 1577545897},
-        {name: "/visualizbatio2n_markers/world_state", lastseen: 1577545897},
-        {name: "/mavros/lobfcal3_position/velocity_local", lastseen: 1577545897},
-        {name: "/world_stabb4te", lastseen: 1577545897},
-        {name: "/ma5vros/logdcal_position/pose", lastseen: 1577545897},
+        {name: "/mavros/exampletopic/1", lastseen: 1577545897, statistics: {traffic: 244, lastseen: 123456}},
+        {name: "/world_state", lastseen: 1577545897, statistics: null},
+        {name: "/planning_ReferencePath", lastseen: 1577545897, statistics: null},
+        {name: "/visualization_markers/world_state", lastseen: 1577545897, statistics: null},
+        {name: "/planning_BoundaryMarkers", lastseen: 1577545897, statistics: null},
+        {name: "/mavros/local_position/velocity_body", lastseen: 1577545897, statistics: null},
+        {name: "/visualization_markers/world_evidence", lastseen: 1577545897, statistics: null},
+        {name: "/mavros/lo4cal_position/velocity_local", lastseen: 1577545897, statistics: null},
+        {name: "/world_st5ate", lastseen: 1577545897, statistics: null},
+        {name: "/mavros/lhgocal_position/pose", lastseen: 1577545897, statistics: null},
+        {name: "/planning_sReferencePath1", lastseen: 1577545897, statistics: null},
+        {name: "/visualizatio2n_markers/world_state", lastseen: 1577545897, statistics: null},
+        {name: "/mavros/lofcal3_position/velocity_local", lastseen: 1577545897, statistics: null},
+        {name: "/world_stab4te", lastseen: 1577545897, statistics: null},
+        {name: "/ma5vros/logcal_position/pose", lastseen: 1577545897, statistics: null},
+        {name: "/world_astate", lastseen: 1577545897, statistics: null},
+        {name: "/planninag_ReferencePath", lastseen: 1577545897, statistics: null},
+        {name: "/visuaaliazation_markers/world_state", lastseen: 1577545897, statistics: null},
+        {name: "/planning_aBoundaryMarkers", lastseen: 1577545897, statistics: null},
+        {name: "/mavroas/loacal_position/velocity_body", lastseen: 1577545897, statistics: null},
+        {name: "/visualizatiaon_markers/world_evidence", lastseen: 1577545897, statistics: null},
+        {name: "/mavros/lo4caal_position/velocity_local", lastseen: 1577545897, statistics: null},
+        {name: "/worldb_st5ate", lastseen: 1577545897, statistics: null},
+        {name: "/mavrosb/lhgocal_position/pose", lastseen: 1577545897, statistics: null},
+        {name: "/planninbg_sReferencePath1", lastseen: 1577545897, statistics: null},
+        {name: "/visualizbatio2n_markers/world_state", lastseen: 1577545897, statistics: null},
+        {name: "/mavros/lobfcal3_position/velocity_local", lastseen: 1577545897, statistics: null},
+        {name: "/world_stabb4te", lastseen: 1577545897, statistics: null},
+        {name: "/ma5vros/logdcal_position/pose", lastseen: 1577545897, statistics: null},
     ],
     nodes: [
         {name: "/mavros", lastseen: 1577545897}
     ],
-    publications: [],
-    subscriptions: [],
-    topicstatistics: [],
+    publications: [
+        {topicname: "/mavros/exampletopic/1", lastseen: 1577545897, nodename: "/mavros"},
+    ],
+    subscriptions: [
+        {topicname: "/mavros/exampletopic/2", lastseen: 1577545897, nodename: "/mavros"},
+    ],
     ssh: {
         connected: true,
         lastping: 1577545897,
@@ -150,21 +154,27 @@ export default class DashboardStateLoader extends React.PureComponent<{}, State>
 
 class DashboardComponent extends React.Component<Dashboard, {}> {
 
+    private readonly tooltipContainerRef: React.RefObject<TooltipContainer>;
+
+    constructor(props :any) {
+        super(props);
+        this.tooltipContainerRef = React.createRef();
+    }
+
     render() {
         console.log("render", this.props);
 
         let {rosnode, ping, logbook, recording, topics, nodes, ssh,
-            systemdservices, subscriptions, publications, topicstatistics} = this.props;
+            systemdservices, subscriptions, publications} = this.props;
 
-        return <main>
-            <TooltipContainer>
+        return <main onClick={this.containerClicked}>
+            <TooltipContainer ref={this.tooltipContainerRef}/>
             <div className="row">
                 {/*<div className="col-xl-2 col-lg-4 col-sm-12 col-xs-12 gutter-small">*/}
-                {/*    <HealthBlock/>*/}
+                    {/*<HealthBlock/>*/}
                 {/*</div>*/}
                 <div className="col-xl-3 col-lg-6 col-sm-6 col-xs-12 gutter-small">
-                    <NodesBlock nodes={nodes} subscriptions={subscriptions} publications={publications}
-                                topicstatistics={topicstatistics}/>
+                    <NodesBlock nodes={nodes} topics={topics} subscriptions={subscriptions} publications={publications}/>
                 </div>
                 <div className="col-xl-3 col-lg-6 col-sm-6 col-xs-12 gutter-small">
                     <TopicsBlock topics={topics} subscriptions={subscriptions} publications={publications}/>
@@ -181,10 +191,14 @@ class DashboardComponent extends React.Component<Dashboard, {}> {
                     <LogbookBlock lines={logbook}/>
                 </div>
                 <div className="col-xl-6 col-xs-12 gutter-small">
-                    <RecordingBlock {...recording} topics={topics}/>
+                    <RecordingBlock {...recording} topics={topics} publications={publications}/>
                 </div>
             </div>
-            </TooltipContainer>
+
         </main>
     }
+
+    containerClicked :MouseEventHandler = () => {
+        this.tooltipContainerRef.current!.hideTip();
+    };
 }

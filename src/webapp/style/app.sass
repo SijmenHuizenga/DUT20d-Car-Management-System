@@ -195,19 +195,22 @@ textarea
 .custom-control-label
   &.danger:before
     border-color: colors.$danger
-  &.warning:before
-    border-color: colors.$active
-  &.success:before
+  &.fault:before
+    border-color: colors.$fault
+  &.active:before
     border-color: colors.$active
 
 .custom-control-input:checked~.custom-control-label
   &.danger::before
     border-color: colors.$danger
     background-color: colors.$danger
-  &.warning::before
+  &.fault::before
+    border-color: colors.$fault
+    background-color: colors.$fault
+  &.active::before
     border-color: colors.$active
     background-color: colors.$active
-  &.success::before
+  &.idle::before
     border-color: colors.$active
     background-color: colors.$active
 

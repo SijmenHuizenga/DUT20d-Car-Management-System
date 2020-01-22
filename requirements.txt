@@ -5,3 +5,4 @@ enum34
 typing
 jsonpickle
 eventlet
+ssh2-python

@@ -1,45 +1,62 @@
 import React from 'react';
-import {Node, TopicPublication, TopicPubSub, TopicStatistic, TopicSubscription} from "../statetypes"
+import {
+    eqTopicPubSubs,
+    getTopicHealth,
+    Node,
+    Topic,
+    TopicPublication,
+    TopicPubSub,
+    TopicSubscription
+} from "../statetypes"
 import {Indicator, IndicatorColor} from "../util/Indicator";
-import {isStatisticHealthy, isNodeActive} from "../util/PubSubSmartness";
 
 interface Props {
     nodes :Node[]
+    topics :Topic[]
     subscriptions :TopicSubscription[]
     publications :TopicPublication[]
-    topicstatistics :TopicStatistic[]
 }
 
 class NodesBlock extends React.Component<Props> {
     render() {
+        const sortedNodes = [...this.props.nodes].sort((a :Node, b :Node) => a.name.localeCompare(b.name));
+
         return <div className="block y-50">
-            {this.props.nodes.map((node) =>
-                <NodeIndicator key={node.name} {...node}
-                               subscriptions={this.props.subscriptions.filter(sub => sub.nodename === node.name)}
-                               publications={this.props.publications.filter(pub => pub.nodename === node.name)}
-                               topicstatistics={this.props.topicstatistics.filter(stat => node.name === stat.node_pub || node.name === stat.node_sub)}
-                />
-            )}
+            {sortedNodes.map(this.renderNodeIndicator.bind(this))}
         </div>
+    }
+
+    renderNodeIndicator(node :Node) {
+        let subs = this.props.subscriptions.filter(sub => sub.nodename === node.name);
+        let pubs = this.props.publications.filter(pub => pub.nodename === node.name);
+
+        let relevantTopics = this.props.topics.filter((topic) =>
+            subs.find((sub) => sub.topicname === topic.name)
+            || pubs.find((pub) => pub.topicname === topic.name));
+
+        return <NodeIndicator key={node.name} {...node}
+                              subscriptions={subs}
+                              publications={pubs}
+                              topics={relevantTopics}
+        />
     }
 }
 
 interface NodeInfo extends Node {
     subscriptions :TopicSubscription[]
     publications :TopicPublication[]
-    topicstatistics :TopicStatistic[]
+    topics :Topic[]
 }
 
 class NodeIndicator extends React.Component<NodeInfo> {
     render() {
-        let {name, lastseen, subscriptions, publications, topicstatistics} = this.props;
-        let [isActive, status] = isNodeActive(this.props, subscriptions, publications, topicstatistics);
+        let {name, lastseen} = this.props;
         return (
             <div>
                 <span className="text-small">
                     <Indicator
-                        color={isActive ? IndicatorColor.active : IndicatorColor.idle}
-                        tooltip={this.renderTooltip(status)}
+                        color={IndicatorColor.active}
+                        tooltip={this.renderTooltip}
                         dataTimestamp={lastseen} />
                     <span className="pl-1">{name.substr(1)}</span>
                 </span>
@@ -47,41 +64,41 @@ class NodeIndicator extends React.Component<NodeInfo> {
         );
     }
 
-    renderTooltip(status :string) {
+    shouldComponentUpdate(nextProps :NodeInfo): boolean {
+        return nextProps.name !== this.props.name
+            || nextProps.lastseen !== this.props.lastseen
+            || !eqTopicPubSubs(nextProps.subscriptions, this.props.subscriptions)
+            || !eqTopicPubSubs(nextProps.publications, this.props.publications)
+    }
+
+    renderTooltip = () => {
         let {subscriptions, publications, name} = this.props;
         subscriptions = subscriptions.filter(sub => sub.nodename === name);
         publications = publications.filter(pub => pub.nodename === name);
-        return <div>
-            {status}<br/>
+        return <div className={"text-small"}>
             Subscribed to
             <ul>
-                {subscriptions.length > 0 ? this.renderTopicIndicators(subscriptions, 'sub') : <div>none</div>}
+                {subscriptions.length > 0 ? this.renderTopicIndicators(subscriptions) : <div>none</div>}
             </ul>
             Publishing to
             <ul>
-                {publications.length > 0 ? this.renderTopicIndicators(publications, 'pub') : <div>none</div>}
+                {publications.length > 0 ? this.renderTopicIndicators(publications) : <div>none</div>}
             </ul>
         </div>;
+    };
+
+    renderTopicIndicators(pubsubs :TopicPubSub[]) {
+        return pubsubs.map(pb => this.renderTopicIndicator(pb.topicname, pb.lastseen))
     }
 
-    renderTopicIndicators(subscriptions :TopicPubSub[], pubsub :'pub' | 'sub') {
-        return subscriptions.map(sub => this.renderTopicIndicator(sub.topicname, sub.lastseen, pubsub))
-    }
-
-    renderTopicIndicator(topicname :string, topicLastseen :number, pubsub :'pub' | 'sub') {
-        let [healthy, status] = this.getPubSubTopicHealth(topicname, pubsub);
-        return <div key={pubsub+topicname}>
-            <Indicator color={healthy} dataTimestamp={topicLastseen} />
-            <span className="pl-1 text-small">{topicname} ({status})</span>
+    renderTopicIndicator(topicname :string, pubsubLastSeen :number) {
+        let [healthy, status] = getTopicHealth(this.props.topics.find((t) => t.name === topicname));
+        return <div key={topicname}>
+            <Indicator color={healthy} dataTimestamp={pubsubLastSeen} />
+            <span className="pl-1 text-small">{topicname} <span className="text-grayyed">({status})</span></span>
         </div>
     }
 
-    // Get the health of a topic that is either published by or subscribed to this node.
-    getPubSubTopicHealth(topicname :string, pubsub :'pub' | 'sub') :[IndicatorColor, string]{
-        let stats = this.props.topicstatistics.filter(
-            (stat) => stat[pubsub === 'pub' ? 'node_pub' : 'node_sub'] === this.props.name && stat.topic === topicname);
-        return stats.length === 0 ? [IndicatorColor.idle, "No statistics available"] : isStatisticHealthy(stats, pubsub);
-    }
 }
 
 export default NodesBlock;

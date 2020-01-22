@@ -4,7 +4,6 @@ import EditableText from "../util/EditableText";
 import Requestor from "../util/Requestor";
 import {LogbookLine} from "../statetypes";
 import {toast} from "react-toastify";
-import RecursivePureComponent from "../util/RecursivePureComponent";
 
 interface Props {
     lines :LogbookLine[]
@@ -19,7 +18,7 @@ interface State {
     dragCurrentHoverRowid :number | null
 }
 
-class LogbookBlock extends RecursivePureComponent<Props, State> {
+class LogbookBlock extends React.Component<Props, State> {
     private scroller: HTMLDivElement | null;
     private inputfield: HTMLInputElement | null;
 
@@ -38,7 +37,6 @@ class LogbookBlock extends RecursivePureComponent<Props, State> {
     }
 
     render() {
-        console.log("RENDER LOGBOOKBLOCK");
         let {input, inputDisabled} = this.state;
         let lines = this.lines();
         return <div className="block y-50 d-flex flex-column">
@@ -267,7 +265,6 @@ class LogbookLineComponent extends React.PureComponent<LineProps, {moving :boole
 
     render() {
         let {rowid, timestamp, text, updateLine, source} = this.props;
-        console.log("render");
         return <tr onMouseLeave={this.onMouseLeave.bind(this)}
                    onMouseEnter={this.onMouseEnter.bind(this)}
                    className={source !== "human" ? "text-small logbook-small" : ""}>

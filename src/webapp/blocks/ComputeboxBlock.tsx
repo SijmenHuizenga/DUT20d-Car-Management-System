@@ -48,19 +48,27 @@ class ComputeboxBlock extends React.Component<Props, State> {
         let {connected, lastping} = this.props.ssh;
         return <Indicator color={connected ? IndicatorColor.active : IndicatorColor.danger}
                                  dataTimestamp={lastping}
-                                 tooltip={`SSH ${connected ? "connected" : "disconnected"}.`}/>
+                                 tooltip={this.renderSshTooltip}/>
     }
+
+    renderSshTooltip = () => {
+        return `SSH ${this.props.ssh.connected ? "connected" : "disconnected"}.`;
+    };
 
     renderPingIndicator() {
         let {timestamp, success} = this.props.ping;
         return <Indicator color={success ? IndicatorColor.active : IndicatorColor.danger}
                           dataTimestamp={timestamp}
-                          tooltip={`Last ping ${success ? "succeeded" : "failed"}`}/>
+                          tooltip={this.renderPingTooltip}/>
     }
+
+    renderPingTooltip = () => {
+        return `Last ping ${this.props.ping.success ? "succeeded" : "failed"}`;
+    };
 
     renderRosnodeIndicator() {
         let up = this.props.rosnode_up;
-        return <Tooltip tooltip={`Ros connection ${up ? "up" : "down"}.`}>
+        return <Tooltip tooltip={() => `Ros connection ${up ? "up" : "down"}.`}>
             <Indicator color={up ? IndicatorColor.active : IndicatorColor.danger} />
         </Tooltip>
     }

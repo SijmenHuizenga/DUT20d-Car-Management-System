@@ -1,17 +1,18 @@
-import React, {MouseEventHandler} from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 
-const TooltipContext = React.createContext<TooltipContextType | null>(null);
-interface TooltipContextType {
-    showTip: (content :TooltipContent, location :DOMRect) => void
-    hideTip: () => void
+var showTip: undefined | ((content :TooltipContent, location :DOMRect) => void) = undefined;
+var hideTip: undefined | (() => void) = undefined;
+
+export type TooltipContent = string | JSX.Element
+export type TooltipCreator = () => TooltipContent
+
+interface Props {
+    tooltip: TooltipCreator
 }
 
-type TooltipContent = string | JSX.Element
+export default class Tooltip extends React.Component<Props, {}> {
 
-export default class Tooltip extends React.PureComponent<{tooltip: TooltipContent}> {
-
-    static contextType = TooltipContext;
     private hideOnLeave: boolean = true;
 
     render() {
@@ -25,8 +26,13 @@ export default class Tooltip extends React.PureComponent<{tooltip: TooltipConten
         )
     }
 
+    shouldComponentUpdate(nextProps: any, nextState: { outdated: boolean }) {
+        return this.props.children !== nextProps.children;
+    }
+
     onClick = (e :React.MouseEvent) => {
-        this.context.showTip(this.props.tooltip, this.getPosition());
+        if(showTip !== undefined)
+            showTip(this.props.tooltip(), this.getPosition());
         this.hideOnLeave = false;
         // When a user clicks the root app, a onclick is triggered and all tooltips are hidden. 
         // When someone clicks on a tooltip trigger that click event should be exclusively by the tooltip trigger. 
@@ -36,20 +42,22 @@ export default class Tooltip extends React.PureComponent<{tooltip: TooltipConten
     };
 
     onMouseEnter = () => {
-        this.context.showTip(this.props.tooltip, this.getPosition());
+        if(showTip !== undefined)
+            showTip(this.props.tooltip(), this.getPosition());
         this.hideOnLeave = true
     };
 
     onMouseLeave =() => {
         if(this.hideOnLeave) {
-            this.context.hideTip()
+            if(hideTip !== undefined)
+                hideTip()
         }
     };
 
     getPosition() {
         let element = ReactDOM.findDOMNode(this) as HTMLDivElement;
         if(element == null){
-            return
+            throw new DOMException("Invalid state")
         }
         return element.getBoundingClientRect();
     }
@@ -64,19 +72,17 @@ export class TooltipContainer extends React.Component<{}, TT> {
 
     constructor(props: {}, context: any) {
         super(props, context);
-        this.state = {content: null, position: null}
+        this.state = {content: null, position: null};
+        showTip = this.showTip;
+        hideTip = this.hideTip;
     }
 
     render() {
-        return <TooltipContext.Provider value={{
-            showTip: this.showTip,
-            hideTip: this.hideTip,
-        }}>
-            <div onClick={this.containerClicked}>
-                {this.props.children}
-            </div>
-            {this.state.content === null ? null : <TooltipBox {...this.state} />}
-        </TooltipContext.Provider>
+        return this.state.content === null ? null : <TooltipBox {...this.state} />
+    }
+
+    shouldComponentUpdate(nextProps: Readonly<{}>, nextState: Readonly<TT>, nextContext: any): boolean {
+        return nextState.position !== this.state.position || nextState.content !== this.state.content;
     }
 
     showTip = (content :TooltipContent, position :DOMRect) => {
@@ -87,9 +93,6 @@ export class TooltipContainer extends React.Component<{}, TT> {
         this.setState({content: null})
     };
 
-    containerClicked :MouseEventHandler = () => {
-        this.hideTip()
-    };
 }
 
 class TooltipBox extends React.PureComponent<TT> {

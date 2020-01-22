@@ -3,7 +3,7 @@ import time
 
 import rosgraph
 import rospy
-from rosgraph_msgs.msg import TopicStatistics
+from cms.msg import Statistics
 
 from .database import Database
 from .logbook import Logbook
@@ -18,6 +18,7 @@ class RosNode:
                  logbook  # type: Logbook
                  ):
         self.statistics_subscriber = None
+        self.meta_timer = None
         self.rosmeta = RosMeta(db, state)
         self.db = db
         self.state = state
@@ -46,11 +47,12 @@ class RosNode:
         while not rospy.is_shutdown():
             if self.is_master_disconnected():
                 self.unregister_subscribers()
+                self.unregister_timers()
                 return
             rate_1_second.sleep()
 
     def register_subscribers(self):
-        self.statistics_subscriber = rospy.Subscriber("/statistics", TopicStatistics, self.statistics_callback)
+        self.statistics_subscriber = rospy.Subscriber("/cms/statistics", Statistics, self.statistics_callback)
         print("[rosnode] Registered subscribers")
 
     def unregister_subscribers(self):
@@ -58,7 +60,12 @@ class RosNode:
         print("[rosnode] Unregistered subscribers")
 
     def register_timers(self):
-        rospy.Timer(rospy.Duration(2), self.rosmeta.timercallback)
+        print("[rosnode] Registered timers")
+        self.meta_timer = rospy.Timer(rospy.Duration(2), self.rosmeta.timercallback)
+
+    def unregister_timers(self):
+        print("[rosnode] Unregistered timers")
+        self.meta_timer.shutdown()
 
     def is_master_disconnected(self):
         try:
@@ -72,32 +79,25 @@ class RosNode:
                        {'now': time.time(), 'up': up})
         self.state.rosnode.up = up
 
-    def statistics_callback(self, stats):
-        for s in self.state.topicstatistics:
-            if is_topic_ignored(s.topic):
-                continue
-            if s.topic == stats.topic and s.node_pub == stats.node_pub and s.node_sub == stats.node_sub:
-                s.lastseen = time.time()
-                s.window_start = stats.window_start.to_time()
-                s.window_stop = stats.window_stop.to_time()
-                s.delivered_msgs = stats.delivered_msgs
-                s.dropped_msgs = stats.dropped_msgs
-                s.traffic = stats.traffic
+    def statistics_callback(self, statisticsmessage):
+        for topicstats in statisticsmessage.statistics:
+            self.update_statistics(topicstats)
+
+    def update_statistics(self, topicstats):
+        if is_topic_ignored(topicstats.topic_name):
+            return
+        for existingTopic in self.state.topics:
+            if existingTopic.name == topicstats.topic_name:
+                existingTopic.statistics = TopicStatistic(lastseen=time.time(), traffic=topicstats.traffic)
                 break
         else:
-            self.state.topicstatistics.append(TopicStatistic(
-                topic=stats.topic,
-                node_pub=stats.node_pub,
-                node_sub=stats.node_sub,
+            self.state.topics.append(Topic(
+                name=topicstats.topic_name,
                 lastseen=time.time(),
-                window_start=stats.window_start,
-                window_stop=stats.window_stop,
-                delivered_msgs=stats.delivered_msgs,
-                dropped_msgs=stats.dropped_msgs,
-                traffic=stats.traffic
+                statistics=TopicStatistic(
+                    lastseen=time.time(),
+                    traffic=topicstats.traffic)
             ))
-        print "statistics"
-
 
 class RosMeta:
     def __init__(self,
@@ -115,6 +115,7 @@ class RosMeta:
             print "timer"
 
         except Exception, e:
+            print e
             # todo: print stacktrace
             return
 
@@ -188,7 +189,7 @@ class RosMeta:
                     s.lastseen = lastseen
                 break
         else:
-            self.state.topics.append(Topic(topic, lastseen))
+            self.state.topics.append(Topic(topic, lastseen, statistics=None))
 
     def update_node(self, node, lastseen):
         if is_node_ignored(node):
@@ -205,14 +206,10 @@ class RosMeta:
 def is_topic_ignored(topicname):
     if topicname.startswith("/rosout"):
         return True
-    if topicname == "/statistics":
-        return True
     return False
 
 
 def is_node_ignored(nodename):
-    if nodename.startswith("/rostopic"):
-        return True
-    if nodename == "/rosout":
+    if nodename.startswith("/ros"):
         return True
     return False

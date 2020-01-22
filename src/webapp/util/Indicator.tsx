@@ -1,6 +1,7 @@
 import React from "react";
-import Tooltip from "./Tooltip";
+import Tooltip, {TooltipCreator} from "./Tooltip";
 import {OUTDATED_AFTER_SECONDS} from "../statetypes";
+import {devmode} from "../Dashboard";
 
 export enum IndicatorColor {
     // Danger = Something is wrong and requires immediate action from a user
@@ -36,21 +37,44 @@ interface Props {
 
     // The tooltip. If null no tooltip is shown.
     // When the information is outdated according to dataTimestamp a tooltip will always be shown.
-    tooltip :string | null | JSX.Element
+    tooltip: TooltipCreator | null
 }
 
-export class Indicator extends React.PureComponent<Props> {
+export class Indicator extends React.Component<Props, {outdated :boolean}> {
     public static defaultProps = {
         dataTimestamp: null,
         tooltip: null
     };
 
-    render() {
-        const {dataTimestamp, tooltip} = this.props;
-        const isDataRecent = dataTimestamp == null ? true : isRecent(dataTimestamp);
+    constructor(props :Props) {
+        super(props);
+        this.state = {
+            outdated: props.dataTimestamp == null ? false : !isRecent(props.dataTimestamp)
+        }
+    }
 
-        if(!isDataRecent) {
-            return <Tooltip tooltip={
+    static getDerivedStateFromProps = function (props :Props, state :{outdated :boolean}) {
+        if(props.dataTimestamp === null) {
+            return null;
+        }
+        const newOutdated = !isRecent(props.dataTimestamp);
+        if(state.outdated !== newOutdated) {
+            return {
+                outdated: newOutdated
+            }
+        }
+        return null;
+    };
+
+    shouldComponentUpdate(nextProps: Props, nextState: { outdated: boolean }) {
+        return nextState.outdated !== this.state.outdated || nextProps.tooltip !== this.props.tooltip;
+    }
+
+    render() {
+        const {tooltip} = this.props;
+
+        if(this.state.outdated) {
+            return <Tooltip tooltip={() =>
                         `The information last updated more than ${OUTDATED_AFTER_SECONDS} seconds ago. \n` +
                         `You cannot not trust old data so I turn orange.`}>
                     {this.renderCircle(IndicatorColor.fault)}
@@ -61,9 +85,9 @@ export class Indicator extends React.PureComponent<Props> {
             return this.renderCircle()
         }
 
-        return <Tooltip tooltip={this.props.tooltip!}>
-                {this.renderCircle()}
-            </Tooltip>
+        return <Tooltip tooltip={tooltip}>
+            {this.renderCircle()}
+        </Tooltip>
     }
 
     renderCircle(color = this.props.color) {
@@ -73,5 +97,8 @@ export class Indicator extends React.PureComponent<Props> {
 }
 
 export function isRecent(timestamp :number, secondsRecent = OUTDATED_AFTER_SECONDS) {
+    if(devmode) {
+        return true;
+    }
     return new Date().getTime() / 1000 - timestamp < secondsRecent
 }
