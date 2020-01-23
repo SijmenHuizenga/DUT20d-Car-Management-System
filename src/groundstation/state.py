@@ -1,7 +1,8 @@
 from typing import List, Optional
 
 import jsonpickle
-
+import time
+import threading
 
 class Ping:
     def __init__(self):
@@ -97,20 +98,29 @@ class Recording:
         # Wheather or not we are currently recording.
         self.is_recording = False  # type: bool
 
+        # The topics selected for recording.
+        self.config_topics = []  # type: List[str]
+
         # The filename that is configued for upcomming recordings.
-        self.filename = "unset"  # type: str
+        self.config_filename = "fakedata"  # type: str
 
         # The name of the rosbag that is currently recording
-        self.bagfilename = "fakedata.bag.active"  # type: str
+        self.recording_file = "/data/bags/fakedata.bag.active"  # type: str
 
-        # The duration of the duration. Only valid if is_recording==True
-        self.recordingduration = "00:00"  # type: str
+        # The duration of the duration. Only valid if is_recording==True. Seconds
+        self.recording_duration = 60  # type: int
 
-        # The topics selected for recording.
-        self.selected_topics = []  # type: List[str]
+        # The size of the recording_file in megabyte
+        self.recording_filesize = 1500  # type: int
 
-        # When was this information last refreshed?
-        self.lastrefresh = 0  # type: float
+        # The topics that are being recorded.
+        self.recording_topics = []  # type: List[str]
+
+        # When was the recording_* information last refreshed?
+        self.lastrefresh_recording = 0  # type: float
+
+        # When was the config_* information last refreshed?
+        self.lastrefresh_config = 0  # type: float
 
 
 class Topic:
@@ -199,14 +209,36 @@ class State:
     subscriptions = []  # type: List[TopicSubscription]
     publications = []  # type: List[TopicPublication]
 
+    lastping = 0
+    somethingtoemit = True
+
     def __init__(self, db):
         self.db = db
         self.populate_memory_state()
         self.socketio = None
 
+    def start(self):
+        thread = threading.Thread(target=self.emit_state_thread)
+        thread.daemon = True
+        thread.start()
+
+    def emit_state_thread(self):
+        while 1:
+            time.sleep(0.1)
+            if self.socketio is None:
+                continue
+            timesincelastemit = time.time() - self.lastping
+            if timesincelastemit < 0.3:
+                # do not emit state if last emitted state was less then 0.3 s ago
+                continue
+            if timesincelastemit > 1 or self.somethingtoemit:
+                self.socketio.emit('state', self.to_json(), broadcast=True)
+                self.lastping = time.time()
+                self.somethingtoemit = False
+
+
     def emit_state(self):
-        assert self.socketio is not None, "sio was not set"
-        self.socketio.emit('state', self.to_json(), broadcast=True)
+        self.somethingtoemit = True
 
     def populate_memory_state(self):
         self.logbook = map(self.logline_fromdict, self.db.select_all("SELECT rowid, * FROM logbook", {}))

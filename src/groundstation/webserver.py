@@ -1,6 +1,7 @@
 import logging
 import time
-import os
+import sys
+import traceback
 
 # Initializes the eventlet async webserver.
 # This is required for multithreaded message emitting over websocket.
@@ -108,6 +109,7 @@ class Webserver:
             self.recorder.set_topic(json['topicname'], json['selected'])
             return "ok", 201
         except Exception, e:
+            traceback.print_exc(file=sys.stdout)
             print "error while updating seleced topics:", e
             abort(500, e)
 

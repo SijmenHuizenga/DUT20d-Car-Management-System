@@ -14,9 +14,17 @@ find_package(catkin REQUIRED COMPONENTS
              std_msgs)
 
 
+add_service_files( FILES
+  RecordingUpdateConfig.srv
+  RecordingGetBagInfo.srv
+)
+
 add_message_files( FILES
   Statistic.msg
   Statistics.msg
+  RecordingStatus.msg
+  RecordingConfig.msg
+  BagTopicInfo.msg
 )
 
 generate_messages()
@@ -25,6 +33,6 @@ catkin_package(
     CATKIN_DEPENDS message_runtime
 )
 include_directories(${catkin_INCLUDE_DIRS})
-add_executable(statistics src/statistics.cpp)
+add_executable(statistics src/statisticsnode.cpp)
 add_dependencies(statistics ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(statistics ${catkin_LIBRARIES})

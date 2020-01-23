@@ -16,6 +16,7 @@ services = [
     "vehicle_interface.service",
     "mavros.service",
     "cms_statistics.service",
+    "cms_metanodes.service",
     "run_cameras.service",
 ]
 

@@ -39,4 +39,3 @@ class Pinger:
         self.state.ping.timestamp = now
         self.state.ping.success = success
         self.state.emit_state()
-        print("ping finished")

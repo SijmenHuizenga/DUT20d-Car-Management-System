@@ -3,8 +3,10 @@ import time
 
 import rosgraph
 import rospy
-from cms.msg import Statistics
+from cms.msg import Statistics, RecordingStatus, RecordingConfig
+from cms.srv import RecordingUpdateConfig
 
+from .rosrecording import RosRecorder
 from .database import Database
 from .logbook import Logbook
 from .state import State, TopicType, Topic, TopicSubscription, Node, TopicPublication, TopicStatistic
@@ -15,14 +17,20 @@ class RosNode:
     def __init__(self,
                  db,  # type: Database
                  state,  # type: State
-                 logbook  # type: Logbook
+                 logbook,  # type: Logbook
+                 rosrecorder,  # type: RosRecorder
                  ):
         self.statistics_subscriber = None
+        self.recordingstatus_subscriber = None
+        self.recordingconfig_subscriber = None
+        self.update_recordingconfig_service = None
+        self.rosbaginfo_service = None
         self.meta_timer = None
         self.rosmeta = RosMeta(db, state)
         self.db = db
         self.state = state
         self.logbook = logbook
+        self.rosrecorder = rosrecorder
 
     def run(self):
         while 1:
@@ -41,22 +49,28 @@ class RosNode:
         rospy.init_node('cms')
         self.register_subscribers()
         self.register_timers()
+        self.create_serviceproxies()
         self.set_rosnode_health(True)
         self.logbook.add_line(time.time(), "Connected to ROS master", "groundstation")
-        rate_1_second = rospy.Rate(1)
+        rate_1_second = rospy.Rate(2)
         while not rospy.is_shutdown():
             if self.is_master_disconnected():
                 self.unregister_subscribers()
                 self.unregister_timers()
+                self.close_serviceproxies()
                 return
             rate_1_second.sleep()
 
     def register_subscribers(self):
         self.statistics_subscriber = rospy.Subscriber("/cms/statistics", Statistics, self.statistics_callback)
+        self.recordingstatus_subscriber = rospy.Subscriber("/cms/recording/status", RecordingStatus, self.rosrecorder.status_callback)
+        self.recordingconfig_subscriber = rospy.Subscriber("/cms/recording/config", RecordingConfig, self.rosrecorder.config_callback)
         print("[rosnode] Registered subscribers")
 
     def unregister_subscribers(self):
         self.statistics_subscriber.unregister()
+        self.recordingstatus_subscriber.unregister()
+        self.recordingconfig_subscriber.unregister()
         print("[rosnode] Unregistered subscribers")
 
     def register_timers(self):
@@ -66,6 +80,15 @@ class RosNode:
     def unregister_timers(self):
         print("[rosnode] Unregistered timers")
         self.meta_timer.shutdown()
+
+    def create_serviceproxies(self):
+        self.update_recordingconfig_service = rospy.ServiceProxy('/cms/recording/updateconfig', RecordingUpdateConfig)
+        self.rosbaginfo_service = rospy.ServiceProxy('/cms/recording/updateconfig', RecordingUpdateConfig)
+        self.rosrecorder.set_service_proxies(self.update_recordingconfig_service, self.rosbaginfo_service)
+
+    def close_serviceproxies(self):
+        self.update_recordingconfig_service.close()
+        self.rosbaginfo_service.close()
 
     def is_master_disconnected(self):
         try:
@@ -112,8 +135,6 @@ class RosMeta:
         try:
             self.update_topictypes()
             self.update_pubsubs()
-            print "timer"
-
         except Exception, e:
             print e
             # todo: print stacktrace

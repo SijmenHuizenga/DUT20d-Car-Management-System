@@ -84,12 +84,9 @@ const fakeDashboard: Dashboard = {
         }
     ],
     recording: {
-        lastrefresh: 0,
         is_recording: false,
-        filename: "sysid_corner1_vioenabled",
-        bagfilename: "sysid_corner1_vioenabled_20190804172203.bag.active",
-        recordingduration: "03:42",
-        selected_topics: [
+        config_filename: "sysid_corner1_vioenabled",
+        config_topics: [
             "/planning_ReferencePath",
             "/visualization_markers/world_state",
             "/mavros/local_position/velocity_local",
@@ -103,6 +100,25 @@ const fakeDashboard: Dashboard = {
             "/planning_Reference2Path",
             "/visualization_3markers/world_state",
         ],
+        recording_file: "/storage/bags/sysid_corner1_vioenabled.bag.active",
+        recording_duration: 60,
+        recording_topics: [
+            "/planning_ReferencePath",
+            "/visualization_markers/world_state",
+            "/mavros/local_position/velocity_local",
+            "/world_state",
+            "/mavros/local_position/pose",
+            "/planning_ReferencePath1",
+            "/visualizatio2n_markers/world_state",
+            "/mavros/local3_position/velocity_local",
+            "/world_sta4te",
+            "/ma5vros/local_position/pose",
+            "/planning_Reference2Path",
+            "/visualization_3markers/world_state",
+        ],
+        lastrefresh_config: 0,
+        lastrefresh_recording: 0,
+        recording_filesize: 1024
     }
 };
 

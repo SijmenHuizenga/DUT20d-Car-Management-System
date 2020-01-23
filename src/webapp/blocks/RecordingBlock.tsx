@@ -25,7 +25,7 @@ class RecordingContainer extends React.Component<Props, {}> {
 class RecordingBlock extends React.Component<Props> {
 
     allTopicNames() :string[]{
-        let out = [...this.props.selected_topics, ...this.props.topics.map((topic) => topic.name)];
+        let out = [...this.props.config_topics, ...this.props.topics.map((topic) => topic.name)];
         out.sort(this.sortTopics);
         return out.filter((value, index, self) => self.indexOf(value) === index);
     }
@@ -38,7 +38,7 @@ class RecordingBlock extends React.Component<Props> {
     }
 
     isTopicSelected(topicname :string) :boolean {
-        return this.props.selected_topics.indexOf(topicname) !== -1
+        return this.props.config_topics.indexOf(topicname) !== -1
     }
 
     onRecordingToggle() {
@@ -73,17 +73,17 @@ class RecordingBlock extends React.Component<Props> {
 
 class InactiveRecordingBlock extends RecordingBlock {
     render() {
-        let {filename} = this.props;
+        let {config_filename, lastrefresh_config} = this.props;
 
         return <div className="block y-50 d-flex flex-fill flex-column">
             <div className="d-flex">
                 <div className="text-large">
-                    <Indicator color={IndicatorColor.idle} dataTimestamp={this.props.lastrefresh}/>
+                    <Indicator color={IndicatorColor.idle} dataTimestamp={lastrefresh_config}/>
                     Idle
                 </div>
                 <div className="flex-grow-1 pl-2 d-flex align-items-center">
-                    <EditableText value={filename} save={this.updateFilename.bind(this)} multiline={false} >
-                        {filename}
+                    <EditableText value={config_filename} save={this.updateFilename.bind(this)} multiline={false} >
+                        {config_filename}
                     </EditableText>
                 </div>
                 <div>
@@ -101,8 +101,8 @@ class InactiveRecordingBlock extends RecordingBlock {
     }
 
     renderTopics() {
-        if(!Array.isArray(this.props.selected_topics)) {
-            return "ERROR: " + this.props.selected_topics
+        if(!Array.isArray(this.props.config_topics)) {
+            return "ERROR: " + this.props.config_topics
         }
 
         return this.allTopicNames().map((topicname) => {
@@ -129,11 +129,13 @@ class InactiveRecordingBlock extends RecordingBlock {
 
 class ActiveRecordingBlock extends RecordingBlock {
     render() {
+        let {recording_file, recording_duration, recording_filesize, lastrefresh_recording} = this.props;
         return <div className="block y-50 d-flex flex-fill flex-column">
             <div className="mb-2 ">
-                <span className="text-large">Recording</span>
-                <span className="pl-1 text-small">| {this.props.bagfilename}</span>
-                <span className="pl-1 text-small">| recording for {this.props.recordingduration}</span>
+                <span className="text-large"><Indicator color={IndicatorColor.active} dataTimestamp={lastrefresh_recording}/> Recording</span>
+                <span className="pl-1 text-small">| {recording_file}</span>
+                <span className="pl-1 text-small">| recording for {recording_duration}s</span>
+                <span className="pl-1 text-small">| {recording_filesize}mb</span>
                 <div className="float-right">
                     <button type="button"
                             className="btn btn-sm btn-outline-primary"

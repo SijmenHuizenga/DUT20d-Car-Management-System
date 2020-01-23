@@ -1,0 +1,19 @@
+# The full filename and apth of the bag, starting at root /
+string filename
+
+---
+
+# The full filename and apth of the bag, starting at root /
+string filename
+
+# The start time of the bag. Timestamp in seconds, includes fractions of a second
+float32 starttime
+
+# The end time of the bag. Timestamp in seconds, includes fractions of a second
+float32 endtime
+
+# information about the recorded messages
+BagTopicInfo[] topics
+
+# Size of bag in mb
+uint16 filesize

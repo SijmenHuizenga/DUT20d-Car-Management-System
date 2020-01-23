@@ -67,7 +67,7 @@ export class Indicator extends React.Component<Props, {outdated :boolean}> {
     };
 
     shouldComponentUpdate(nextProps: Props, nextState: { outdated: boolean }) {
-        return nextState.outdated !== this.state.outdated || nextProps.tooltip !== this.props.tooltip;
+        return nextProps.color !== this.props.color || nextState.outdated !== this.state.outdated || nextProps.tooltip !== this.props.tooltip;
     }
 
     render() {

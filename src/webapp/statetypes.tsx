@@ -118,11 +118,14 @@ export function getStatisticsHealth(ts :TopicStatistic | null) :[IndicatorColor,
 
 export interface Recording {
     is_recording :boolean
-    filename :string
-    bagfilename :string
-    recordingduration :string
-    selected_topics :string[]
-    lastrefresh :number
+    config_topics :string[]
+    config_filename :string
+    recording_file :string
+    recording_duration :number
+    recording_filesize :number
+    recording_topics :string[]
+    lastrefresh_recording :number
+    lastrefresh_config :number
 }
 
 export interface SSH {
