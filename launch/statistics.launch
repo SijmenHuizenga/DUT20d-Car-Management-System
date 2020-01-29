@@ -1,5 +1,0 @@
-<launch>
-    <!-- Launches the cms statistics node -->
-    <node ns="cms" name="statistics" type="statistics" pkg="cms" output="screen"/>
-</launch>
-

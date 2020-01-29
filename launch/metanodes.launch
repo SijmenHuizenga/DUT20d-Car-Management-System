@@ -1,5 +1,0 @@
-<launch>
-    <!-- Launches the cms rosbag node -->
-    <node ns="cms" name="recording" type="recordingnode.py" pkg="cms" output="screen"/>
-</launch>
-

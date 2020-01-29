@@ -5,20 +5,20 @@ from .sshclient import SSHClient
 from .state import State, SystemdService, SystemdServiceRunning, SystemdServiceEnabled
 
 services = [
-    "manualjoycontrol.service",
-    "rosrecord.service",
-    "acceleration_dut18d.service",
-    "skidpad_dut18d.service",
-    "trackdrive_dut18d.service",
-    "sine_wave.service",
     "roscore.service",
-    "megamission.service",
-    "vehicle_interface.service",
-    "mavros.service",
-    "cms_statistics.service",
-    "cms_metanodes.service",
-    "run_cameras.service",
+    "cameras.service",
+    "infrastructure.service",
     "lidar.service",
+    "missioncontrol.service",
+    "se.service",
+    "statistics.service",
+    "vehicleinterface.service",
+    "pixhawk.service",
+    "mission_acceleration.service",
+    "mission_inspection.service",
+    "mission_joystick.service",
+    "mission_skidpad.service",
+    "mission_trackdrive.service",
 ]
 
 

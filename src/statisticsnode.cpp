@@ -15,6 +15,7 @@ std::vector<std::string> topics = {
     "/camera/quad3/image_raw",
     "/camera/quad4/image_raw",
     "/velodyne_packets",
+    "/velodyne_points",
     "/camera/image_raw",
     "/mavros/imu/data_raw",
     "/mavros/local_position/pose",
