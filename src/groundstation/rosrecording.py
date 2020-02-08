@@ -3,7 +3,7 @@ import rospy
 from cms.msg import RecordingConfig
 from cms.srv import RecordingUpdateConfigRequest
 
-from groundstation.logbook import Logbook
+from .logbookconnector import add_logline
 from .sshclient import SSHClient
 from .state import State
 
@@ -12,11 +12,9 @@ class RosRecorder:
     def __init__(self,
                  state,  # type: State
                  ssh,  # type: SSHClient
-                 logbook  # type: Logbook
                  ):
         self.ssh = ssh
         self.state = state
-        self.logbook = logbook
         self.update_recordingconfig_service = None
         self.rosbaginfo_service = None
         self.statuscallback_first = True
@@ -34,9 +32,9 @@ class RosRecorder:
     def status_callback(self, status):
         if not self.statuscallback_first:
             if not self.state.recording.is_recording and status.recordingactive:
-                self.logbook.add_line(time.time(), "Recording started, filename: %s" % status.filename, "recorder")
+                add_logline(time.time(), "Recording started, filename: %s" % status.filename, "recorder")
             if self.state.recording.is_recording and not status.recordingactive:
-                self.logbook.add_line(time.time(), "Recording stopped after %s seconds." % self.state.recording.recording_duration, "recorder")
+                add_logline(time.time(), "Recording stopped after %s seconds." % self.state.recording.recording_duration, "recorder")
 
         self.state.recording.is_recording = status.recordingactive
         self.state.recording.recording_file = status.filename

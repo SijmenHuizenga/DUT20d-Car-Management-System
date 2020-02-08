@@ -32,22 +32,6 @@ class Rosnode:
         self.up = False  # type: bool
 
 
-class LogbookLine:
-    def __init__(self, timestamp, text, source, rowid=None):
-        # The timestamp on which the line resides.
-        # If the line is updated the old value is replaced by the new.
-        self.timestamp = timestamp  # type: float
-
-        # The multiline and markdown supported text.
-        self.text = text  # type: str
-
-        # Who made this logline? This field keeps track of who issued the line.
-        self.source = source  # type: str
-
-        # The id of the row in the database. Optional.
-        self.rowid = rowid  # type: Optional[int]
-
-
 # YES I KNOW ENUMS EXIST BUT I JUST SPENT 90 MINUTES TRYING
 # TO GET THEM TO WORK AND I FAILD SO NOW WE USE STRINGS AAH
 # IF YOU WANT ENUMS GO AHEAD FIX IT PLZZ thank you
@@ -201,7 +185,6 @@ class State:
     ssh = SSH()
     rosnode = Rosnode()
     recording = Recording()
-    logbook = []  # type: List[LogbookLine]
     systemdservices = []  # type: List[SystemdService]
     topics = []  # type: List[Topic]
     nodes = []  # type: List[Node]
@@ -212,9 +195,7 @@ class State:
     lastping = 0
     somethingtoemit = True
 
-    def __init__(self, db):
-        self.db = db
-        self.populate_memory_state()
+    def __init__(self):
         self.socketio = None
 
     def start(self):
@@ -236,15 +217,8 @@ class State:
                 self.lastping = time.time()
                 self.somethingtoemit = False
 
-
     def emit_state(self):
         self.somethingtoemit = True
-
-    def populate_memory_state(self):
-        self.logbook = map(self.logline_fromdict, self.db.select_all("SELECT rowid, * FROM logbook", {}))
-
-    def logline_fromdict(self, d):
-        return LogbookLine(d['timestamp'], d['text'], d['source'], d['rowid'])
 
     def set_socketio(self, sio):
         self.socketio = sio
@@ -259,7 +233,6 @@ class State:
             'ssh': self.ssh,
             'rosnode': self.rosnode,
             'recording': self.recording,
-            'logbook': self.logbook,
             'topics': self.topics,
             'nodes': self.nodes,
             'systemdservices': self.systemdservices,

@@ -5,11 +5,8 @@ import Requestor from "../util/Requestor";
 import {LogbookLine} from "../statetypes";
 import {toast} from "react-toastify";
 
-interface Props {
-    lines :LogbookLine[]
-}
-
 interface State {
+    lines :LogbookLine[]
     input :string
     inputDisabled :boolean
     scrollStickToBottom :boolean
@@ -18,15 +15,18 @@ interface State {
     dragCurrentHoverRowid :number | null
 }
 
-class LogbookBlock extends React.Component<Props, State> {
+class LogbookBlock extends React.Component<{}, State> {
     private scroller: HTMLDivElement | null;
     private inputfield: HTMLInputElement | null;
+    private timerID: NodeJS.Timeout | null;
 
-    constructor(props: Props) {
+    constructor(props: {}) {
         super(props);
         this.inputfield = null;
         this.scroller = null;
+        this.timerID = null;
         this.state = {
+            lines: [],
             input: '',
             inputDisabled: false,
             scrollStickToBottom: true,
@@ -197,6 +197,14 @@ class LogbookBlock extends React.Component<Props, State> {
 
     componentDidMount() {
         this.scrollToBottom();
+        this.timerID = setInterval(
+            () => this.reloadLogbook(),
+            1000
+        );
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.timerID!);
     }
 
     componentDidUpdate() {
@@ -219,11 +227,21 @@ class LogbookBlock extends React.Component<Props, State> {
         return false;
     }
 
+    reloadLogbook() {
+        Requestor.execute(`http://${window.location.hostname}:1095/logbook`, 'GET')
+            .then((response) => response.json())
+            .then((json) => this.setState({lines: json}))
+            .catch((error) => {
+                //todo show some kind of error
+            })
+    }
+
     storeNewLine() {
         this.setState({inputDisabled: true, scrollStickToBottom: true});
 
-        Requestor.execute('/logbook', 'POST', {text: this.state.input, source: 'human'})
-            .then(() => this.setState({inputDisabled: false, input: ''}))
+        Requestor.execute(`http://${window.location.hostname}:1095/logbook`, 'POST', {text: this.state.input, source: 'human'})
+            .then((response) => response.json())
+            .then((json) => this.setState({inputDisabled: false, input: '', lines: json}))
             .catch((error) => {
                 toast('Failed to store logline: ' + error, {type: 'error'});
                 this.setState({
@@ -233,17 +251,17 @@ class LogbookBlock extends React.Component<Props, State> {
     }
 
     updateLine = (rowid: number, changeset: any) => {
-        return Requestor.put(`/logbook/${rowid}`, changeset)
-            .then(() => {
-                return true;
-            })
+        return Requestor.put(`http://${window.location.hostname}:1095/logbook/${rowid}`, changeset)
+            .then((response) => response.json())
+            .then((json) => this.setState({lines: json}))
+            .then(() => true)
             .catch((error) => {
                 toast('Failed to update logline: ' + error, {type: 'error'});
                 return false;
             });
     };
 
-    lines = () => [...this.props.lines].sort((a, b) => a.timestamp - b.timestamp);
+    lines = () => [...this.state.lines].sort((a, b) => a.timestamp - b.timestamp);
 
 }
 

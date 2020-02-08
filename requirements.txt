@@ -6,3 +6,5 @@ typing
 jsonpickle
 eventlet
 ssh2-python
+waitress
+requests

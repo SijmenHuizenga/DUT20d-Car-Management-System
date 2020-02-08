@@ -22,14 +22,6 @@ const fakeDashboard: Dashboard = {
         timestamp: 1234,
         success: true
     },
-    logbook: [
-        {rowid: 111, timestamp: 1, text: "Example line 111", source: "human"},
-        {rowid: 222, timestamp: 2, text: "Example line 222", source: "human"},
-        {rowid: 333, timestamp: 3, text: "Ros Connection open", source: "example"},
-        {rowid: 444, timestamp: 4, text: "Example line 333", source: "human"},
-        {rowid: 555, timestamp: 5, text: "Lost connection", source: "example"},
-        {rowid: 666, timestamp: 66, text: "Example line 666", source: "human"},
-    ],
     topics: [
         {name: "/mavros/exampletopic/1", lastseen: 1577545897, statistics: {traffic: 244, lastseen: 123456}},
         {name: "/world_state", lastseen: 1577545897, statistics: null},
@@ -180,7 +172,7 @@ class DashboardComponent extends React.Component<Dashboard, {}> {
     render() {
         console.log("render", this.props);
 
-        let {rosnode, ping, logbook, recording, topics, nodes, ssh,
+        let {rosnode, ping, recording, topics, nodes, ssh,
             systemdservices, subscriptions, publications} = this.props;
 
         return <main onClick={this.containerClicked}>
@@ -204,7 +196,7 @@ class DashboardComponent extends React.Component<Dashboard, {}> {
             </div>
             <div className="row">
                 <div className="col-xl-6 col-xs-12 gutter-small">
-                    <LogbookBlock lines={logbook}/>
+                    <LogbookBlock />
                 </div>
                 <div className="col-xl-6 col-xs-12 gutter-small">
                     <RecordingBlock {...recording} topics={topics} publications={publications}/>

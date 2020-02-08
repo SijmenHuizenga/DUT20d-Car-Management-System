@@ -6,7 +6,6 @@ export interface Dashboard {
     rosnode :{
         up :boolean
     }
-    logbook :LogbookLine[]
     ping :Ping
     ssh :SSH
     recording :Recording

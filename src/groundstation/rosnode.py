@@ -6,18 +6,15 @@ import rospy
 from cms.msg import Statistics, RecordingStatus, RecordingConfig
 from cms.srv import RecordingUpdateConfig
 
+from .logbookconnector import add_logline
 from .rosrecording import RosRecorder
-from .database import Database
-from .logbook import Logbook
 from .state import State, TopicType, Topic, TopicSubscription, Node, TopicPublication, TopicStatistic
 
 
 class RosNode:
 
     def __init__(self,
-                 db,  # type: Database
                  state,  # type: State
-                 logbook,  # type: Logbook
                  rosrecorder,  # type: RosRecorder
                  ):
         self.statistics_subscriber = None
@@ -26,10 +23,8 @@ class RosNode:
         self.update_recordingconfig_service = None
         self.rosbaginfo_service = None
         self.meta_timer = None
-        self.rosmeta = RosMeta(db, state)
-        self.db = db
+        self.rosmeta = RosMeta(state)
         self.state = state
-        self.logbook = logbook
         self.rosrecorder = rosrecorder
 
     def run(self):
@@ -43,7 +38,7 @@ class RosNode:
                 time.sleep(2)
                 continue
             self.run_node()
-            self.logbook.add_line(time.time(), "Disconnected from ROS master", "groundstation")
+            add_logline(time.time(), "Disconnected from ROS master", "groundstation")
 
     def run_node(self):
         rospy.init_node('cms')
@@ -51,7 +46,7 @@ class RosNode:
         self.register_timers()
         self.create_serviceproxies()
         self.set_rosnode_health(True)
-        self.logbook.add_line(time.time(), "Connected to ROS master", "groundstation")
+        add_logline(time.time(), "Connected to ROS master", "groundstation")
         rate_1_second = rospy.Rate(2)
         while not rospy.is_shutdown():
             if self.is_master_disconnected():
@@ -98,8 +93,6 @@ class RosNode:
         return not rosgraph.is_master_online()
 
     def set_rosnode_health(self, up):
-        self.db.insert('INSERT INTO rosnodehealth VALUES (:now, :up)',
-                       {'now': time.time(), 'up': up})
         self.state.rosnode.up = up
 
     def statistics_callback(self, statisticsmessage):
@@ -124,10 +117,8 @@ class RosNode:
 
 class RosMeta:
     def __init__(self,
-                 db,  # type: Database
                  state,  # type: State
                  ):
-        self.db = db
         self.state = state
         pass
 

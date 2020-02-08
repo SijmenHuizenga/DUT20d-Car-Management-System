@@ -1,18 +1,10 @@
 import logging
-import time
 import sys
 import traceback
 
-# Initializes the eventlet async webserver.
-# This is required for multithreaded message emitting over websocket.
-from eventlet import monkey_patch as monkey_patch
-monkey_patch()
-
-# from flask_socketio import SocketIO
-from flask import Flask, request, abort, jsonify, Response, current_app
+from flask import Flask, request, abort, Response, current_app
 from flask_socketio import SocketIO
 
-from .logbook import Logbook
 from .rosrecording import RosRecorder
 from .sshclient import SSHClient
 from .state import State
@@ -24,13 +16,11 @@ class Webserver:
 
     def __init__(self,
                  state,  # type: State
-                 logbook,  # type: Logbook
                  ssh,  # type: SSHClient
                  recorder  # type: RosRecorder
                  ):
         self.state = state
         self.app = None
-        self.logbook = logbook
         self.ssh = ssh
         self.recorder = recorder
 
@@ -46,8 +36,6 @@ class Webserver:
         app.add_url_rule('/', 'root', self.root)
         app.add_url_rule('/state', 'state', self.request_state, methods=['GET'])
         app.add_url_rule('/runcommand', 'runcommand', self.exec_ssh_command, methods=['POST'])
-        app.add_url_rule('/logbook', 'logbook_create', self.logbook_create, methods=['POST'])
-        app.add_url_rule('/logbook/<int:rowid>', 'logbook_update', self.logbook_update, methods=['PUT'])
         app.add_url_rule('/rebootluke', 'reboot_luke', self.reboot_luke, methods=['POST'])
         app.add_url_rule('/recording/toggletopic', 'recording_toggle', self.recording_toggle, methods=['PUT'])
         app.add_url_rule('/recording/filename', 'recording_setfilename', self.recording_setfilename, methods=['PUT'])
@@ -62,34 +50,6 @@ class Webserver:
 
     def request_state(self):
         return Response(response=self.state.to_json(), status=200, mimetype='application/json')
-
-    def logbook_create(self):
-        try:
-            content = request.get_json()
-            if 'text' not in content:
-                abort(400)
-            if 'timestamp' not in content:
-                timestamp = time.time()
-            else:
-                timestamp = request.json.timestamp
-            self.logbook.add_line(timestamp, content['text'], content['source'])
-            return "ok", 201
-        except Exception, e:
-            print "error while handling /logbook request:", e
-            abort(500, e)
-
-    def logbook_update(self, rowid):
-        try:
-            changes = request.get_json()
-            if 'text' in changes:
-                self.logbook.update_line_text(rowid, changes['text'])
-
-            if 'timestamp' in changes:
-                self.logbook.update_line_timestamp(rowid, changes['timestamp'])
-            return "ok", 201
-        except Exception, e:
-            print "error while handling /logbook request:", e
-            abort(500, e)
 
     def reboot_luke(self):
         try:

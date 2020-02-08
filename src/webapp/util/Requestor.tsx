@@ -2,12 +2,12 @@ function put(uri :string, body={}) {
     return execute(uri, "PUT", body)
 }
 
-function execute(uri :string, method :string, body={}) {
+function execute(uri :string, method="", body={}): Promise<any> {
     return new Promise((resolve, reject) => {
         fetch(uri, {
             method: method,
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(body)
+            headers: method === 'GET' ? {} : {'Content-Type': 'application/json'},
+            body: method === 'GET' ? null : JSON.stringify(body)
         }).then((response) => {
             if ((response.status === 201 || response.status === 200) && response.ok) {
                 resolve(response);
