@@ -66,7 +66,7 @@ class TopicIndicator extends React.Component<TopicInfo, {}> {
             || nextProps.lastseen !== this.props.lastseen
             || !eqStatistics(nextProps.statistics, this.props.statistics)
             || !eqTopicPubSubs(nextProps.subscriptions, this.props.subscriptions)
-            || !eqTopicPubSubs(nextProps.publications, this.props.publications)
+            || !eqTopicPubSubs(nextProps.publications, this.props.publications);
     }
 
     renderTooltip = () => {
