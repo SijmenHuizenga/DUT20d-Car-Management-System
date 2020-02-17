@@ -15,9 +15,7 @@ import {TooltipContainer} from "./util/Tooltip";
 
 export const devmode = false;
 const fakeDashboard: Dashboard = {
-    rosnode: {
-        up: false,
-    },
+    rosnode_up: false,
     ping: {
         timestamp: 1234,
         success: true
@@ -129,7 +127,7 @@ export default class DashboardStateLoader extends React.PureComponent<{}, State>
             groundStationState: devmode ? fakeDashboard : null,
             connectionerror: devmode ? null : "groundstation offline"
         };
-        this.socket = io(window.location.hostname + ':5000');
+        this.socket = io(window.location.hostname + ':1097');
     }
 
     render() {
@@ -172,7 +170,7 @@ class DashboardComponent extends React.Component<Dashboard, {}> {
     render() {
         console.log("render", this.props);
 
-        let {rosnode, ping, recording, topics, nodes, ssh,
+        let {rosnode_up, ping, recording, topics, nodes, ssh,
             systemdservices, subscriptions, publications} = this.props;
 
         return <main onClick={this.containerClicked}>
@@ -182,13 +180,25 @@ class DashboardComponent extends React.Component<Dashboard, {}> {
                     {/*<HealthBlock/>*/}
                 {/*</div>*/}
                 <div className="col-xl-3 col-lg-6 col-sm-6 col-xs-12 gutter-small">
-                    <NodesBlock nodes={nodes} topics={topics} subscriptions={subscriptions} publications={publications}/>
+                    {
+                        // @ts-ignore
+                        [nodes, topics, subscriptions, publications].includes(undefined)
+                            ? "Undefined"
+                            : <NodesBlock nodes={nodes} topics={topics} subscriptions={subscriptions} publications={publications}/>
+                    }
+
                 </div>
                 <div className="col-xl-3 col-lg-6 col-sm-6 col-xs-12 gutter-small">
-                    <TopicsBlock topics={topics} subscriptions={subscriptions} publications={publications}/>
+                    {
+                        // @ts-ignore
+                        [topics, subscriptions, publications].includes(undefined)
+                            ? "Undefined"
+                            : <TopicsBlock topics={topics} subscriptions={subscriptions} publications={publications}/>
+                    }
+
                 </div>
                 <div className="col-xs-12 col-xl-6 gutter-small ">
-                    <ComputeboxBlock rosnode_up={rosnode.up} ping={ping} ssh={ssh}/>
+                    <ComputeboxBlock rosnode_up={rosnode_up} ping={ping} ssh={ssh}/>
                     <ServicesBlock systemdservices={systemdservices}/>
                     <GitBlock/>
                 </div>
@@ -199,7 +209,12 @@ class DashboardComponent extends React.Component<Dashboard, {}> {
                     <LogbookBlock />
                 </div>
                 <div className="col-xl-6 col-xs-12 gutter-small">
-                    <RecordingBlock {...recording} topics={topics} publications={publications}/>
+                    {
+                        // @ts-ignore
+                        [topics, recording, publications].includes(undefined)
+                            ? "undefined"
+                            : <RecordingBlock {...recording} topics={topics} publications={publications}/>
+                    }
                 </div>
             </div>
 

@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+
+<launch>
+    <group ns="cms">
+        <node pkg="cms" type="groundstation-webserver.py" name="webserver" output="screen" respawn="true"/>
+        <node pkg="cms" type="groundstation-logbook.py" name="logbook" output="screen" respawn="true"/>
+        <node pkg="cms" type="groundstation-ssh.py" name="ssh" output="screen" respawn="true"/>
+        <node pkg="cms" type="groundstation-ros.py" name="ros" output="screen" respawn="true"/>
+    </group>
+</launch>

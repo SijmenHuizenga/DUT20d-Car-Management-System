@@ -1,30 +1,13 @@
 import datetime
+import logging
 import sqlite3
 import time
-import logging
 
 import jsonpickle as jsonpickle
-from flask import Flask, abort, request, Response
-from flask_cors import CORS
-from waitress import serve
+from flask import request, Response
 
-logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S [logbookserver]', level=logging.INFO)
-
-
-class LogbookLine:
-    def __init__(self, timestamp, text, source, rowid=None):
-        # The timestamp on which the line resides.
-        # If the line is updated the old value is replaced by the new.
-        self.timestamp = timestamp  # type: float
-
-        # The multiline and markdown supported text.
-        self.text = text  # type: str
-
-        # Who made this logline? This field keeps track of who issued the line.
-        self.source = source  # type: str
-
-        # The id of the row in the database. Optional.
-        self.rowid = rowid  # type: int
+from groundstation.models import LogbookLine
+from groundstation.utils import dict_factory
 
 
 class Logbook:
@@ -39,13 +22,13 @@ class Logbook:
             return Response(response=jsonpickle.encode(self.get_all(), unpicklable=False, warn=True), status=200, mimetype='application/json')
         except Exception, e:
             print "error while handling /logbook request:", e
-            abort(500, e)
+            return str(e), 500
 
     def create(self):
         try:
             content = request.get_json()
             if 'text' not in content or 'source' not in content:
-                abort(400)
+                return "json field 'text' or 'source' not found", 400
             if 'timestamp' not in content:
                 timestamp = time.time()
             else:
@@ -54,7 +37,7 @@ class Logbook:
             return self.get()
         except Exception, e:
             print "error while handling /logbook request:", e
-            abort(500, e)
+            return str(e), 500
 
     def update(self, rowid):
         try:
@@ -67,7 +50,7 @@ class Logbook:
             return self.get()
         except Exception, e:
             print "error while handling /logbook request:", e
-            abort(500, e)
+            return str(e), 500
 
     def create_schema(self):
         with self.database:
@@ -125,19 +108,3 @@ class Logbook:
         logging.info('Updated line timestmap rowid %d to "%f"' % (rowid, timestamp))
 
 
-def dict_factory(cursor, row):
-    d = {}
-    for idx, col in enumerate(cursor.description):
-        d[col[0]] = row[idx]
-    return d
-
-
-logbook = Logbook()
-
-app = Flask(__name__)
-CORS(app)
-app.config['PROPAGATE_EXCEPTIONS'] = True
-app.add_url_rule('/logbook', 'logbook_get', logbook.get, methods=['GET'])
-app.add_url_rule('/logbook', 'logbook_create', logbook.create, methods=['POST'])
-app.add_url_rule('/logbook/<int:rowid>', 'logbook_update', logbook.update, methods=['PUT'])
-serve(app, host="0.0.0.0", port=1095)

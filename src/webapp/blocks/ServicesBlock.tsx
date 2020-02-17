@@ -1,6 +1,6 @@
 import React from "react";
 import Tooltip from "../util/Tooltip";
-import {SystemdService, SystemdServiceRunning, SystemdServiceEnabled} from "../statetypes";
+import {SystemdService, SystemdServiceEnabled, SystemdServiceRunning} from "../statetypes";
 import {ContextMenu, ContextMenuTrigger, MenuItem} from "react-contextmenu";
 import {Indicator, IndicatorColor} from "../util/Indicator";
 import Requestor from "../util/Requestor";
@@ -8,6 +8,9 @@ import {toast} from "react-toastify";
 
 class ServicesBlock extends React.Component<{ systemdservices: SystemdService[] }, {}> {
     render() {
+        if(this.props.systemdservices === undefined) {
+            return null
+        }
         return <div className="block">
             {this.props.systemdservices.map((service) =>
                 <ServiceIndicator key={service.name} {...service}/>
@@ -107,7 +110,7 @@ class ServiceIndicator extends React.Component<SystemdService> {
 
     handleClick(command :string, title :string) {
         const toastid = toast(`${title}...`, { autoClose: false });
-        Requestor.execute("/runcommand", "POST", {command})
+        Requestor.runcommand(command)
             .then((body :any) => body.json())
             .then((body :any) => {
                 toast.update(toastid, {

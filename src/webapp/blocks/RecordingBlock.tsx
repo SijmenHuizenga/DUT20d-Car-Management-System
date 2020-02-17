@@ -1,12 +1,7 @@
 import React from "react";
 import EditableText from "../util/EditableText";
 import Requestor from "../util/Requestor"
-import {
-    getTopicHealthPubs,
-    Recording,
-    Topic,
-    TopicPublication,
-} from "../statetypes";
+import {getTopicHealthPubs, Recording, Topic, TopicPublication,} from "../statetypes";
 import {Indicator, IndicatorColor} from "../util/Indicator";
 import Tooltip from "../util/Tooltip";
 import {toast} from "react-toastify";
@@ -25,7 +20,7 @@ class RecordingContainer extends React.Component<Props, {}> {
 class RecordingBlock extends React.Component<Props> {
 
     allTopicNames() :string[]{
-        let out = [...this.props.config_topics, ...this.props.topics.map((topic) => topic.name)];
+        let out = [...(this.props.config_topics || []), ...(this.props.topics || []).map((topic) => topic.name)];
         out.sort(this.sortTopics);
         return out.filter((value, index, self) => self.indexOf(value) === index);
     }
@@ -45,7 +40,7 @@ class RecordingBlock extends React.Component<Props> {
         const startstop = this.props.is_recording ? "stop" : "start";
         const toastid = toast(`${startstop} recording...`, { autoClose: false });
 
-        return Requestor.put("/recording/" + startstop, {})
+        return Requestor.runcommand(`sudo systemctl ${startstop} rosrecord`)
             .then(() =>
                 toast.update(toastid, {
                     render: `${startstop} recording ok`,
@@ -116,7 +111,7 @@ class InactiveRecordingBlock extends RecordingBlock {
     }
 
     updateFilename(newname :string) {
-        return Requestor.put("/recording/filename", {filename: newname})
+        return Requestor.setRecordingFilename(newname)
             .then(() => {
                 return true;
             })
@@ -193,10 +188,8 @@ class TopicSelector extends React.PureComponent<{topicname :string, selected :bo
         const toastid = toast(`${e.currentTarget.checked ? 'un' : ''}selecting topic ${this.props.topicname} for recording`,
             { autoClose: false });
 
-        return Requestor.put("/recording/toggletopic", {
-            topicname: this.props.topicname,
-            selected: e.currentTarget.checked
-        }).then(() => toast.update(toastid, {
+        return Requestor.setRecordingTopic(this.props.topicname,e.currentTarget.checked)
+        .then(() => toast.update(toastid, {
             render: `${e.currentTarget.checked ? 'un' : ''}selected topic ${this.props.topicname} for recording`,
             type: toast.TYPE.SUCCESS,
             autoClose: 5000

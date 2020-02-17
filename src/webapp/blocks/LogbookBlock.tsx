@@ -228,7 +228,7 @@ class LogbookBlock extends React.Component<{}, State> {
     }
 
     reloadLogbook() {
-        Requestor.execute(`http://${window.location.hostname}:1095/logbook`, 'GET')
+        Requestor.getLogbook()
             .then((response) => response.json())
             .then((json) => this.setState({lines: json}))
             .catch((error) => {
@@ -239,7 +239,7 @@ class LogbookBlock extends React.Component<{}, State> {
     storeNewLine() {
         this.setState({inputDisabled: true, scrollStickToBottom: true});
 
-        Requestor.execute(`http://${window.location.hostname}:1095/logbook`, 'POST', {text: this.state.input, source: 'human'})
+        Requestor.addLogbookLine(this.state.input)
             .then((response) => response.json())
             .then((json) => this.setState({inputDisabled: false, input: '', lines: json}))
             .catch((error) => {
@@ -251,7 +251,7 @@ class LogbookBlock extends React.Component<{}, State> {
     }
 
     updateLine = (rowid: number, changeset: any) => {
-        return Requestor.put(`http://${window.location.hostname}:1095/logbook/${rowid}`, changeset)
+        return Requestor.updateLogbookLine(rowid, changeset)
             .then((response) => response.json())
             .then((json) => this.setState({lines: json}))
             .then(() => true)

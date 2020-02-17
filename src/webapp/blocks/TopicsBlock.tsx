@@ -18,6 +18,10 @@ interface Props {
 
 class TopicsBlock extends React.Component<Props, {}> {
     render() {
+        if(this.props.topics === undefined) {
+            return null;
+        }
+
         const sortedTopics = [...this.props.topics].sort((a :Topic, b :Topic) => {
             if((a.statistics === null) === (b.statistics === null)) {
                 return a.name.localeCompare(b.name);

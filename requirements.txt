@@ -1,5 +1,6 @@
 flask
 flask_socketio
+flask_cors
 paramiko
 enum34
 typing
