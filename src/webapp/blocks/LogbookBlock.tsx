@@ -4,6 +4,7 @@ import EditableText from "../util/EditableText";
 import Requestor from "../util/Requestor";
 import {LogbookLine} from "../statetypes";
 import {toast} from "react-toastify";
+import {ContextMenu, ContextMenuTrigger, MenuItem} from "react-contextmenu";
 
 interface State {
     lines :LogbookLine[]
@@ -296,7 +297,33 @@ class LogbookLineComponent extends React.PureComponent<LineProps, {moving :boole
                     <Markdown source={text} className="pl-1 logline"/>
                 </EditableText>
             </td>
+            <td>
+                <ContextMenuTrigger id={`service${this.props.rowid}logbooktrigger`} holdToDisplay={0}>
+                    <div className={"text-small text-grayyed"}>⋮</div>
+                </ContextMenuTrigger>
+                <ContextMenu id={`service${this.props.rowid}logbooktrigger`}>
+                    <MenuItem onClick={() => this.postToSlack()}>
+                        Post to slack
+                    </MenuItem>
+                </ContextMenu>
+            </td>
         </tr>
+    }
+
+    postToSlack() {
+        const toastid = toast(`Posting message to slack...`, { autoClose: false });
+        Requestor.slackLogbookLine(this.props.rowid)
+            .then(() =>
+                toast.update(toastid, {
+                    render: "Posted message to slack",
+                    type: toast.TYPE.SUCCESS,
+                    autoClose: 5000
+                })
+            )
+            .catch((error) => toast.update(toastid, {
+                render: <span title={error}>Posting message to slack failed</span>,
+                type: toast.TYPE.WARNING,
+            }))
     }
 
     renderTimestamp(timestamp :number) {

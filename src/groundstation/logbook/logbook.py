@@ -4,6 +4,7 @@ import sqlite3
 import time
 
 import jsonpickle as jsonpickle
+import requests
 from flask import request, Response
 
 from groundstation.models import LogbookLine
@@ -12,10 +13,11 @@ from groundstation.utils import dict_factory
 
 class Logbook:
 
-    def __init__(self):
-        self.database = sqlite3.connect('logbook-%s.db' % datetime.date.today(), check_same_thread=False)
+    def __init__(self, slackurl):
+        self.database = sqlite3.connect('/var/cms/logbook-%s.db' % datetime.date.today(), check_same_thread=False)
         self.database.row_factory = dict_factory
         self.create_schema()
+        self.slackurl = slackurl
 
     def get(self):
         try:
@@ -48,6 +50,22 @@ class Logbook:
             if 'timestamp' in changes:
                 self.update_line_timestamp(rowid, changes['timestamp'])
             return self.get()
+        except Exception, e:
+            print "error while handling /logbook request:", e
+            return str(e), 500
+
+    def slack(self, rowid):
+        try:
+            line = self.get_line(rowid)
+            r = requests.post(url=self.slackurl,
+                              data=jsonpickle.encode({
+                                  "text": datetime.datetime.fromtimestamp(line.timestamp).strftime('%Y-%m-%d %H:%M:%S') + ": " + line.text
+                              }, unpicklable=False, warn=True),
+                              headers={'content-type': 'application/json'})
+            if r.status_code != 200:
+                return str("Slack returned status code " + r.status_code), 503
+            else:
+                return str("ok"), 200
         except Exception, e:
             print "error while handling /logbook request:", e
             return str(e), 500

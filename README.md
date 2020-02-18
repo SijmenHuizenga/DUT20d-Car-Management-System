@@ -28,6 +28,11 @@ _DO NOT RUN `apt-get install npm` because that will break ros!!_
 Run `npm install --dev` in the current working directory to get all dependencies installed.
 Run `npm run build`, wait for it to finish
 
+Now, create a new file `/var/cms-keys.yaml` and add the keys. What keys? Ask Sijmen.
+
+Create the directory `/var/cms/` and give it permissions to the current users to create files. 
+CMS will store the logbook databases in there.
+
 After that, the groundstation can be started using `groundstation.launch`.
 Just run `roslaunch cms groundstation.launch` to run it.
 _If you want to connect to an existing ros master (e.g. the car) you must first export environment variables ROS_MASTER_URI and ROS_IP in your shell_

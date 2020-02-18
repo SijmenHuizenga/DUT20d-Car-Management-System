@@ -54,5 +54,8 @@ export default {
     },
     updateLogbookLine(rowid :number, changeset :object) {
         return put(`http://${window.location.hostname}:1095/logbook/${rowid}`, changeset)
+    },
+    slackLogbookLine(rowid :number) {
+        return execute(`http://${window.location.hostname}:1095/logbook/${rowid}/slack`, 'POST')
     }
 }

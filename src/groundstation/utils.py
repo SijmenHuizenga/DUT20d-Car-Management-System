@@ -62,9 +62,17 @@ def update(d, u):
     return d
 
 
-def loadconfig():
-    with open(os.path.join(os.path.dirname(__file__), "../../config/car.yaml"), 'r') as stream:
+def load_yaml(filename):
+    with open(filename, 'r') as stream:
         try:
             return yaml.safe_load(stream)
         except yaml.YAMLError as exc:
             sys.exit(exc)
+
+
+def loadconfig():
+    return load_yaml(os.path.join(os.path.dirname(__file__), "../../config/car.yaml"))
+
+
+def loadsecrets():
+    return load_yaml("/var/cms-keys.yaml")
