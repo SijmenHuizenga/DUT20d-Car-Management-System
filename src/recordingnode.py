@@ -1,12 +1,14 @@
 #!/usr/bin/env python
-import os
 import datetime
+import os
 import subprocess
-import rospy
 import time
+
+import rospy
 from cms.msg import RecordingStatus, RecordingConfig, BagTopicInfo
-from cms.srv import RecordingUpdateConfig, RecordingUpdateConfigResponse, RecordingGetBagInfo, RecordingGetBagInfoResponse
-from rosbag.bag import Bag, ROSBagException
+from cms.srv import RecordingUpdateConfig, RecordingUpdateConfigResponse, RecordingGetBagInfo, \
+    RecordingGetBagInfoResponse
+from rosbag.bag import Bag
 
 
 class RosbagRecordNode:

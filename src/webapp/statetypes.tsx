@@ -3,9 +3,7 @@ import {IndicatorColor, isRecent} from "./util/Indicator";
 export const OUTDATED_AFTER_SECONDS = 5;
 
 export interface Dashboard {
-    rosnode :{
-        up :boolean
-    }
+    rosnode_up :boolean
     ping :Ping
     ssh :SSH
     recording :Recording

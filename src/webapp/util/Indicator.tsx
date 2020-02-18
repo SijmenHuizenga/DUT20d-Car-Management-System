@@ -45,12 +45,31 @@ export class Indicator extends React.Component<Props, {outdated :boolean}> {
         dataTimestamp: null,
         tooltip: null
     };
+    private timer: NodeJS.Timeout | undefined;
 
     constructor(props :Props) {
         super(props);
         this.state = {
             outdated: props.dataTimestamp == null ? false : !isRecent(props.dataTimestamp)
-        }
+        };
+    }
+
+    componentDidMount() {
+        this.timer = setInterval(() => {
+            if (this.props.dataTimestamp === null) {
+                return null;
+            }
+            this.setState(prevState => {
+                const newOutdated = !isRecent(this.props.dataTimestamp as number);
+                if (prevState.outdated !== newOutdated) {
+                    return {outdated: newOutdated}
+                }
+            })
+        }, 1000);
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.timer as NodeJS.Timeout);
     }
 
     static getDerivedStateFromProps = function (props :Props, state :{outdated :boolean}) {

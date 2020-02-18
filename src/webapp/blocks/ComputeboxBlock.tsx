@@ -33,7 +33,7 @@ class ComputeboxBlock extends React.Component<Props, State> {
                 &nbsp;
                 {this.renderSshIndicator()}
                 &nbsp;
-                {this.props.ssh.uptime}</span>
+                {(this.props.ssh || {uptime: "SSH not started"}).uptime}</span>
             <div className="float-right">
                 <button type="button"
                         className="btn btn-sm btn-outline-danger py-0"
@@ -45,6 +45,9 @@ class ComputeboxBlock extends React.Component<Props, State> {
     }
 
     renderSshIndicator() {
+        if(this.props.ssh === undefined) {
+            return null
+        }
         let {connected, lastping} = this.props.ssh;
         return <Indicator color={connected ? IndicatorColor.active : IndicatorColor.danger}
                                  dataTimestamp={lastping}
@@ -56,6 +59,9 @@ class ComputeboxBlock extends React.Component<Props, State> {
     };
 
     renderPingIndicator() {
+        if(this.props.ping === undefined) {
+            return null
+        }
         let {timestamp, success} = this.props.ping;
         return <Indicator color={success ? IndicatorColor.active : IndicatorColor.danger}
                           dataTimestamp={timestamp}
@@ -67,6 +73,9 @@ class ComputeboxBlock extends React.Component<Props, State> {
     };
 
     renderRosnodeIndicator() {
+        if(this.props.rosnode_up === undefined) {
+            return null
+        }
         let up = this.props.rosnode_up;
         return <Tooltip tooltip={() => `Ros connection ${up ? "up" : "down"}.`}>
             <Indicator color={up ? IndicatorColor.active : IndicatorColor.danger} />
@@ -77,7 +86,7 @@ class ComputeboxBlock extends React.Component<Props, State> {
         this.setState({
             rebootbtnDisabled: true
         });
-        Requestor.execute("/rebootluke", "POST")
+        Requestor.runcommand("sudo reboot")
             .then(() =>
                 toast("Reboot started")
             )

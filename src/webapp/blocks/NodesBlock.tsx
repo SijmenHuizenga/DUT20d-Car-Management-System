@@ -19,6 +19,10 @@ interface Props {
 
 class NodesBlock extends React.Component<Props> {
     render() {
+        if(this.props.nodes === undefined) {
+            return null;
+        }
+
         const sortedNodes = [...this.props.nodes].sort((a :Node, b :Node) => a.name.localeCompare(b.name));
 
         return <div className="block y-50">
