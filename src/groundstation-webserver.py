@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 # To test this script from the command line you can use the following command
 # > curl --data '{"text1": "1"}' -X POST http://localhost:1097/state --header "Content-Type:application/json"

@@ -9,3 +9,5 @@ eventlet
 ssh2-python
 waitress
 requests
+slackclient
+peewee

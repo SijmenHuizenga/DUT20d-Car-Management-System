@@ -2,3 +2,8 @@ host: luke
 ip: 192.168.1.1
 username: luke
 password: ""
+# This is the channel id found in web browser url when opening the channel it is the last random string like so:
+# https://app.slack.com/client/xx/<channelid>
+# CUSSY1UUF = #sijmens-secret-corner
+# CTFCQ7KLY = #testing-day-notes
+slackchannel: "CUSSY1UUF"

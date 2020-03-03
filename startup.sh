@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# This script is used by the cms laptop to startup cms.
+# It has hard-coded values to that system.
+# Don't try to use it somewhere else
+
 source ~/autonomy/devel/setup.bash
 roscd cms
 

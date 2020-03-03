@@ -103,6 +103,11 @@ h1, h2, h3, .h1, .h2, .h3
   border-left-width: 4px !important
   border-right-width: 4px !important
 
+.btn-link
+  color: colors.$text
+  &:hover, &:focus, &:active
+    color: colors.$text-bright
+
 .btn-outline-primary 
   color: colors.$text
   border: 2px solid colors.$text-dark
@@ -112,6 +117,8 @@ h1, h2, h3, .h1, .h2, .h3
     border-color: colors.$text
     outline: 0
     background: transparent
+  &:disabled
+    color: colors.$text-dark
 
 .btn-outline-danger
   color: colors.$text
