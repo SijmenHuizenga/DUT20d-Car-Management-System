@@ -12,7 +12,8 @@ interface Props {
 }
 
 interface State {
-    rebootbtnDisabled: boolean
+    rebootbtnDisabled: boolean,
+    clearPerceptionButtonDisabled: boolean,
 }
 
 class ComputeboxBlock extends React.Component<Props, State> {
@@ -20,7 +21,8 @@ class ComputeboxBlock extends React.Component<Props, State> {
     constructor(props :Props) {
         super(props);
         this.state = {
-            rebootbtnDisabled: false
+            rebootbtnDisabled: false,
+            clearPerceptionButtonDisabled: false,
         }
     }
 
@@ -35,6 +37,11 @@ class ComputeboxBlock extends React.Component<Props, State> {
                 &nbsp;
                 {(this.props.ssh || {uptime: "SSH not started"}).uptime}</span>
             <div className="float-right">
+                <button type="button"
+                        className="btn btn-sm btn-outline-primary py-0 mr-1"
+                        disabled={this.state.clearPerceptionButtonDisabled}
+                        onClick={this.clearPerception.bind(this)}>Clear perception cache
+                </button>
                 <button type="button"
                         className="btn btn-sm btn-outline-danger py-0"
                         disabled={this.state.rebootbtnDisabled}
@@ -95,6 +102,22 @@ class ComputeboxBlock extends React.Component<Props, State> {
             ).then(() =>
             this.setState({
                 rebootbtnDisabled: false
+            }));
+    }
+
+    clearPerception() {
+        this.setState({
+            clearPerceptionButtonDisabled: true
+        });
+        Requestor.runcommand("rosservice call /perception_server/reset")
+            .then(() =>
+                toast("Perception cleared")
+            )
+            .catch((error) =>
+                toast("Clearing perception failed: "+error, {type: 'error'})
+            ).then(() =>
+            this.setState({
+                clearPerceptionButtonDisabled: false
             }));
     }
 }
