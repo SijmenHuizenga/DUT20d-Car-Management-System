@@ -4,11 +4,13 @@ import time
 
 import rosgraph
 import rospy
+from tf.msg import tfMessage
 from cms.msg import Statistics, RecordingStatus, RecordingConfig
 from cms.srv import RecordingUpdateConfig
 
 from groundstation.rosnode.rosmeta import RosMeta
-from groundstation.utils import add_logline, sendstate
+from groundstation.rosnode.transformcapture import TransformCapture
+from groundstation.utils import sendstate
 
 
 class RosNode:
@@ -17,11 +19,13 @@ class RosNode:
         self.statistics_subscriber = None
         self.recordingstatus_subscriber = None
         self.recordingconfig_subscriber = None
+        self.tf_subscriber = None
         self.update_recordingconfig_service = None
         self.rosbaginfo_service = None
         self.meta_timer = None
         self.rosmeta = RosMeta()
         self.rosrecorder = rosrecorder
+        self.transformcapture = TransformCapture()
 
     def run(self):
         while 1:
@@ -54,12 +58,14 @@ class RosNode:
         self.statistics_subscriber = rospy.Subscriber("/cms/statistics", Statistics, self.rosmeta.statistics_callback)
         self.recordingstatus_subscriber = rospy.Subscriber("/cms/recording/status", RecordingStatus, self.rosrecorder.status_callback)
         self.recordingconfig_subscriber = rospy.Subscriber("/cms/recording/config", RecordingConfig, self.rosrecorder.config_callback)
+        self.tf_subscriber = rospy.Subscriber("/tf", tfMessage, self.transformcapture.transform_callback)
         logging.info("Registered subscribers")
 
     def unregister_subscribers(self):
         self.statistics_subscriber.unregister()
         self.recordingstatus_subscriber.unregister()
         self.recordingconfig_subscriber.unregister()
+        self.tf_subscriber.unregister()
         logging.info("Unregistered subscribers")
 
     def register_timers(self):

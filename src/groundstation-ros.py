@@ -1,8 +1,5 @@
 #!/usr/bin/env python
-import commands
 import logging
-import os
-import sys
 
 from groundstation.rosnode.pinger import Pinger
 from groundstation.rosnode.rosnode import RosNode
