@@ -1,27 +1,61 @@
 import datetime
 import logging
-import sqlite3
 import time
+from peewee import *
 
 import jsonpickle as jsonpickle
-import requests
 from flask import request, Response
 
-from groundstation.models import LogbookLine
-from groundstation.utils import dict_factory
+
+db = SqliteDatabase('/var/cms/logbook-%s.db' % datetime.date.today())
+
+
+class LogbookLine(Model):
+    rowid = AutoField()
+    timestamp = FloatField()
+    text = CharField()
+    source = CharField()
+    lastupdated = FloatField()
+
+    # Every slack message is uniquely identified by it's timestamp and channel.
+    # When we post a message to slack the timestamp is stored here.
+    # If timestamp is None the message is not yet synced to Slack.
+    slacktimestamp = CharField(null=True)
+
+    # The timestamp when the line was last synchronized with slack.
+    # If this field is None the message is not yet synced to Slack.
+    # If this field's value is unequal to lastupdated it indicates that the message was initially synced with Slack but
+    # the text was changed since the last sync.
+    slacklastupdated = FloatField(null=True)
+
+    class Meta:
+        database = db
+
+    def get_slack_msg(self, showtimestamp):
+        out = ""
+
+        if showtimestamp:
+            out += datetime.datetime.fromtimestamp(self.timestamp).strftime('%H:%M:%S') + ": "
+
+        if self.source == 'human':
+            return out + self.text
+        else:
+            return out + '`' + self.text + '`'
+
+
+db.connect()
+db.create_tables([LogbookLine])
 
 
 class Logbook:
 
-    def __init__(self, slackurl):
-        self.database = sqlite3.connect('/var/cms/logbook-%s.db' % datetime.date.today(), check_same_thread=False)
-        self.database.row_factory = dict_factory
-        self.create_schema()
-        self.slackurl = slackurl
+    def __init__(self, slackclient, slackchannel):
+        self.slackclient = slackclient
+        self.slackchannel = slackchannel
 
     def get(self):
         try:
-            return Response(response=jsonpickle.encode(self.get_all(), unpicklable=False, warn=True), status=200, mimetype='application/json')
+            return self.jsonresponse(list(LogbookLine.select().dicts()))
         except Exception, e:
             print "error while handling /logbook request:", e
             return str(e), 500
@@ -35,7 +69,11 @@ class Logbook:
                 timestamp = time.time()
             else:
                 timestamp = content['timestamp']
-            self.add_line(timestamp, content['text'], content['source'])
+
+            line = LogbookLine.create(timestamp=timestamp, text=content['text'], source=content['source'],
+                                      lastupdated=time.time(), slacklastupdated=None, slacktimestamp=None)
+
+            self.synclinetoslack(line)
             return self.get()
         except Exception, e:
             print "error while handling /logbook request:", e
@@ -44,85 +82,70 @@ class Logbook:
     def update(self, rowid):
         try:
             changes = request.get_json()
-            if 'text' in changes:
-                self.update_line_text(rowid, changes['text'])
+            if 'text' not in changes:
+                return "Bad request", 400
 
-            if 'timestamp' in changes:
-                self.update_line_timestamp(rowid, changes['timestamp'])
+            line = LogbookLine.get_by_id(rowid)
+            line.text = changes['text']
+            line.lastupdated = time.time()
+            line.save()
+
+            self.synclinetoslack(line)
+
             return self.get()
         except Exception, e:
             print "error while handling /logbook request:", e
             return str(e), 500
 
-    def slack(self, rowid):
+    def fullslacksync(self):
+        successes = 0
+        fails = 0
+        for line in LogbookLine.select():
+            if line.lastupdated != line.slacklastupdated:
+                if self.synclinetoslack(line):
+                    successes += 1
+                else:
+                    fails += 1
+
+        return self.jsonresponse({
+            "logbook": list(LogbookLine.select().dicts()),
+            "syncfailedlines": fails,
+            "syncsuccesslines": successes,
+        })
+
+    def synclinetoslack(self, line):
         try:
-            line = self.get_line(rowid)
-            r = requests.post(url=self.slackurl,
-                              data=jsonpickle.encode({
-                                  "text": datetime.datetime.fromtimestamp(line.timestamp).strftime('%Y-%m-%d %H:%M:%S') + ": " + line.text
-                              }, unpicklable=False, warn=True),
-                              headers={'content-type': 'application/json'})
-            if r.status_code != 200:
-                return str("Slack returned status code " + r.status_code), 503
+            if line.slacktimestamp is None:
+                response = self.slackclient.api_call(
+                    "chat.postMessage",
+                    channel=self.slackchannel,
+                    text=line.get_slack_msg(time.time() - line.timestamp > 5),
+                    parse="full",
+                    link_names=True,
+                )
             else:
-                return str("ok"), 200
+                response = self.slackclient.api_call(
+                    "chat.update",
+                    ts=line.slacktimestamp,
+                    channel=self.slackchannel,
+                    text=line.get_slack_msg(float(line.slacktimestamp) - line.timestamp > 5),
+                    parse="full",
+                    link_names=True,
+                )
+
+            if response['ok']:
+                line.slacklastupdated = line.lastupdated
+                line.slacktimestamp = response['ts']
+                line.save()
+                return True
+            else:
+                logging.error("Logline slack sync failed: %s" % response['error'])
+                return False
         except Exception, e:
-            print "error while handling /logbook request:", e
-            return str(e), 500
-
-    def create_schema(self):
-        with self.database:
-            self.database.execute('CREATE TABLE IF NOT EXISTS logbook (timestamp FLOAT, text TEXT, source VARCHAR(255))')
-            logging.info("Logbook database ready to go")
-
-    def get_all(self):
-        cursor = self.database.cursor()
-        cursor.execute("SELECT rowid, * FROM logbook", {})
-        out = cursor.fetchall()
-        if out is None:
-            return []
-        cursor.close()
-        return map(self.logline_fromdict, out)
-
-    def get_line(self, rowid):
-        cursor = self.database.cursor()
-        cursor.execute("SELECT rowid, * FROM logbook WHERE rowid=:rowid", {'rowid': rowid})
-        out = cursor.fetchone()
-        cursor.close()
-        if out is None:
-            raise Exception("Line does not exit")
-        return self.logline_fromdict(out)
-
-    def logline_fromdict(self, d):
-        return LogbookLine(d['timestamp'], d['text'], d['source'], d['rowid'])
-
-    def add_line(self, timestamp, text, source):
-        assert text, "Text cannot be empty"
-        with self.database:
-            self.database.execute('INSERT INTO logbook VALUES (:timestamp, :text, :source)', {
-                'timestamp': timestamp,
-                'text': text,
-                'source': source
-            })
-
-        logging.info('Added line: [%s] %s' % (source, text))
-
-    def update_line_text(self, rowid, text):
-        assert text, "Text cannot be empty"
-        with self.database:
-            self.database.execute("UPDATE logbook SET text=:text WHERE rowid=:rowid", {
-                'text': text,
-                'rowid': rowid
-            })
-
-        logging.info('Updated line text rowid %d to "%s"' % (rowid, text))
-
-    def update_line_timestamp(self, rowid, timestamp):
-        with self.database:
-            self.database.execute("UPDATE logbook SET timestamp=:timestamp WHERE rowid=:rowid", {
-                'rowid': rowid,
-                'timestamp': timestamp
-            })
-        logging.info('Updated line timestmap rowid %d to "%f"' % (rowid, timestamp))
+            logging.error("Logline slack sync failed: %s" % str(e))
+            return False
 
 
+    def jsonresponse(self, json):
+        return Response(response=jsonpickle.encode(json, unpicklable=False, warn=True), status=200,
+                        mimetype='application/json')
