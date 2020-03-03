@@ -2,13 +2,14 @@ import logging
 import threading
 import time
 
-from groundstation.utils import sendstate
+from groundstation.utils import sendstate, add_logline
 
 
 class SSHPing:
 
     def __init__(self, client):
         self.client = client
+        self.last_upstime_seconds = 0
 
     def start(self):
         thread = threading.Thread(target=self.forever)
@@ -26,10 +27,17 @@ class SSHPing:
     def ping(self):
         try:
             self.client.ensure_transport()
-            (exitcode, uptimestr) = self.client.run_command("uptime -p")
+            # This file contains two numbers: the uptime of the system (seconds),
+            # and the amount of time spent in idle process (seconds).
+            (exitcode, proc_uptime) = self.client.run_command("cat /proc/uptime")
             if exitcode != 0:
                 raise Exception("uptime exit code was not 0")
             connected = True
+            uptime_seconds = float(proc_uptime.strip().split(" ")[0])
+            if self.last_upstime_seconds > uptime_seconds:
+                add_logline(time.time(), "Luke powercygit scled", "sshping")
+            self.last_upstime_seconds = uptime_seconds
+            uptimestr = time.strftime("%H hours %M minutes %S seconds", time.gmtime(uptime_seconds))
         except Exception, e:
             uptimestr = str(e)
             connected = False

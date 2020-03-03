@@ -34,7 +34,6 @@ class RosNode:
                 time.sleep(2)
                 continue
             self.run_node()
-            add_logline(time.time(), "Disconnected from ROS master", "groundstation")
 
     def run_node(self):
         rospy.init_node('cms')
@@ -42,7 +41,6 @@ class RosNode:
         self.register_timers()
         self.create_serviceproxies()
         self.set_rosnode_health(True)
-        add_logline(time.time(), "Connected to ROS master", "groundstation")
         rate_1_second = rospy.Rate(2)
         while not rospy.is_shutdown():
             if self.is_master_disconnected():
