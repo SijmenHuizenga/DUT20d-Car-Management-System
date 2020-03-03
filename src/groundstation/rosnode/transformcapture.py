@@ -13,6 +13,10 @@ class TransformCapture:
             'base_link->velodyne': {'lastseen': 0.0},
             'velodyne->quad2': {'lastseen': 0.0},
             'velodyne->quad1': {'lastseen': 0.0},
+            'quad1->quad3': {'lastseen': 0.0},
+            'quad2->quad4': {'lastseen': 0.0},
+            'imu->vio': {'lastseen': 0.0},
+            'vio->quad1': {'lastseen': 0.0},
         }
 
     def transform_callback(self, data):
