@@ -7,7 +7,7 @@ import NodesBlock from "./blocks/NodesBlock";
 import TopicsBlock from "./blocks/TopicsBlock";
 import ComputeboxBlock from "./blocks/ComputeboxBlock";
 import ServicesBlock from "./blocks/ServicesBlock";
-import GitBlock from "./blocks/GitBlock";
+import TransformsBlock from "./blocks/TransformsBlock";
 import LogbookBlock from "./blocks/LogbookBlock";
 import RecordingBlock from "./blocks/RecordingBlock";
 import {Dashboard, SystemdServiceEnabled, SystemdServiceRunning} from "./statetypes";
@@ -73,6 +73,9 @@ const fakeDashboard: Dashboard = {
             enabled: SystemdServiceEnabled.enabled,
         }
     ],
+    transforms: {
+        'a->b': {lastseen: 123}
+    },
     recording: {
         is_recording: false,
         config_filename: "sysid_corner1_vioenabled",
@@ -171,7 +174,7 @@ class DashboardComponent extends React.Component<Dashboard, {}> {
         console.log("render", this.props);
 
         let {rosnode_up, ping, recording, topics, nodes, ssh,
-            systemdservices, subscriptions, publications} = this.props;
+            systemdservices, subscriptions, publications, transforms} = this.props;
 
         return <main onClick={this.containerClicked}>
             <TooltipContainer ref={this.tooltipContainerRef}/>
@@ -200,7 +203,7 @@ class DashboardComponent extends React.Component<Dashboard, {}> {
                 <div className="col-xs-12 col-xl-6 gutter-small ">
                     <ComputeboxBlock rosnode_up={rosnode_up} ping={ping} ssh={ssh}/>
                     <ServicesBlock systemdservices={systemdservices}/>
-                    <GitBlock/>
+                    <TransformsBlock transforms={transforms}/>
                 </div>
 
             </div>

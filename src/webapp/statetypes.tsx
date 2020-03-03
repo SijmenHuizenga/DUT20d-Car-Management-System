@@ -11,7 +11,8 @@ export interface Dashboard {
     topics :Topic[]
     nodes :Node[]
     subscriptions :TopicSubscription[]
-    publications :TopicPublication[]
+    publications :TopicPublication[],
+    transforms: Transforms
 }
 
 export interface Ping {
@@ -33,6 +34,12 @@ export interface Topic {
     name :string
     lastseen: number
     statistics: TopicStatistic | null
+}
+
+export interface Transforms {[key :string] :Transform}
+
+export interface Transform {
+    lastseen :number
 }
 
 export function getTopicHealth(topic :Topic | undefined) :[IndicatorColor, string]{
