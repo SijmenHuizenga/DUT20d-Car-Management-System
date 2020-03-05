@@ -42,12 +42,13 @@ class RosRecorder:
         self.statuscallback_first = False
         sendstate({'recording': self.recording})
 
-    def set_topic(self, topicname, selected):
+    def set_topics(self, topicnames, selected):
         newtopics = self.recording.config_topics[:]
-        if topicname in newtopics:
-            newtopics.remove(topicname)
-        if selected:
-            newtopics.append(topicname)
+        for topicname in topicnames:
+            if topicname in newtopics:
+                newtopics.remove(topicname)
+            if selected:
+                newtopics.append(topicname)
 
         self.save_configuration(newtopics, self.recording.config_filename)
 

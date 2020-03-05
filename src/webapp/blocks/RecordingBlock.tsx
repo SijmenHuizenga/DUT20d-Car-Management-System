@@ -199,7 +199,7 @@ class TopicSelector extends React.PureComponent<{topicname :string, selected :bo
         const toastid = toast(`${e.currentTarget.checked ? 'un' : ''}selecting topic ${this.props.topicname} for recording`,
             { autoClose: false });
 
-        return Requestor.setRecordingTopic(this.props.topicname,e.currentTarget.checked)
+        return Requestor.setRecordingTopic([this.props.topicname], e.currentTarget.checked)
             .then(() => toast.update(toastid, {
                 render: `${e.currentTarget.checked ? 'un' : ''}selected topic ${this.props.topicname} for recording`,
                 type: toast.TYPE.SUCCESS,
@@ -212,11 +212,12 @@ class TopicSelector extends React.PureComponent<{topicname :string, selected :bo
 }
 
 interface ActionBarProps {setFilter :{(filter :string) :void}}
-class ActionBar extends React.Component<ActionBarProps, {action :null|"filter"|"preset"|"add"}> {
+class ActionBar extends React.Component<ActionBarProps, {action :null|"filter"|"preset"|"add", topicinput: string}> {
     constructor(props :ActionBarProps) {
         super(props);
         this.state = {
-            action: null
+            action: null,
+            topicinput: ""
         }
     }
 
@@ -226,27 +227,65 @@ class ActionBar extends React.Component<ActionBarProps, {action :null|"filter"|"
                 return this.renderButtons();
             case "filter":
                 return this.renderFilterAction();
+            case "add":
+                return this.renderManualAddTopic();
             default:
                 throw new Error("Invalid state " + this.state.action)
         }
     }
 
-    renderFilterAction() {
-        let back = () => {
-            this.setState({"action": null});
-            this.props.setFilter("")
-        };
-
-        let changeAction = (e :ChangeEvent<HTMLInputElement>) => {
-            this.props.setFilter(e.target.value)
-        };
-
+    renderManualAddTopic() {
         return <div className="d-flex">
-            <button type="button" onClick={back}
-                    className="btn btn-sm btn-outline-primary py-0 mr-1">back
-            </button>
+            {this.renderBackBtn()}
+            <TextareaAutosize
+                maxRows={6}
+                className="flex-grow-1 px-1"
+                value={this.state.topicinput}
+                onChange={(e :React.FormEvent<HTMLTextAreaElement>) => this.setState({topicinput: e.currentTarget.value})}
+            />
+            <button type="button" className="btn btn-sm btn-outline-primary py-0 ml-1 text-nowrap"
+                    disabled={this.state.topicinput === ""}
+                    onClick={this.submitManualTopics.bind(this)}>add topics</button>
+        </div>
+    }
+
+    submitManualTopics() {
+        const topics = this.state.topicinput
+            .trim()
+            .split("\n")
+            .map((s) => s.trim())
+            .filter((s) => s !== "");
+
+        for(let i in topics) {
+            if(topics[i].indexOf(" ") !== -1) {
+                alert("Topic cannot have a space character: \n" + topics[i]);
+                return
+            }
+        }
+
+        if(topics.length === 0) {
+            alert("No topics selected");
+            return
+        }
+
+        const toastid = toast(`Adding ${topics.length} topics for recording...`, { autoClose: false });
+
+        return Requestor.setRecordingTopic(topics, true)
+            .then(() => toast.update(toastid, {
+                render: `Added ${topics.length} topics for recording`,
+                type: toast.TYPE.SUCCESS,
+                autoClose: 5000
+            })).catch((error) => toast.update(toastid, {
+                render: "Failed to update selected topcs: " + error,
+                type: toast.TYPE.ERROR,
+            }));
+    }
+
+    renderFilterAction() {
+        return <div className="d-flex">
+            {this.renderBackBtn()}
             <span className="pr-1">Filter</span>
-            <input className="flex-grow-1 px-1" onChange={changeAction}/>
+            <input className="flex-grow-1 px-1" onChange={(e) => this.props.setFilter(e.target.value)}/>
         </div>
     }
 
@@ -265,6 +304,16 @@ class ActionBar extends React.Component<ActionBarProps, {action :null|"filter"|"
                     onClick={() => this.setState({action: "add"})}>Manually add topics
             </button>
         </div>
+    }
+
+    renderBackBtn() {
+        let back = () => {
+            this.setState({"action": null});
+            this.props.setFilter("")
+        };
+        return <button type="button" onClick={back}
+                       className="btn btn-sm btn-outline-primary py-0 mr-1">back
+        </button>
     }
 }
 

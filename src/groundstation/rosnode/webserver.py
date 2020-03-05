@@ -30,7 +30,7 @@ class Webserver:
         log.setLevel(logging.ERROR)
 
         self.app.config['PROPAGATE_EXCEPTIONS'] = True
-        self.app.add_url_rule('/recording/toggletopic', 'recording_toggle', self.recording_toggle, methods=['PUT'])
+        self.app.add_url_rule('/recording/settopics', 'recording_toggle', self.recording_toggle, methods=['PUT'])
         self.app.add_url_rule('/recording/filename', 'recording_setfilename', self.recording_setfilename, methods=['PUT'])
 
         logging.info("Starting server on port 1099")
@@ -39,10 +39,10 @@ class Webserver:
     def recording_toggle(self):
         try:
             json = request.get_json()
-            if 'topicname' not in json or 'selected' not in json:
+            if 'topicnames' not in json or 'selected' not in json:
                 return "json field 'topicname' or 'selected' not found", 400
 
-            self.recorder.set_topic(json['topicname'], json['selected'])
+            self.recorder.set_topics(json['topicnames'], json['selected'])
             return "ok", 201
         except Exception, e:
             traceback.print_exc(file=sys.stdout)

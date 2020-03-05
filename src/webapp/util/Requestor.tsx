@@ -43,8 +43,8 @@ export default {
     setRecordingFilename(filename: string) {
         return put(`http://${window.location.hostname}:1099/recording/filename`, {filename})
     },
-    setRecordingTopic(topicname: string, selected :boolean) {
-        return put(`http://${window.location.hostname}:1099/recording/toggletopic`, {topicname, selected})
+    setRecordingTopic(topicnames: string[], selected :boolean) {
+        return put(`http://${window.location.hostname}:1099/recording/settopics`, {topicnames, selected})
     },
     getLogbook() {
         return execute(`http://${window.location.hostname}:1095/logbook`, 'GET')
