@@ -1,4 +1,4 @@
-import React, {ChangeEvent} from "react";
+import React from "react";
 import EditableText from "../util/EditableText";
 import Requestor from "../util/Requestor"
 import {getTopicHealthPubs, Recording, Topic, TopicPublication,} from "../statetypes";
@@ -6,6 +6,7 @@ import {Indicator, IndicatorColor} from "../util/Indicator";
 import Tooltip from "../util/Tooltip";
 import {toast} from "react-toastify";
 import TextareaAutosize from "react-autosize-textarea";
+import RecordingPresets from "../util/RecordingPresets";
 
 interface Props extends Recording {
     topics :Topic[]
@@ -44,6 +45,7 @@ class RecordingBlock extends React.Component<Props, {filter: string}> {
             </div>
             {this.props.is_recording ? null :
                 <ActionBar
+                    selectedTopics={this.props.config_topics}
                     setFilter={(filter) => this.setState({filter})}
                 />
             }
@@ -211,13 +213,17 @@ class TopicSelector extends React.PureComponent<{topicname :string, selected :bo
     }
 }
 
-interface ActionBarProps {setFilter :{(filter :string) :void}}
-class ActionBar extends React.Component<ActionBarProps, {action :null|"filter"|"preset"|"add", topicinput: string}> {
+interface ActionBarProps {
+    setFilter :{(filter :string) :void}
+    selectedTopics :string[]
+}
+class ActionBar extends React.Component<ActionBarProps, {action :null|"filter"|"preset"|"add", topicinput: string, disableActions :boolean}> {
     constructor(props :ActionBarProps) {
         super(props);
         this.state = {
             action: null,
-            topicinput: ""
+            topicinput: "",
+            disableActions: false,
         }
     }
 
@@ -229,6 +235,8 @@ class ActionBar extends React.Component<ActionBarProps, {action :null|"filter"|"
                 return this.renderFilterAction();
             case "add":
                 return this.renderManualAddTopic();
+            case "preset":
+                return this.renderPresetSelection();
             default:
                 throw new Error("Invalid state " + this.state.action)
         }
@@ -244,7 +252,7 @@ class ActionBar extends React.Component<ActionBarProps, {action :null|"filter"|"
                 onChange={(e :React.FormEvent<HTMLTextAreaElement>) => this.setState({topicinput: e.currentTarget.value})}
             />
             <button type="button" className="btn btn-sm btn-outline-primary py-0 ml-1 text-nowrap"
-                    disabled={this.state.topicinput === ""}
+                    disabled={this.state.topicinput === "" || this.state.disableActions}
                     onClick={this.submitManualTopics.bind(this)}>add topics</button>
         </div>
     }
@@ -267,18 +275,7 @@ class ActionBar extends React.Component<ActionBarProps, {action :null|"filter"|"
             alert("No topics selected");
             return
         }
-
-        const toastid = toast(`Adding ${topics.length} topics for recording...`, { autoClose: false });
-
-        return Requestor.setRecordingTopic(topics, true)
-            .then(() => toast.update(toastid, {
-                render: `Added ${topics.length} topics for recording`,
-                type: toast.TYPE.SUCCESS,
-                autoClose: 5000
-            })).catch((error) => toast.update(toastid, {
-                render: "Failed to update selected topcs: " + error,
-                type: toast.TYPE.ERROR,
-            }));
+        this.addManyTopics(topics)
     }
 
     renderFilterAction() {
@@ -287,6 +284,40 @@ class ActionBar extends React.Component<ActionBarProps, {action :null|"filter"|"
             <span className="pr-1">Filter</span>
             <input className="flex-grow-1 px-1" onChange={(e) => this.props.setFilter(e.target.value)}/>
         </div>
+    }
+
+    renderPresetSelection() {
+        return <div className="d-flex">
+            {this.renderBackBtn()}
+            <table className="ml-2 table-sm">
+                <tbody>
+                {Object.keys(RecordingPresets).map(
+                    (presetname) => this.renderPresetRow(presetname, RecordingPresets[presetname])
+                )}
+                </tbody>
+            </table>
+        </div>
+    }
+
+    renderPresetRow(presetname :string, topics :string[]) {
+        return <tr>
+            <td>
+                {presetname}
+            </td>
+            <td>
+                <Tooltip tooltip={() => topics.join("\n")}>
+                    <u>{topics.length} topics </u>
+                </Tooltip>
+
+            </td>
+            <td>
+                {topics.every(topic => this.props.selectedTopics.indexOf(topic) > -1)
+                    ? "All topics already selected for recording"
+                    : <button type="button" className="btn btn-sm btn-outline-primary py-0 ml-1 text-nowrap"
+                            disabled={this.state.disableActions}
+                            onClick={this.addManyTopics.bind(this, topics)}>add topics</button>}
+            </td>
+        </tr>
     }
 
     renderButtons() {
@@ -314,6 +345,27 @@ class ActionBar extends React.Component<ActionBarProps, {action :null|"filter"|"
         return <button type="button" onClick={back}
                        className="btn btn-sm btn-outline-primary py-0 mr-1">back
         </button>
+    }
+
+    addManyTopics(topics :string[]) {
+        const toastid = toast(`Adding ${topics.length} topics for recording...`, { autoClose: false });
+        this.setState({disableActions: true});
+
+        Requestor.setRecordingTopic(topics, true)
+            .then(() => {
+                toast.update(toastid, {
+                    render: `Added ${topics.length} topics for recording`,
+                    type: toast.TYPE.SUCCESS,
+                    autoClose: 5000
+                });
+                this.setState({disableActions: false});
+            }).catch((error) => {
+                toast.update(toastid, {
+                    render: "Failed to update selected topcs: " + error,
+                    type: toast.TYPE.ERROR,
+                });
+            this.setState({disableActions: false});
+            });
     }
 }
 
