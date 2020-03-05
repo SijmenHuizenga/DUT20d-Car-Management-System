@@ -97,7 +97,7 @@ export class TooltipContainer extends React.Component<{}, TT> {
 
 class TooltipBox extends React.PureComponent<TT> {
     render() {
-        return <div className="tooltip-body" style={{
+        return <div onClick={this.onClick.bind(this)} className="tooltip-body" style={{
             top: this.props.position!.top + 25 + window.scrollY,
             left: this.props.position!.left + 5,
         }}>
@@ -113,5 +113,12 @@ class TooltipBox extends React.PureComponent<TT> {
         }
         return this.props.content;
     }
+
+    onClick = (e :React.MouseEvent) => {
+        // When a user clicks the root app, a onclick is triggered and all tooltips are hidden.
+        // We don't want a user clicking inside the tooltip to hide the tooltip.
+        // So we stop the onclickevent from ever reachging the root.
+        e.stopPropagation()
+    };
 }
 
