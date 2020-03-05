@@ -13,7 +13,7 @@ import RecordingBlock from "./blocks/RecordingBlock";
 import {Dashboard, SystemdServiceEnabled, SystemdServiceRunning} from "./statetypes";
 import {TooltipContainer} from "./util/Tooltip";
 
-export const devmode = false;
+export const devmode = true;
 const fakeDashboard: Dashboard = {
     rosnode_up: false,
     ping: {

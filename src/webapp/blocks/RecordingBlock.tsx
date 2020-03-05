@@ -1,20 +1,37 @@
-import React from "react";
+import React, {ChangeEvent} from "react";
 import EditableText from "../util/EditableText";
 import Requestor from "../util/Requestor"
 import {getTopicHealthPubs, Recording, Topic, TopicPublication,} from "../statetypes";
 import {Indicator, IndicatorColor} from "../util/Indicator";
 import Tooltip from "../util/Tooltip";
 import {toast} from "react-toastify";
+import TextareaAutosize from "react-autosize-textarea";
 
 interface Props extends Recording {
     topics :Topic[]
     publications :TopicPublication[]
 }
 
-class RecordingBlock extends React.Component<Props> {
+class RecordingBlock extends React.Component<Props, {filter: string}> {
+
+    constructor(props :Props) {
+        super(props);
+        this.state = {
+            filter: ""
+        }
+    }
 
     render() {
         return <div className="block y-50 d-flex flex-fill flex-column">
+            {this.renderToolbar()}
+            <div className="overflow-auto mt-1">
+                {this.renderTopics()}
+            </div>
+        </div>
+    }
+
+    renderToolbar() {
+        return <div className="d-flex flex-column">
             <div className="d-flex">
                 {this.props.is_recording ? this.renderRecordingStatus() : this.renderIdleStatus()}
                 <div>
@@ -25,9 +42,11 @@ class RecordingBlock extends React.Component<Props> {
                     </button>
                 </div>
             </div>
-            <div className="overflow-auto mt-1">
-                {this.renderTopics()}
-            </div>
+            {this.props.is_recording ? null :
+                <ActionBar
+                    setFilter={(filter) => this.setState({filter})}
+                />
+            }
         </div>
     }
 
@@ -97,7 +116,11 @@ class RecordingBlock extends React.Component<Props> {
     allTopicNames() :string[]{
         let out = [...(this.props.config_topics || []), ...(this.props.topics || []).map((topic) => topic.name)];
         out.sort(this.sortTopics);
-        return out.filter((value, index, self) => self.indexOf(value) === index);
+        let names = out.filter((value, index, self) => self.indexOf(value) === index);
+        if(this.state.filter !== "") {
+            names = names.filter(name => name.toLowerCase().includes(this.state.filter.toLowerCase()))
+        }
+        return names
     }
 
     getTopicHealth(topicname :string) {
@@ -160,10 +183,10 @@ class TopicSelector extends React.PureComponent<{topicname :string, selected :bo
         return <div className="custom-control custom-checkbox">
             <Tooltip tooltip={() => topicDescription(selected, healthDescription)}>
                 <input type="checkbox"
-                   className={`custom-control-input ${healthColor}`}
-                   id={`recordtopic_${topicname}`}
-                   checked={selected}
-                   onChange={this.handleCheckboxChange.bind(this)}
+                       className={`custom-control-input ${healthColor}`}
+                       id={`recordtopic_${topicname}`}
+                       checked={selected}
+                       onChange={this.handleCheckboxChange.bind(this)}
                 />
                 <label
                     className={`custom-control-label ${healthColor}`}
@@ -177,16 +200,72 @@ class TopicSelector extends React.PureComponent<{topicname :string, selected :bo
             { autoClose: false });
 
         return Requestor.setRecordingTopic(this.props.topicname,e.currentTarget.checked)
-        .then(() => toast.update(toastid, {
-            render: `${e.currentTarget.checked ? 'un' : ''}selected topic ${this.props.topicname} for recording`,
-            type: toast.TYPE.SUCCESS,
-            autoClose: 5000
-        })).catch((error) => toast.update(toastid, {
-            render: "Failed to update selected topcs: " + error,
-            type: toast.TYPE.ERROR,
-        }));
+            .then(() => toast.update(toastid, {
+                render: `${e.currentTarget.checked ? 'un' : ''}selected topic ${this.props.topicname} for recording`,
+                type: toast.TYPE.SUCCESS,
+                autoClose: 5000
+            })).catch((error) => toast.update(toastid, {
+                render: "Failed to update selected topcs: " + error,
+                type: toast.TYPE.ERROR,
+            }));
     }
 }
+
+interface ActionBarProps {setFilter :{(filter :string) :void}}
+class ActionBar extends React.Component<ActionBarProps, {action :null|"filter"|"preset"|"add"}> {
+    constructor(props :ActionBarProps) {
+        super(props);
+        this.state = {
+            action: null
+        }
+    }
+
+    render() {
+        switch (this.state.action) {
+            case null:
+                return this.renderButtons();
+            case "filter":
+                return this.renderFilterAction();
+            default:
+                throw new Error("Invalid state " + this.state.action)
+        }
+    }
+
+    renderFilterAction() {
+        let back = () => {
+            this.setState({"action": null});
+            this.props.setFilter("")
+        };
+
+        let changeAction = (e :ChangeEvent<HTMLInputElement>) => {
+            this.props.setFilter(e.target.value)
+        };
+
+        return <div className="d-flex">
+            <span className="pr-2" onClick={back}>back</span>
+            <span className="pr-1">filter</span>
+            <input className="flex-grow-1" onChange={changeAction}/>
+        </div>
+    }
+
+    renderButtons() {
+        return <div className="d-flex">
+            <button type="button"
+                    className="btn btn-sm btn-outline-primary py-0 mr-1"
+                    onClick={() => this.setState({action: "filter"})}>Filter visable topics
+            </button>
+            <button type="button"
+                    className="btn btn-sm btn-outline-primary py-0 mr-1"
+                    onClick={() => this.setState({action: "preset"})}>Add topics from preset
+            </button>
+            <button type="button"
+                    className="btn btn-sm btn-outline-primary py-0 mr-1"
+                    onClick={() => this.setState({action: "add"})}>Manually add topics
+            </button>
+        </div>
+    }
+}
+
 
 function topicDescription(selected :boolean, health :string) {
     return `This topic is ${selected ? "" : "not"} selected for recording\n${health}`
