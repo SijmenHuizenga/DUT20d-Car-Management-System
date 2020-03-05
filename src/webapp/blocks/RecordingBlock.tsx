@@ -11,13 +11,88 @@ interface Props extends Recording {
     publications :TopicPublication[]
 }
 
-class RecordingContainer extends React.Component<Props, {}> {
-    render() {
-        return this.props.is_recording ? <ActiveRecordingBlock {...this.props}/> : <InactiveRecordingBlock {...this.props} />
-    }
-}
-
 class RecordingBlock extends React.Component<Props> {
+
+    render() {
+        return <div className="block y-50 d-flex flex-fill flex-column">
+            <div className="d-flex">
+                {this.props.is_recording ? this.renderRecordingStatus() : this.renderIdleStatus()}
+                <div>
+                    <button type="button"
+                            className="btn btn-sm btn-outline-primary"
+                            onClick={this.onRecordingToggle.bind(this)}>
+                        {this.props.is_recording ? "Stop recording" : "Start recording"}
+                    </button>
+                </div>
+            </div>
+            <div className="overflow-auto mt-1">
+                {this.renderTopics()}
+            </div>
+        </div>
+    }
+
+    renderRecordingStatus() {
+        let {recording_file, recording_duration, recording_filesize, lastrefresh_recording} = this.props;
+
+        return <div className="flex-grow-1">
+            <span className="text-large">
+                <Indicator color={IndicatorColor.active} dataTimestamp={lastrefresh_recording}/> Recording
+            </span>
+            <span className="pl-1 text-small">| {recording_file}</span>
+            <span className="pl-1 text-small">| recording for {recording_duration}s</span>
+            <span className="pl-1 text-small">| {recording_filesize}mb</span>
+        </div>
+    }
+
+    renderIdleStatus() {
+        let {config_filename, lastrefresh_config} = this.props;
+
+        return <React.Fragment>
+            <div className="text-large">
+                <Indicator color={IndicatorColor.idle} dataTimestamp={lastrefresh_config}/>
+                Idle
+            </div>
+            <div className="flex-grow-1 pl-2 d-flex align-items-center">
+                <EditableText value={config_filename} save={this.updateFilename.bind(this)} multiline={false} >
+                    {config_filename}
+                </EditableText>
+            </div>
+        </React.Fragment>
+    }
+
+    renderTopics() {
+        if(!Array.isArray(this.props.config_topics)) {
+            return "ERROR: " + this.props.config_topics
+        }
+
+        return this.allTopicNames().map((topicname) => {
+            let [healthColor, healthDescription] = this.getTopicHealth(topicname);
+            if(this.props.is_recording) {
+                return <TopicIndicator topicname={topicname}
+                                       healthColor={healthColor}
+                                       healthDescription={healthDescription}
+                                       selected={this.isTopicSelected(topicname)}/>
+            } else {
+                return <TopicSelector key={topicname}
+                                      topicname={topicname}
+                                      selected={this.isTopicSelected(topicname)}
+                                      healthColor={healthColor}
+                                      healthDescription={healthDescription}/>
+            }
+
+        });
+    }
+
+    updateFilename(newname :string) {
+        return Requestor.setRecordingFilename(newname)
+            .then(() => {
+                return true;
+            })
+            .catch((error) => {
+                toast("Failed to update recording filename: " + error, {type: 'error'});
+                return false;
+            });
+    }
 
     allTopicNames() :string[]{
         let out = [...(this.props.config_topics || []), ...(this.props.topics || []).map((topic) => topic.name)];
@@ -64,93 +139,6 @@ class RecordingBlock extends React.Component<Props> {
         return Number(selectedB) - Number(selectedA);
     };
 
-}
-
-class InactiveRecordingBlock extends RecordingBlock {
-    render() {
-        let {config_filename, lastrefresh_config} = this.props;
-
-        return <div className="block y-50 d-flex flex-fill flex-column">
-            <div className="d-flex">
-                <div className="text-large">
-                    <Indicator color={IndicatorColor.idle} dataTimestamp={lastrefresh_config}/>
-                    Idle
-                </div>
-                <div className="flex-grow-1 pl-2 d-flex align-items-center">
-                    <EditableText value={config_filename} save={this.updateFilename.bind(this)} multiline={false} >
-                        {config_filename}
-                    </EditableText>
-                </div>
-                <div>
-                    <button type="button"
-                            className="btn btn-sm btn-outline-primary"
-                            onClick={this.onRecordingToggle.bind(this)}>
-                        Start recording
-                    </button>
-                </div>
-            </div>
-            <div className="overflow-auto mt-1">
-                {this.renderTopics()}
-            </div>
-        </div>
-    }
-
-    renderTopics() {
-        if(!Array.isArray(this.props.config_topics)) {
-            return "ERROR: " + this.props.config_topics
-        }
-
-        return this.allTopicNames().map((topicname) => {
-            let [healthColor, healthDescription] = this.getTopicHealth(topicname);
-            return <TopicSelector key={topicname}
-                                  topicname={topicname}
-                                  selected={this.isTopicSelected(topicname)}
-                                  healthColor={healthColor}
-                                  healthDescription={healthDescription}/>
-        });
-    }
-
-    updateFilename(newname :string) {
-        return Requestor.setRecordingFilename(newname)
-            .then(() => {
-                return true;
-            })
-            .catch((error) => {
-                toast("Failed to update recording filename: " + error, {type: 'error'});
-                return false;
-            });
-    }
-}
-
-class ActiveRecordingBlock extends RecordingBlock {
-    render() {
-        let {recording_file, recording_duration, recording_filesize, lastrefresh_recording} = this.props;
-        return <div className="block y-50 d-flex flex-fill flex-column">
-            <div className="mb-2 ">
-                <span className="text-large"><Indicator color={IndicatorColor.active} dataTimestamp={lastrefresh_recording}/> Recording</span>
-                <span className="pl-1 text-small">| {recording_file}</span>
-                <span className="pl-1 text-small">| recording for {recording_duration}s</span>
-                <span className="pl-1 text-small">| {recording_filesize}mb</span>
-                <div className="float-right">
-                    <button type="button"
-                            className="btn btn-sm btn-outline-primary"
-                            onClick={this.onRecordingToggle.bind(this)}>
-                        Stop recording
-                    </button>
-                </div>
-            </div>
-            <div className="overflow-auto mt-1">
-                {this.allTopicNames().map((topicname) => {
-                    let [healthColor, healthDescription] = this.getTopicHealth(topicname);
-
-                    return <TopicIndicator topicname={topicname}
-                                           healthColor={healthColor}
-                                           healthDescription={healthDescription}
-                                           selected={this.isTopicSelected(topicname)}/>
-                })}
-            </div>
-        </div>
-    }
 }
 
 class TopicIndicator extends React.Component<{topicname :string, selected :boolean, healthColor :IndicatorColor, healthDescription :string}, {}> {
@@ -204,5 +192,5 @@ function topicDescription(selected :boolean, health :string) {
     return `This topic is ${selected ? "" : "not"} selected for recording\n${health}`
 }
 
-export default RecordingContainer;
+export default RecordingBlock;
 
