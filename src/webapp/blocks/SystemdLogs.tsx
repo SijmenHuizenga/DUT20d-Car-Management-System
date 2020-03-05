@@ -37,7 +37,7 @@ export default class SystemdLogsBlock extends React.Component<Props, State> {
     }
 
     componentDidMount() {
-        Requestor.runcommand(`sudo journalctl --unit --no-pager ${this.props.servicename} --lines ${this.state.linecount}`)
+        Requestor.runcommand(`sudo journalctl --no-pager --unit ${this.props.servicename} --lines ${this.state.linecount}`)
             .then((response) => response.json())
             .then((json) => {
                 this.setState({

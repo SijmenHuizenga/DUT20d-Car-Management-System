@@ -186,7 +186,7 @@ class TopicSelector extends React.PureComponent<{topicname :string, selected :bo
             <Tooltip tooltip={() => topicDescription(selected, healthDescription)}>
                 <input type="checkbox"
                        className={`custom-control-input ${healthColor}`}
-                       id={`recordtopic_${topicname}`}
+                       id={`recordtopic_${topicname}_`+selected}
                        checked={selected}
                        onChange={this.handleCheckboxChange.bind(this)}
                 />
