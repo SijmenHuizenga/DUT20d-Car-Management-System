@@ -27,7 +27,7 @@ export class ModalContainer extends React.Component<{}, {content: ModalContent |
                             </button>
                         </div>
                         <div className="modal-body">
-                            ...
+                            {this.state.content}
                         </div>
                     </div>
                 </div>

@@ -14,7 +14,7 @@ import {Dashboard, SystemdServiceEnabled, SystemdServiceRunning} from "./statety
 import {TooltipContainer} from "./util/Tooltip";
 import {ModalContainer} from "./util/Modal";
 
-export const devmode = false;
+export const devmode = true;
 const fakeDashboard: Dashboard = {
     rosnode_up: false,
     ping: {
@@ -72,6 +72,12 @@ const fakeDashboard: Dashboard = {
             running: SystemdServiceRunning.running,
             lastupdate: 1577545897,
             enabled: SystemdServiceEnabled.enabled,
+        },{
+            name: "cameras.service",
+            statustext: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, \nsed do eiusmod tempor \nincididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
+            running: SystemdServiceRunning.stopped,
+            lastupdate: 1577545897,
+            enabled: SystemdServiceEnabled.disabled,
         }
     ],
     transforms: {

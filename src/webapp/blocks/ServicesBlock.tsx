@@ -6,6 +6,7 @@ import {Indicator, IndicatorColor} from "../util/Indicator";
 import Requestor from "../util/Requestor";
 import {toast} from "react-toastify";
 import modal from "../util/Modal";
+import SystemdLogsBlock from "./SystemdLogs";
 
 class ServicesBlock extends React.Component<{ systemdservices: SystemdService[] }, {}> {
     render() {
@@ -69,9 +70,8 @@ class ServiceIndicator extends React.Component<SystemdService> {
         return <ContextMenu id={`service${this.props.name}startstoptrigger`}>
             {this.renderActivateButtons()}
             {this.renderMaskButtons()}
-            <MenuItem onClick={() => modal(<div>Test</div>, `${this.props.name} logs`)}>
-                Show logs
-            </MenuItem>
+            {this.props.running === SystemdServiceRunning.error ? null
+                : <MenuItem onClick={() => modal(<SystemdLogsBlock servicename={this.props.name}/>, `${this.props.name} logs`)}>Show logs</MenuItem>}
         </ContextMenu>
     }
 

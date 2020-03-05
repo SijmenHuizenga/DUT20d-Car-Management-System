@@ -198,12 +198,17 @@ class TopicSelector extends React.PureComponent<{topicname :string, selected :bo
     }
 
     handleCheckboxChange(e :React.ChangeEvent<HTMLInputElement>) {
-        const toastid = toast(`${e.currentTarget.checked ? 'un' : ''}selecting topic ${this.props.topicname} for recording`,
+        // After clicking the checkbox it will probably move because selected topics are sorted to the top.
+        // To prevent scrolling we blur it so the user isn't scrolled away.
+        e.currentTarget.blur();
+
+        const newChecked = e.currentTarget.checked;
+        const toastid = toast(`${newChecked ? 'un' : ''}selecting topic ${this.props.topicname} for recording`,
             { autoClose: false });
 
-        return Requestor.setRecordingTopic([this.props.topicname], e.currentTarget.checked)
+        return Requestor.setRecordingTopic([this.props.topicname], newChecked)
             .then(() => toast.update(toastid, {
-                render: `${e.currentTarget.checked ? 'un' : ''}selected topic ${this.props.topicname} for recording`,
+                render: `${newChecked ? 'un' : ''}selected topic ${this.props.topicname} for recording`,
                 type: toast.TYPE.SUCCESS,
                 autoClose: 5000
             })).catch((error) => toast.update(toastid, {
@@ -276,6 +281,14 @@ class ActionBar extends React.Component<ActionBarProps, {action :null|"filter"|"
             return
         }
         this.addManyTopics(topics)
+            .then((success) => {
+                if(success) {
+                    this.setState({
+                        action: null,
+                        topicinput: "",
+                    })
+                }
+            })
     }
 
     renderFilterAction() {
@@ -351,7 +364,7 @@ class ActionBar extends React.Component<ActionBarProps, {action :null|"filter"|"
         const toastid = toast(`Adding ${topics.length} topics for recording...`, { autoClose: false });
         this.setState({disableActions: true});
 
-        Requestor.setRecordingTopic(topics, true)
+        return Requestor.setRecordingTopic(topics, true)
             .then(() => {
                 toast.update(toastid, {
                     render: `Added ${topics.length} topics for recording`,
@@ -359,12 +372,14 @@ class ActionBar extends React.Component<ActionBarProps, {action :null|"filter"|"
                     autoClose: 5000
                 });
                 this.setState({disableActions: false});
+                return true;
             }).catch((error) => {
                 toast.update(toastid, {
                     render: "Failed to update selected topcs: " + error,
                     type: toast.TYPE.ERROR,
                 });
-            this.setState({disableActions: false});
+                this.setState({disableActions: false});
+                return false;
             });
     }
 }
