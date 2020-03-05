@@ -82,7 +82,6 @@ class LogbookBlock extends React.Component<{}, State> {
         Requestor.logbookSlackFullsync()
             .then((response) => response.json())
             .then((json) => {
-                console.log("json", json);
                 this.setState({fullsyncInProgress: false, lines: json.logbook});
                 if(json.syncfailedlines > 0) {
                     toast(json.syncfailedlines + ' lines could not be synced to slack. Check the network connection of the cms laptop.', {type: 'error'});

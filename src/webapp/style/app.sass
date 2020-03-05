@@ -15,6 +15,8 @@
 @import "node_modules/bootstrap/scss/buttons"
 @import "node_modules/bootstrap/scss/input-group"
 @import "node_modules/bootstrap/scss/utilities"
+@import "node_modules/bootstrap/scss/modal"
+@import "node_modules/bootstrap/scss/close"
 
 html
   height: 100%
@@ -232,3 +234,11 @@ input
     border-color: colors.$active
     background-color: colors.$active
 
+.modal
+  color: colors.$background_darker
+  .modal-header
+    padding: 10px
+  .modal-content
+    border-radius: 0
+  .modal-header .close
+    padding: 20px

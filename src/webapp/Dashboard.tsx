@@ -12,8 +12,9 @@ import LogbookBlock from "./blocks/LogbookBlock";
 import RecordingBlock from "./blocks/RecordingBlock";
 import {Dashboard, SystemdServiceEnabled, SystemdServiceRunning} from "./statetypes";
 import {TooltipContainer} from "./util/Tooltip";
+import {ModalContainer} from "./util/Modal";
 
-export const devmode = true;
+export const devmode = false;
 const fakeDashboard: Dashboard = {
     rosnode_up: false,
     ping: {
@@ -182,6 +183,7 @@ class DashboardComponent extends React.Component<Dashboard, {}> {
 
         return <main onClick={this.containerClicked}>
             <TooltipContainer ref={this.tooltipContainerRef}/>
+            <ModalContainer/>
             <div className="row">
                 {/*<div className="col-xl-2 col-lg-4 col-sm-12 col-xs-12 gutter-small">*/}
                     {/*<HealthBlock/>*/}
