@@ -77,7 +77,7 @@ const fakeDashboard: Dashboard = {
         'a->b': {lastseen: 123}
     },
     recording: {
-        is_recording: false,
+        is_recording: true,
         config_filename: "sysid_corner1_vioenabled",
         config_topics: [
             "/planning_ReferencePath",
