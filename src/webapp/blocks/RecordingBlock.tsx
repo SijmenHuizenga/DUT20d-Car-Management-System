@@ -242,9 +242,11 @@ class ActionBar extends React.Component<ActionBarProps, {action :null|"filter"|"
         };
 
         return <div className="d-flex">
-            <span className="pr-2" onClick={back}>back</span>
-            <span className="pr-1">filter</span>
-            <input className="flex-grow-1" onChange={changeAction}/>
+            <button type="button" onClick={back}
+                    className="btn btn-sm btn-outline-primary py-0 mr-1">back
+            </button>
+            <span className="pr-1">Filter</span>
+            <input className="flex-grow-1 px-1" onChange={changeAction}/>
         </div>
     }
 
