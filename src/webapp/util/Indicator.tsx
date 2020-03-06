@@ -76,13 +76,9 @@ export class Indicator extends React.Component<Props, {outdated :boolean}> {
         if(props.dataTimestamp === null) {
             return null;
         }
-        const newOutdated = !isRecent(props.dataTimestamp);
-        if(state.outdated !== newOutdated) {
-            return {
-                outdated: newOutdated
-            }
+        return {
+            outdated: !isRecent(props.dataTimestamp)
         }
-        return null;
     };
 
     shouldComponentUpdate(nextProps: Props, nextState: { outdated: boolean }) {
