@@ -71,7 +71,7 @@ class ServiceIndicator extends React.Component<SystemdService> {
             {this.renderActivateButtons()}
             {this.renderMaskButtons()}
             {this.props.running === SystemdServiceRunning.error ? null
-                : <MenuItem onClick={() => modal(<SystemdLogsBlock servicename={this.props.name}/>, `${this.props.name} logs`)}>Show logs</MenuItem>}
+                : <MenuItem onClick={() => modal(<SystemdLogsBlock servicename={this.props.name}/>)}>Show logs</MenuItem>}
         </ContextMenu>
     }
 

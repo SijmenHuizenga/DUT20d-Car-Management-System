@@ -1,49 +1,40 @@
 import React, {ReactNode} from 'react';
 
-var showModal: undefined | ((content :ModalContent|null, title :string) => void) = undefined;
+var showModal: undefined | ((content :ReactNode | null) => void) = undefined;
 
-export type ModalContent = string | ReactNode
-
-export class ModalContainer extends React.Component<{}, {content: ModalContent | null, title: string}> {
+export class ModalContainer extends React.Component<{}, {content: ReactNode | null}> {
 
     constructor(props: {}, context: any) {
         super(props, context);
         this.state = {
             content: null,
-            title: "",
         };
         showModal = this.showModal;
     }
 
     render() {
         return this.state.content === null ? null
-            : <div className="modal fade show" tabIndex={-1} role="dialog" aria-hidden="false" style={{display: "block"}}>
-                <div className="modal-dialog modal-lg" role="document">
+            : [<div className="modal show" tabIndex={-1} role="dialog" aria-hidden="false" style={{display: "block"}}
+                    onClick={() => this.setState({content: null})}>
+                <div className="modal-dialog modal-xl modal-dialog-scrollable" role="document"
+                     onClick={(e) => e.stopPropagation()}>
                     <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title">{this.state.title}</h5>
-                            <button type="button" className="close" onClick={() => this.setState({content: null})}>
-                                &times;
-                            </button>
-                        </div>
-                        <div className="modal-body">
-                            {this.state.content}
-                        </div>
+                        {this.state.content}
                     </div>
                 </div>
-            </div>
+            </div>,
+                <div className="modal-backdrop show"/>]
     }
 
-    showModal = (content :ModalContent, title :string) => {
-        this.setState({content, title})
+    showModal = (content :ReactNode|null) => {
+        this.setState({content})
     };
 
 }
 
-export default function (content :ModalContent|null, title :string) {
-    if(showModal !== undefined) {
-        showModal(content, title)
-    } else {
+export default function (content :ReactNode|null) {
+    if(showModal === undefined) {
         throw Error("showModal not defined")
     }
+    showModal(content)
 }

@@ -7,7 +7,7 @@ function execute(uri :string, method="", body={}, timeout=5000): Promise<any> {
     return new Promise((resolve, reject) => {
         const timeoutTimer = setTimeout(()  => {
             didTimeOut = true;
-            reject(new Error('Request timed out'));
+            reject('Request timed out');
         }, timeout);
 
         fetch(uri, {

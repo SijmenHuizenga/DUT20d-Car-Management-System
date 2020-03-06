@@ -14,7 +14,7 @@ import {Dashboard, SystemdServiceEnabled, SystemdServiceRunning} from "./statety
 import {TooltipContainer} from "./util/Tooltip";
 import {ModalContainer} from "./util/Modal";
 
-export const devmode = true;
+export const devmode = false;
 const fakeDashboard: Dashboard = {
     rosnode_up: false,
     ping: {
@@ -150,6 +150,7 @@ export default class DashboardStateLoader extends React.PureComponent<{}, State>
                 ? <div className="erroroverlay  text-center">{this.state.connectionerror}</div>
                 : <DashboardComponent {...this.state.groundStationState} />}
             <ToastContainer position={toast.POSITION.BOTTOM_RIGHT} autoClose={false}/>
+            <ModalContainer/>
         </div>
     }
 
@@ -187,7 +188,6 @@ class DashboardComponent extends React.Component<Dashboard, {}> {
 
         return <main onClick={this.containerClicked}>
             <TooltipContainer ref={this.tooltipContainerRef}/>
-            <ModalContainer/>
             <div className="row">
                 {/*<div className="col-xl-2 col-lg-4 col-sm-12 col-xs-12 gutter-small">*/}
                     {/*<HealthBlock/>*/}

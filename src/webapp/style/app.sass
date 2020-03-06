@@ -2,6 +2,9 @@
 @use "./colors"
 @use "./contextmenu"
 
+// Set max-width of modal to use full screen width
+$modal-xl: 1900px
+
 @import "node_modules/bootstrap/scss/functions"
 @import "node_modules/bootstrap/scss/variables"
 @import "node_modules/bootstrap/scss/mixins"
@@ -106,7 +109,8 @@ h1, h2, h3, .h1, .h2, .h3
   border-right-width: 4px !important
   outline: none !important
   box-shadow: 0 0 0 0 !important
-
+button.close
+  color: colors.$text-bright !important
 .btn-link
   color: colors.$text
   &:hover, &:focus, &:active
@@ -129,6 +133,22 @@ h1, h2, h3, .h1, .h2, .h3
   background: transparent
   &:hover, &:focus, &:active
     border-color: colors.$danger
+
+// select element
+.custom-select
+  width: auto
+  color: colors.$text
+  border: 2px solid colors.$text-dark
+  border-left-width: 4px !important
+  border-right-width: 4px !important
+  background: colors.$background
+  height: auto
+  appearance: menulist
+  padding-top: 0.15rem
+  padding-bottom: 0.15rem
+  option
+    background-color: colors.$background !important
+    padding-top: 2px
 
 // Disconnection error page overlay
 .erroroverlay
@@ -235,9 +255,12 @@ input
     background-color: colors.$active
 
 .modal
-  color: colors.$background_darker
+  //color: colors.$background_darker
+  .modal-content
+    background-color: colors.$background
   .modal-header
     padding: 10px
+    border-bottom: 1px solid colors.$background_dark
   .modal-content
     border-radius: 0
   .modal-header .close
