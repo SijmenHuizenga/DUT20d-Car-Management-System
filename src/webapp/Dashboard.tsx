@@ -182,8 +182,6 @@ class DashboardComponent extends React.Component<Dashboard, {}> {
     }
 
     render() {
-        console.log("render", this.props);
-
         let {rosnode_up, ping, recording, topics, nodes, ssh,
             systemdservices, subscriptions, publications, transforms} = this.props;
 

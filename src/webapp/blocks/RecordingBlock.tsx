@@ -88,15 +88,16 @@ class RecordingBlock extends React.Component<Props, {filter: string}> {
 
         return this.allTopicNames().map((topicname) => {
             let [healthColor, healthDescription] = this.getTopicHealth(topicname);
+            const selected = this.isTopicSelected(topicname);
             if(this.props.is_recording) {
-                return <TopicIndicator topicname={topicname}
+                return <TopicIndicator topicname={topicname+selected}
                                        healthColor={healthColor}
                                        healthDescription={healthDescription}
-                                       selected={this.isTopicSelected(topicname)}/>
+                                       selected={selected}/>
             } else {
-                return <TopicSelector key={topicname}
+                return <TopicSelector key={topicname+selected}
                                       topicname={topicname}
-                                      selected={this.isTopicSelected(topicname)}
+                                      selected={selected}
                                       healthColor={healthColor}
                                       healthDescription={healthDescription}/>
             }
