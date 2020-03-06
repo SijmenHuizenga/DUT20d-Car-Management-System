@@ -182,17 +182,18 @@ class TopicSelector extends React.PureComponent<{topicname :string, selected :bo
 
     render() {
         let {topicname, selected, healthColor, healthDescription} = this.props;
+        const id = `recordtopic_${topicname}_${selected}`;
         return <div className="custom-control custom-checkbox">
             <Tooltip tooltip={() => topicDescription(selected, healthDescription)}>
                 <input type="checkbox"
                        className={`custom-control-input ${healthColor}`}
-                       id={`recordtopic_${topicname}_`+selected}
+                       id={id}
                        checked={selected}
                        onChange={this.handleCheckboxChange.bind(this)}
                 />
                 <label
                     className={`custom-control-label ${healthColor}`}
-                    htmlFor={`recordtopic_${topicname}`}>{topicname}</label>
+                    htmlFor={id}>{topicname}</label>
             </Tooltip>
         </div>
     }
