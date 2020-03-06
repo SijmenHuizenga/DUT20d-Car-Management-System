@@ -208,7 +208,7 @@ class TopicSelector extends React.PureComponent<{topicname :string, selected :bo
         const toastid = toast(`${newChecked ? 'un' : ''}selecting topic ${this.props.topicname} for recording`,
             { autoClose: false });
 
-        return Requestor.setRecordingTopic([this.props.topicname], newChecked)
+        setTimeout(() => Requestor.setRecordingTopic([this.props.topicname], newChecked)
             .then(() => toast.update(toastid, {
                 render: `${newChecked ? 'un' : ''}selected topic ${this.props.topicname} for recording`,
                 type: toast.TYPE.SUCCESS,
@@ -216,7 +216,8 @@ class TopicSelector extends React.PureComponent<{topicname :string, selected :bo
             })).catch((error) => toast.update(toastid, {
                 render: "Failed to update selected topcs: " + error,
                 type: toast.TYPE.ERROR,
-            }));
+            })), 1
+        );
     }
 }
 
