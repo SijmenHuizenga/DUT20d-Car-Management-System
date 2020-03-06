@@ -37,7 +37,7 @@ class SSHPing:
             if self.last_upstime_seconds > uptime_seconds:
                 add_logline(time.time(), "Luke powercycled", "sshping")
             self.last_upstime_seconds = uptime_seconds
-            uptimestr = time.strftime("%H hours %M minutes %S seconds", time.gmtime(uptime_seconds))
+            uptimestr = time.strftime("%Hh %Mm %Ss", time.gmtime(uptime_seconds))
         except Exception, e:
             uptimestr = str(e)
             connected = False
