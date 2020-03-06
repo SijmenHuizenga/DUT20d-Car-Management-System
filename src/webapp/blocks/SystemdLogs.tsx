@@ -15,14 +15,16 @@ interface Props {
 }
 
 export default class SystemdLogsBlock extends React.Component<Props, State> {
+    private scroller: HTMLDivElement | null;
 
     constructor(props :Props) {
         super(props);
+        this.scroller = null;
         this.state = {
             linecount: 300,
             isLoading: true,
             logdata: null,
-            error: null
+            error: null,
         }
     }
 
@@ -50,7 +52,7 @@ export default class SystemdLogsBlock extends React.Component<Props, State> {
                     &times;
                 </button>
             </div>
-            <div className="modal-body">
+            <div className="modal-body" ref={(el) => this.scroller = el}>
             {this.renderLogs()}
             </div>
         </React.Fragment>
@@ -82,7 +84,7 @@ export default class SystemdLogsBlock extends React.Component<Props, State> {
                 error: null,
                 isLoading: false,
                 logdata: [...Array(this.state.linecount)].map(_ => "Mar 06 09:24:10 raampje systemd[562]: var-lib-docker-overlay2-8f53fd4f133cc803bc6cca0424909a406f7c07a42e1cdf90657c9cf43074bd2b-merged-opt-pycharm-skeletons.mount: Succeeded.").join("\n"),
-            }), 1000);
+            }, () => this.scrollToBottom()), 1000);
             return;
         }
         Requestor.runcommand(`sudo journalctl --no-pager --unit ${this.props.servicename} --lines ${this.state.linecount}`)
@@ -91,8 +93,8 @@ export default class SystemdLogsBlock extends React.Component<Props, State> {
                 this.setState({
                     error: null,
                     isLoading: false,
-                    logdata: json.output
-                });
+                    logdata: json.output,
+                }, () => this.scrollToBottom());
             })
             .catch((e) => {
                 this.setState({
@@ -101,6 +103,10 @@ export default class SystemdLogsBlock extends React.Component<Props, State> {
                     error: e,
                 })
             });
+    }
+
+    scrollToBottom() {
+        this.scroller!.scrollTop = this.scroller!.scrollHeight - this.scroller!.offsetHeight;
     }
 
 }
