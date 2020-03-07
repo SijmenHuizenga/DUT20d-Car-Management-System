@@ -14,7 +14,7 @@ import {Dashboard, SystemdServiceEnabled, SystemdServiceRunning} from "./statety
 import {TooltipContainer} from "./util/Tooltip";
 import {ModalContainer} from "./util/Modal";
 
-export const devmode = false;
+export const devmode = true;
 const fakeDashboard: Dashboard = {
     rosnode_up: false,
     ping: {
@@ -84,7 +84,7 @@ const fakeDashboard: Dashboard = {
         'a->b': {lastseen: 123}
     },
     recording: {
-        is_recording: true,
+        is_recording: false,
         config_filename: "sysid_corner1_vioenabled",
         config_topics: [
             "/planning_ReferencePath",

@@ -49,8 +49,8 @@ export default {
     getLogbook() {
         return execute(`http://${window.location.hostname}:1095/logbook`, 'GET')
     },
-    addLogbookLine(text :string) {
-        return execute(`http://${window.location.hostname}:1095/logbook`, 'POST', {text, source: 'human'})
+    addLogbookLine(text :string, source :string = 'human') {
+        return execute(`http://${window.location.hostname}:1095/logbook`, 'POST', {text})
     },
     updateLogbookLine(rowid :number, changeset :object) {
         return put(`http://${window.location.hostname}:1095/logbook/${rowid}`, changeset)

@@ -29,9 +29,9 @@ class RosRecorder:
     def status_callback(self, status):
         if not self.statuscallback_first:
             if not self.recording.is_recording and status.recordingactive:
-                add_logline(time.time(), "Recording started, filename: %s" % status.filename, "recorder")
+                add_logline(time.time(), "`Recording started, filename: %s`" % status.filename)
             if self.recording.is_recording and not status.recordingactive:
-                add_logline(time.time(), "Recording stopped after %s seconds." % self.recording.recording_duration, "recorder")
+                add_logline(time.time(), "`Recording stopped after %s seconds.`" % self.recording.recording_duration)
 
         self.recording.is_recording = status.recordingactive
         self.recording.recording_file = status.filename

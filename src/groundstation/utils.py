@@ -9,16 +9,15 @@ import requests
 import yaml
 
 
-def add_logline(timestamp, text, source):
+def add_logline(timestamp, text):
     r = requests.post(url="http://localhost:1095/logbook", data=json.dumps({
         'timestamp': timestamp,
         'text': text,
-        'source': source
     }), headers={'content-type': 'application/json'})
     if r.status_code != 201:
         logging.info(r.text)
     else:
-        logging.error("[%s] %s" % (source, text))
+        logging.error(text)
 
 
 def sendstate(changeset):

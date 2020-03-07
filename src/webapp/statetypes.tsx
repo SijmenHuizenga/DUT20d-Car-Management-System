@@ -24,7 +24,6 @@ export interface LogbookLine {
     rowid :number
     timestamp :number
     text :string
-    source :string
     lastupdated :number
     slacktimestamp :number
     slacklastupdated :number

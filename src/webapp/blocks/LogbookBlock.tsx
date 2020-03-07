@@ -182,8 +182,8 @@ class LogbookLineComponent extends React.PureComponent<LineProps, {moving :boole
     }
 
     render() {
-        let {rowid, timestamp, text, updateLine, source} = this.props;
-        return <tr className={source !== "human" ? "text-small logbook-small" : ""}>
+        let {rowid, timestamp, text, updateLine} = this.props;
+        return <tr>
             <td className="timestamp text-grayyed">
                 {this.renderTimestamp(timestamp)}
             </td>

@@ -47,6 +47,7 @@ class RecordingBlock extends React.Component<Props, {filter: string}> {
                 <ActionBar
                     selectedTopics={this.props.config_topics}
                     setFilter={(filter) => this.setState({filter})}
+                    storeTopicsInLogbook={this.storeTopicsInLogbook.bind(this)}
                 />
             }
         </div>
@@ -114,6 +115,12 @@ class RecordingBlock extends React.Component<Props, {filter: string}> {
                 toast("Failed to update recording filename: " + error, {type: 'error'});
                 return false;
             });
+    }
+
+    storeTopicsInLogbook() {
+        return Requestor.addLogbookLine(
+            "Currently the following topics are selected for recording:\n```\n"+
+            this.props.config_topics.join("\n")+"\n```")
     }
 
     allTopicNames() :string[]{
@@ -224,6 +231,7 @@ class TopicSelector extends React.PureComponent<{topicname :string, selected :bo
 interface ActionBarProps {
     setFilter :{(filter :string) :void}
     selectedTopics :string[]
+    storeTopicsInLogbook :() => void
 }
 class ActionBar extends React.Component<ActionBarProps, {action :null|"filter"|"preset"|"add", topicinput: string, disableActions :boolean}> {
     constructor(props :ActionBarProps) {
@@ -349,6 +357,10 @@ class ActionBar extends React.Component<ActionBarProps, {action :null|"filter"|"
             <button type="button"
                     className="btn btn-sm btn-outline-primary py-0 mr-1"
                     onClick={() => this.setState({action: "add"})}>Manually add topics
+            </button>
+            <button type="button"
+                    className="btn btn-sm btn-outline-primary py-0 mr-1"
+                    onClick={this.props.storeTopicsInLogbook}>Add config to logbook
             </button>
         </div>
     }

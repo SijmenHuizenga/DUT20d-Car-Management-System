@@ -112,16 +112,13 @@ class Recording:
 
 
 class LogbookLine:
-    def __init__(self, timestamp, text, source, rowid=None):
+    def __init__(self, timestamp, text, rowid=None):
         # The timestamp on which the line resides.
         # If the line is updated the old value is replaced by the new.
         self.timestamp = timestamp  # type: float
 
         # The multiline and markdown supported text.
         self.text = text  # type: str
-
-        # Who made this logline? This field keeps track of who issued the line.
-        self.source = source  # type: str
 
         # The id of the row in the database. Optional.
         self.rowid = rowid  # type: int

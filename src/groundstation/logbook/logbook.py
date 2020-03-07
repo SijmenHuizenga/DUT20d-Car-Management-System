@@ -14,7 +14,6 @@ class LogbookLine(Model):
     rowid = AutoField()
     timestamp = FloatField()
     text = CharField()
-    source = CharField()
     lastupdated = FloatField()
 
     # Every slack message is uniquely identified by it's timestamp and channel.
@@ -37,10 +36,7 @@ class LogbookLine(Model):
         if showtimestamp:
             out += datetime.datetime.fromtimestamp(self.timestamp).strftime('%H:%M:%S') + ": "
 
-        if self.source == 'human':
-            return out + self.text
-        else:
-            return out + '`' + self.text + '`'
+        return out + self.text
 
 
 db.connect()
@@ -63,14 +59,14 @@ class Logbook:
     def create(self):
         try:
             content = request.get_json()
-            if 'text' not in content or 'source' not in content:
-                return "json field 'text' or 'source' not found", 400
+            if 'text' not in content:
+                return "json field 'text' not found", 400
             if 'timestamp' not in content:
                 timestamp = time.time()
             else:
                 timestamp = content['timestamp']
 
-            line = LogbookLine.create(timestamp=timestamp, text=content['text'], source=content['source'],
+            line = LogbookLine.create(timestamp=timestamp, text=content['text'],
                                       lastupdated=time.time(), slacklastupdated=None, slacktimestamp=None)
 
             self.synclinetoslack(line)
