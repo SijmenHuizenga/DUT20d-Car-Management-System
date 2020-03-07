@@ -14,7 +14,7 @@ import {Dashboard, SystemdServiceEnabled, SystemdServiceRunning} from "./statety
 import {TooltipContainer} from "./util/Tooltip";
 import {ModalContainer} from "./util/Modal";
 
-export const devmode = true;
+export const devmode = false;
 const fakeDashboard: Dashboard = {
     rosnode_up: false,
     ping: {
