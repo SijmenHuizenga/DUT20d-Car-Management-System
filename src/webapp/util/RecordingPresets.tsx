@@ -15,6 +15,7 @@ const presets : {[key :string] :string[]} = {
         "/mavros/imu/data_raw",
         "/mavros/global_position/raw/gps_vel",
         "/mavros/global_position/raw/fix",
+        "/mavros/global_position/compass_hdg",
         "/mavros/global_position/local",
         "/mavros/local_position/velocity_body_cov",
         "/mavros/local_position/pose_cov",
