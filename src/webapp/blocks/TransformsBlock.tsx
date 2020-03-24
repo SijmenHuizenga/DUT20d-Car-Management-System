@@ -9,8 +9,9 @@ interface Props {
 class TransformsBlock extends React.Component<Props, {}> {
 
     render() {
-        return <div className="block clearfix">
-                {this.props.transforms == null ? null : this.renderTransforms()}
+        return <div className="block">
+            <h2>Transformations</h2>
+            {this.props.transforms == null ? null : this.renderTransforms()}
         </div>
     }
 

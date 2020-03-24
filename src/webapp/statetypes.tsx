@@ -13,9 +13,12 @@ export interface Dashboard {
     subscriptions :TopicSubscription[]
     publications :TopicPublication[],
     transforms: Transforms
+    pings: {[key :string] :Ping}
 }
 
 export interface Ping {
+    friendlyname :string
+    ip :string
     timestamp :number
     success :boolean
 }

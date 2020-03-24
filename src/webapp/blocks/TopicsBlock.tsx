@@ -33,6 +33,7 @@ class TopicsBlock extends React.Component<Props, {}> {
         });
 
         return <div className="block y-50">
+            <h2>Topics</h2>
             {sortedTopics.map((topic) =>
                 <TopicIndicator key={topic.name} {...topic}
                                 publications={this.props.subscriptions.filter(sub => sub.topicname === topic.name)}

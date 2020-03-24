@@ -5,7 +5,7 @@ import time
 import rosgraph
 import rospy
 from tf.msg import tfMessage
-from cms.msg import Statistics, RecordingStatus, RecordingConfig
+from cms.msg import Statistics, RecordingStatus, RecordingConfig, PingResult
 from cms.srv import RecordingUpdateConfig
 
 from groundstation.rosnode.rosmeta import RosMeta
@@ -20,6 +20,7 @@ class RosNode:
         self.recordingstatus_subscriber = None
         self.recordingconfig_subscriber = None
         self.tf_subscriber = None
+        self.pings_subscriber = None
         self.update_recordingconfig_service = None
         self.rosbaginfo_service = None
         self.meta_timer = None
@@ -58,6 +59,7 @@ class RosNode:
         self.statistics_subscriber = rospy.Subscriber("/cms/statistics", Statistics, self.rosmeta.statistics_callback)
         self.recordingstatus_subscriber = rospy.Subscriber("/cms/recording/status", RecordingStatus, self.rosrecorder.status_callback)
         self.recordingconfig_subscriber = rospy.Subscriber("/cms/recording/config", RecordingConfig, self.rosrecorder.config_callback)
+        self.pings_subscriber = rospy.Subscriber("/cms/pings", PingResult, self.pings_callback)
         self.tf_subscriber = rospy.Subscriber("/tf", tfMessage, self.transformcapture.transform_callback)
         logging.info("Registered subscribers")
 
@@ -65,6 +67,7 @@ class RosNode:
         self.statistics_subscriber.unregister()
         self.recordingstatus_subscriber.unregister()
         self.recordingconfig_subscriber.unregister()
+        self.pings_subscriber.unregister()
         self.tf_subscriber.unregister()
         logging.info("Unregistered subscribers")
 
@@ -94,3 +97,7 @@ class RosNode:
 
     def set_rosnode_health(self, up):
         sendstate({'rosnode_up': up})
+
+    def pings_callback(self, result):
+        print result
+        sendstate({'pings': {result.ip: {'ip': result.ip, 'friendlyname': result.friendlyname, 'success': result.success}}})

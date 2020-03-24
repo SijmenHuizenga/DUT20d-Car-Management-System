@@ -76,7 +76,7 @@ class ComputeboxBlock extends React.Component<Props, State> {
     }
 
     renderPingTooltip = () => {
-        return `Last ping ${this.props.ping.success ? "succeeded" : "failed"}`;
+        return `Last ping from cms groundstation to luke ${this.props.ping.success ? "succeeded" : "failed"}`;
     };
 
     renderRosnodeIndicator() {

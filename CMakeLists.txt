@@ -25,6 +25,7 @@ add_message_files( FILES
   RecordingStatus.msg
   RecordingConfig.msg
   BagTopicInfo.msg
+  PingResult.msg
 )
 
 generate_messages()
@@ -33,6 +34,11 @@ catkin_package(
     CATKIN_DEPENDS message_runtime
 )
 include_directories(${catkin_INCLUDE_DIRS})
+
 add_executable(statistics src/statisticsnode.cpp)
 add_dependencies(statistics ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(statistics ${catkin_LIBRARIES})
+
+add_executable(pinger src/pingnode.cpp)
+add_dependencies(pinger ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(pinger ${catkin_LIBRARIES})

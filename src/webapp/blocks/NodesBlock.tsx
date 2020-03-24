@@ -26,6 +26,7 @@ class NodesBlock extends React.Component<Props> {
         const sortedNodes = [...this.props.nodes].sort((a :Node, b :Node) => a.name.localeCompare(b.name));
 
         return <div className="block y-50">
+            <h2>Nodes</h2>
             {sortedNodes.map(this.renderNodeIndicator.bind(this))}
         </div>
     }

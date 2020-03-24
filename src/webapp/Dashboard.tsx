@@ -13,11 +13,14 @@ import RecordingBlock from "./blocks/RecordingBlock";
 import {Dashboard, SystemdServiceEnabled, SystemdServiceRunning} from "./statetypes";
 import {TooltipContainer} from "./util/Tooltip";
 import {ModalContainer} from "./util/Modal";
+import PingBlock from "./blocks/PingBlock";
 
 export const devmode = false;
 const fakeDashboard: Dashboard = {
     rosnode_up: false,
     ping: {
+        friendlyname: "luke",
+        ip: "192.168.1.1",
         timestamp: 1234,
         success: true
     },
@@ -65,6 +68,12 @@ const fakeDashboard: Dashboard = {
         connected: true,
         lastping: 1577545897,
         uptime: "up for -1 day"
+    },
+    pings: {
+        '1': {ip: "192.168.1.1", friendlyname: "camera 1", success: true, timestamp: 1577545897},
+        '2': {ip: "192.168.1.2", friendlyname: "camera 2", success: false, timestamp: 1577545897},
+        '3': {ip: "192.168.1.3", friendlyname: "camera 3", success: true, timestamp: 1577545897},
+        '4': {ip: "192.168.1.4", friendlyname: "camera 4", success: false, timestamp: 1577545897},
     },
     systemdservices: [{
             name: "recording.service",
@@ -183,7 +192,7 @@ class DashboardComponent extends React.Component<Dashboard, {}> {
     }
 
     render() {
-        let {rosnode_up, ping, recording, topics, nodes, ssh,
+        let {rosnode_up, ping, recording, topics, nodes, ssh, pings,
             systemdservices, subscriptions, publications, transforms} = this.props;
 
         return <main onClick={this.containerClicked}>
@@ -210,11 +219,21 @@ class DashboardComponent extends React.Component<Dashboard, {}> {
                     }
 
                 </div>
-                <div className="col-xs-12 col-xl-6 gutter-small ">
+
+                <div className="col-xs-12 col-xl-6 gutter-small">
                     <ComputeboxBlock rosnode_up={rosnode_up} ping={ping} ssh={ssh}/>
                     <ServicesBlock systemdservices={systemdservices}/>
-                    <TransformsBlock transforms={transforms}/>
+                    <div className="row">
+                        <div className="col-xs-12 col-xl-6">
+                            <TransformsBlock transforms={transforms}/>
+                        </div>
+                        <div className="col-xs-12 col-xl-6">
+                            <PingBlock pings={pings} />
+                        </div>
+                    </div>
                 </div>
+
+
 
             </div>
             <div className="row">
