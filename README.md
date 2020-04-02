@@ -17,6 +17,12 @@ The groundstation talks in a few different ways to the car.
 It is a rosnode and subscribes to diagnostics topics, it executes actions on the car via ssh and checks availability using pings.
 The groundstation runs on one (1) laptop where all users connect to.
 
+## Configuration
+
+To change the Recording Presets (list of pre-defined topics in recording selection area) you should edit ./src/webapp/util/RecordingPresets.tsx
+
+To change the list of devices that are pinged by the cpp module you should edit ./src/pingnode.cpp
+
 ## Running CMS
 For the **groundstation** you must first install the required python dependencies.
 Because these packages are non-ros we must do this via pip. 
