@@ -2,6 +2,8 @@
 
 _This tool was developed specifically for the DUT20d self-driving car. It doesn't 'just' work with any other Formula Student vehicle. This code is published here to inspire. Feel free to use (parts) of it in accordance with the Apache License 2.0._
 
+This project came to life during the development of the DUT20d self-driving car. This car was built by [Formula Student Team Delft](https://www.fsteamdelft.nl/) and [MIT Driverless](https://driverless.mit.edu/).
+
 # Car Management System
 
 This tool tries to answer the question "what's going on with our Autonomaus System?". CMS
