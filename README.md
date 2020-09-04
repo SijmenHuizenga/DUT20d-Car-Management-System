@@ -1,8 +1,20 @@
+![Cover](./pictures/cover.jpg)
+
+_This tool was developed specifically for the DUT20d self-driving car. It doesn't 'just' work with any other Formula Student vehicle. This code is published here to inspire. Feel free to use (parts) of it in accordance with the Apache License 2.0._
+
 # Car Management System
 
 This tool tries to answer the question "what's going on with our Autonomaus System?". CMS
 * connects to the car, collects all the health indicators and visualises them in a simple dashboard.
 * offers you the ability to execute frequent tasks on the car like starting/stopping services, nodes and recordings.
+
+## [Click here to see CMS in action](https://www.youtube.com/watch?v=ykrlxfTCHak)
+
+![add_topics_from_preset.gif](pictures/add_topics_from_preset.gif)
+![filter](pictures/filter.gif)
+![manually add topics](pictures/manual_add_topics.gif)
+![record metadata](pictures/recording_metadata.gif)
+![topic details](pictures/topic-details.png)
 
 # Architecture
 The architecture of this system is as follows
